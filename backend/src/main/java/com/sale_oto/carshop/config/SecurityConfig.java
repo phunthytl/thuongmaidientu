@@ -77,6 +77,11 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.GET, "/api/phu-kien/**").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/dich-vu/**").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/danh-gia/**").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/media/**").permitAll()
+
+                    // Media - Upload/Delete (Admin + NV)
+                    .requestMatchers(HttpMethod.POST, "/api/media/**").hasAnyRole("ADMIN", "NHAN_VIEN")
+                    .requestMatchers(HttpMethod.DELETE, "/api/media/**").hasAnyRole("ADMIN", "NHAN_VIEN")
 
                     // Admin only
                     .requestMatchers("/api/nhan-vien/**").hasRole("ADMIN")

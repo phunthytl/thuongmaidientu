@@ -5,9 +5,7 @@ import com.sale_oto.carshop.dto.request.DonHangRequest;
 import com.sale_oto.carshop.dto.response.ChiTietDonHangResponse;
 import com.sale_oto.carshop.dto.response.DonHangResponse;
 import com.sale_oto.carshop.entity.*;
-import com.sale_oto.carshop.enums.LoaiSanPham;
 import com.sale_oto.carshop.enums.TrangThaiDonHang;
-import com.sale_oto.carshop.exception.BadRequestException;
 import com.sale_oto.carshop.exception.ResourceNotFoundException;
 import com.sale_oto.carshop.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -70,30 +68,36 @@ public class DonHangService {
         return toResponse(donHang);
     }
 
+    @Transactional(readOnly = true)
     public DonHangResponse getById(Long id) {
         DonHang donHang = donHangRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Đơn hàng", id));
         return toResponse(donHang);
     }
 
+    @Transactional(readOnly = true)
     public DonHangResponse getByMaDonHang(String maDonHang) {
         DonHang donHang = donHangRepository.findByMaDonHang(maDonHang)
                 .orElseThrow(() -> new ResourceNotFoundException("Đơn hàng không tìm thấy: " + maDonHang));
         return toResponse(donHang);
     }
 
+    @Transactional(readOnly = true)
     public Page<DonHangResponse> getAll(Pageable pageable) {
         return donHangRepository.findAll(pageable).map(this::toResponse);
     }
 
+    @Transactional(readOnly = true)
     public Page<DonHangResponse> getByKhachHang(Long khachHangId, Pageable pageable) {
         return donHangRepository.findByKhachHangId(khachHangId, pageable).map(this::toResponse);
     }
 
+    @Transactional(readOnly = true)
     public Page<DonHangResponse> getByTrangThai(TrangThaiDonHang trangThai, Pageable pageable) {
         return donHangRepository.findByTrangThai(trangThai, pageable).map(this::toResponse);
     }
 
+    @Transactional(readOnly = true)
     public Page<DonHangResponse> search(String keyword, Pageable pageable) {
         return donHangRepository.search(keyword, pageable).map(this::toResponse);
     }
