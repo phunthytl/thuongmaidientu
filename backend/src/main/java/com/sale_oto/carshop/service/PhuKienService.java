@@ -2,10 +2,12 @@ package com.sale_oto.carshop.service;
 
 import com.sale_oto.carshop.dto.request.PhuKienRequest;
 import com.sale_oto.carshop.dto.response.PhuKienResponse;
-import com.sale_oto.carshop.entity.HinhAnhPhuKien;
+import com.sale_oto.carshop.enums.LoaiDoiTuong;
+import com.sale_oto.carshop.enums.LoaiMedia;
 import com.sale_oto.carshop.entity.PhuKien;
 import com.sale_oto.carshop.exception.ResourceNotFoundException;
 import com.sale_oto.carshop.repository.DanhGiaRepository;
+import com.sale_oto.carshop.repository.MediaRepository;
 import com.sale_oto.carshop.repository.PhuKienRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -13,7 +15,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 public class PhuKienService {
 
     private final PhuKienRepository phuKienRepository;
+    private final MediaRepository mediaRepository;
     private final DanhGiaRepository danhGiaRepository;
 
     @Transactional
@@ -82,9 +84,12 @@ public class PhuKienService {
     }
 
     private PhuKienResponse toResponse(PhuKien pk) {
-        List<String> hinhAnhs = pk.getHinhAnhs() != null
-                ? pk.getHinhAnhs().stream().map(HinhAnhPhuKien::getDuongDan).collect(Collectors.toList())
-                : Collections.emptyList();
+        List<String> hinhAnhs = mediaRepository
+                .findByLoaiDoiTuongAndDoiTuongIdAndLoaiMediaOrderByThuTuAsc(
+                        LoaiDoiTuong.PHU_KIEN, pk.getId(), LoaiMedia.IMAGE)
+                .stream()
+                .map(media -> media.getUrl())
+                .collect(Collectors.toList());
 
         Double diemTB = danhGiaRepository.getAverageRatingByPhuKienId(pk.getId());
 

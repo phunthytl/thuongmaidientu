@@ -1,7 +1,6 @@
 package com.sale_oto.carshop.repository;
 
 import com.sale_oto.carshop.entity.DanhGia;
-import com.sale_oto.carshop.enums.LoaiSanPham;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

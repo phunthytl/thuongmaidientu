@@ -39,9 +39,6 @@ public class PhuKien extends BaseEntity {
     @Column(name = "trang_thai", nullable = false)
     private Boolean trangThai = true;
 
-    @OneToMany(mappedBy = "phuKien", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<HinhAnhPhuKien> hinhAnhs;
-
     @OneToMany(mappedBy = "phuKien")
     private List<DanhGia> danhGias;
 }

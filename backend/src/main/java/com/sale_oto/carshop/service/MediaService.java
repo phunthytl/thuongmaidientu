@@ -39,7 +39,7 @@ public class MediaService {
         String folder = "carshop/" + loaiDoiTuong.name().toLowerCase() + "/" + doiTuongId;
 
         try {
-            Map<String, Object> uploadParams = ObjectUtils.asMap(
+            Map<?, ?> uploadParams = ObjectUtils.asMap(
                     "folder", folder,
                     "resource_type", loaiMedia == LoaiMedia.VIDEO ? "video" : "image",
                     "overwrite", false
@@ -75,11 +75,14 @@ public class MediaService {
     @Transactional
     public List<MediaResponse> uploadMultiple(List<MultipartFile> files, LoaiDoiTuong loaiDoiTuong,
                                               Long doiTuongId, String moTa) {
-        return files.stream()
-                .map(file -> {
-                    int thuTu = (int) mediaRepository.countByLoaiDoiTuongAndDoiTuongId(loaiDoiTuong, doiTuongId);
-                    return upload(file, loaiDoiTuong, doiTuongId, moTa, thuTu);
-                })
+        int baseOrder = (int) mediaRepository.countByLoaiDoiTuongAndDoiTuongId(loaiDoiTuong, doiTuongId);
+        return java.util.stream.IntStream.range(0, files.size())
+                .mapToObj(index -> upload(
+                        files.get(index),
+                        loaiDoiTuong,
+                        doiTuongId,
+                        moTa,
+                        baseOrder + index))
                 .toList();
     }
 

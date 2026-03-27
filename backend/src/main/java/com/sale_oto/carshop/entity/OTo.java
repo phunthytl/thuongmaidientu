@@ -60,9 +60,6 @@ public class OTo extends BaseEntity {
     @Column(name = "trang_thai")
     private TrangThaiOTo trangThai = TrangThaiOTo.DANG_BAN;
 
-    @OneToMany(mappedBy = "oto", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<HinhAnhOTo> hinhAnhs;
-
     @OneToMany(mappedBy = "oto")
     private List<DanhGia> danhGias;
 }

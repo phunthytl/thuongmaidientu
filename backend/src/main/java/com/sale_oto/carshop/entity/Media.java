@@ -37,6 +37,7 @@ public class Media extends BaseEntity {
     private String moTa;
 
     @Column(name = "thu_tu")
+    @Builder.Default
     private Integer thuTu = 0;
 
     @Column(name = "dung_luong")

@@ -2,12 +2,13 @@ package com.sale_oto.carshop.service;
 
 import com.sale_oto.carshop.dto.request.OToRequest;
 import com.sale_oto.carshop.dto.response.OToResponse;
-import com.sale_oto.carshop.entity.HinhAnhOTo;
+import com.sale_oto.carshop.enums.LoaiDoiTuong;
+import com.sale_oto.carshop.enums.LoaiMedia;
 import com.sale_oto.carshop.entity.OTo;
 import com.sale_oto.carshop.enums.TrangThaiOTo;
 import com.sale_oto.carshop.exception.ResourceNotFoundException;
 import com.sale_oto.carshop.repository.DanhGiaRepository;
-import com.sale_oto.carshop.repository.HinhAnhOToRepository;
+import com.sale_oto.carshop.repository.MediaRepository;
 import com.sale_oto.carshop.repository.OToRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -16,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 public class OToService {
 
     private final OToRepository oToRepository;
-    private final HinhAnhOToRepository hinhAnhOToRepository;
+    private final MediaRepository mediaRepository;
     private final DanhGiaRepository danhGiaRepository;
 
     @Transactional
@@ -113,9 +113,12 @@ public class OToService {
     }
 
     private OToResponse toResponse(OTo oto) {
-        List<String> hinhAnhs = oto.getHinhAnhs() != null
-                ? oto.getHinhAnhs().stream().map(HinhAnhOTo::getDuongDan).collect(Collectors.toList())
-                : Collections.emptyList();
+        List<String> hinhAnhs = mediaRepository
+                .findByLoaiDoiTuongAndDoiTuongIdAndLoaiMediaOrderByThuTuAsc(
+                        LoaiDoiTuong.OTO, oto.getId(), LoaiMedia.IMAGE)
+                .stream()
+                .map(media -> media.getUrl())
+                .collect(Collectors.toList());
 
         Double diemTB = danhGiaRepository.getAverageRatingByOtoId(oto.getId());
 
