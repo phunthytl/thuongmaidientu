@@ -159,6 +159,8 @@ public class DonHangService {
                 .maDonHang(dh.getMaDonHang())
                 .tenKhachHang(dh.getKhachHang().getHoTen())
                 .khachHangId(dh.getKhachHang().getId())
+                .soDienThoaiKhachHang(dh.getKhachHang().getSoDienThoai())
+                .emailKhachHang(dh.getKhachHang().getEmail())
                 .tenNhanVienXuLy(dh.getNhanVienXuLy() != null ? dh.getNhanVienXuLy().getHoTen() : null)
                 .nhanVienXuLyId(dh.getNhanVienXuLy() != null ? dh.getNhanVienXuLy().getId() : null)
                 .tongTien(dh.getTongTien())

@@ -25,6 +25,11 @@ public class DanhGiaController {
                 .body(ApiResponse.created(danhGiaService.create(request)));
     }
 
+    @GetMapping
+    public ResponseEntity<ApiResponse<Page<DanhGiaResponse>>> getAll(Pageable pageable) {
+        return ResponseEntity.ok(ApiResponse.success(danhGiaService.getAll(pageable)));
+    }
+
     @GetMapping("/oto/{otoId}")
     public ResponseEntity<ApiResponse<Page<DanhGiaResponse>>> getByOto(
             @PathVariable Long otoId, Pageable pageable) {

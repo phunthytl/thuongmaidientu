@@ -1,9 +1,23 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import MinimalistAdminLayout from './components/layout/MinimalistAdminLayout';
-import AdminLogin from './pages/admin/Login';
-import Dashboard from './pages/admin/Dashboard';
-import Products from './pages/admin/Products';
-import ClientLogin from './pages/client/Login';
+import AdminLogin from './pages/admin/DangNhap';
+import Dashboard from './pages/admin/TongQuan';
+import Oto from './pages/admin/Oto';
+import ThemOto from './pages/admin/ThemOto';
+import ChiTietOto from './pages/admin/ChiTietOto';
+import PhuKien from './pages/admin/PhuKien';
+import ThemPhuKien from './pages/admin/ThemPhuKien';
+import ChiTietPhuKien from './pages/admin/ChiTietPhuKien';
+import DichVu from './pages/admin/DichVu';
+import ThemDichVu from './pages/admin/ThemDichVu';
+import ChiTietDichVu from './pages/admin/ChiTietDichVu';
+import KhachHang from './pages/admin/KhachHang';
+import DonHang from './pages/admin/DonHang';
+import ChiTietDonHang from './pages/admin/ChiTietDonHang';
+import DanhGia from './pages/admin/DanhGia';
+import KhieuNai from './pages/admin/KhieuNai';
+import ChiTietKhieuNai from './pages/admin/ChiTietKhieuNai';
+import ClientLogin from './pages/client/DangNhap';
 import ProtectedRoute from './components/routes/ProtectedRoute';
 
 function App() {
@@ -29,9 +43,33 @@ function App() {
                     <Route path="products" element={
                         // Example of ChucVu specific route protecting:
                         // <ProtectedRoute allowedChucVu={['QUAN_LY', 'NHAN_VIEN_KHO']}>
-                        <Products />
+                        <Oto />
                         // </ProtectedRoute>
                     } />
+                    <Route path="products/add-car" element={
+                        <ThemOto />
+                    } />
+                    <Route path="products/oto/:id" element={
+                        <ChiTietOto />
+                    } />
+                    <Route path="products/accessories" element={
+                        <PhuKien />
+                    } />
+                    <Route path="products/accessories/new" element={
+                        <ThemPhuKien />
+                    } />
+                    <Route path="products/accessories/:id" element={
+                        <ChiTietPhuKien />
+                    } />
+                    <Route path="services" element={<DichVu />} />
+                    <Route path="services/new" element={<ThemDichVu />} />
+                    <Route path="services/:id" element={<ChiTietDichVu />} />
+                    <Route path="customers" element={<KhachHang />} />
+                    <Route path="orders" element={<DonHang />} />
+                    <Route path="orders/:id" element={<ChiTietDonHang />} />
+                    <Route path="reviews" element={<DanhGia />} />
+                    <Route path="disputes" element={<KhieuNai />} />
+                    <Route path="disputes/:id" element={<ChiTietKhieuNai />} />
                 </Route>
             </Routes>
         </BrowserRouter>

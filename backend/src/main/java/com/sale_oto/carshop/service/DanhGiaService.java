@@ -55,6 +55,10 @@ public class DanhGiaService {
         return toResponse(danhGia);
     }
 
+    public Page<DanhGiaResponse> getAll(Pageable pageable) {
+        return danhGiaRepository.findAll(pageable).map(this::toResponse);
+    }
+
     public Page<DanhGiaResponse> getByOto(Long otoId, Pageable pageable) {
         return danhGiaRepository.findByOtoId(otoId, pageable).map(this::toResponse);
     }

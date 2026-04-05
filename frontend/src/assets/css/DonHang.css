@@ -1,0 +1,139 @@
+.orders-container {
+    animation: fadeInSlideUp 0.6s ease-out;
+}
+
+@keyframes fadeInSlideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.orders-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 2px solid #111111;
+    padding-bottom: 20px;
+    margin-bottom: 40px;
+}
+
+.orders-subtitle {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    color: #666666;
+    margin: 0 0 12px 0;
+}
+
+.orders-title {
+    font-size: 32px;
+    font-family: 'Lora', serif;
+    color: #111111;
+    margin: 0;
+}
+
+.btn-export-orders {
+    background-color: transparent;
+    color: #111111;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    text-transform: uppercase;
+    padding: 12px 24px;
+    border: 1px solid #111111;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-export-orders:hover {
+    background-color: #111111;
+    color: #ffffff;
+}
+
+.orders-table-wrapper {
+    background-color: #ffffff;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.02);
+}
+
+.table-header {
+    display: flex;
+    background-color: #fafafa;
+    border-bottom: 1px solid #e5e5e5;
+    padding: 20px 24px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #444444;
+}
+
+.table-body {
+    display: flex;
+    flex-direction: column;
+}
+
+.table-row {
+    display: flex;
+    padding: 20px 24px;
+    border-bottom: 1px solid #f0f0f0;
+    align-items: center;
+    transition: background-color 0.2s ease;
+}
+
+.table-row:last-child {
+    border-bottom: none;
+}
+
+.table-row:hover {
+    background-color: #fcfcfc;
+}
+
+.col-order-id { width: 20%; font-family: monospace; font-size: 14px; font-weight: 600; color: #111111; }
+.col-customer { width: 30%; display: flex; flex-direction: column; gap: 4px; }
+.customer-name { font-family: 'Lora', serif; font-size: 15px; color: #111111; font-weight: 600; }
+.customer-phone { font-size: 11px; font-family: monospace; color: #888888; letter-spacing: 0.05em; }
+.col-date { width: 20%; font-size: 13px; color: #555555; }
+.col-total { width: 15%; font-family: monospace; font-size: 14px; color: #111111; font-weight: 600; text-align: right;}
+.col-status { width: 15%; text-align: right; justify-content: flex-end; display: flex;}
+
+/* TRANG_THAI_DON_HANG: CHO_XAC_NHAN, DA_XAC_NHAN, DANG_XU_LY, DANG_GIAO, HOAN_THANH, DA_HUY */
+.order-badge {
+    padding: 6px 12px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    border: 1px solid currentColor;
+    border-radius: 4px;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.order-status-select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22currentColor%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 8px auto;
+    padding-right: 24px;
+    font-family: inherit;
+}
+
+.order-status-cho_xac_nhan { color: #854d0e; background-color: #fefce8; }
+.order-status-da_xac_nhan { color: #1d4ed8; background-color: #eff6ff; }
+.order-status-dang_xu_ly { color: #4338ca; background-color: #eef2ff; }
+.order-status-dang_giao { color: #0284c7; background-color: #f0f9ff; }
+.order-status-hoan_thanh { color: #166534; background-color: #f0fdf4; }
+.order-status-da_huy { color: #b91c1c; background-color: #fef2f2; }
+.order-status-unknown { color: #4b5563; background-color: #f3f4f6; }
+
+.order-badge option {
+    background-color: #ffffff;
+    color: #111111;
+    font-weight: 500;
+}

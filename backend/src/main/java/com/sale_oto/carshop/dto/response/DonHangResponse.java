@@ -16,6 +16,8 @@ public class DonHangResponse {
     private String maDonHang;
     private String tenKhachHang;
     private Long khachHangId;
+    private String soDienThoaiKhachHang;
+    private String emailKhachHang;
     private String tenNhanVienXuLy;
     private Long nhanVienXuLyId;
     private BigDecimal tongTien;
