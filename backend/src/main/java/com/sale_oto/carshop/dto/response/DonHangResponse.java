@@ -23,7 +23,9 @@ public class DonHangResponse {
     private BigDecimal tongTien;
     private TrangThaiDonHang trangThai;
     private String ghiChu;
-    private String diaChiGiaoHang;
+    private DiaChiResponse diaChiGiaoHang;
+    private BigDecimal phiVanChuyen;
+    private String maDonHangGhn;
     private List<ChiTietDonHangResponse> chiTietDonHangs;
     private LocalDateTime ngayTao;
     private LocalDateTime ngayCapNhat;

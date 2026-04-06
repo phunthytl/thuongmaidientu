@@ -7,6 +7,7 @@ export default function DonHang() {
     const navigate = useNavigate();
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState('ALL');
 
     useEffect(() => {
         const fetchOrders = async () => {
@@ -62,8 +63,43 @@ export default function DonHang() {
                 </div>
                 <div className="action-group">
                     <button className="btn-export-orders">Xuất Báo Cáo</button>
+                    <button className="btn-export-orders" style={{marginLeft: '8px'}}>Lịch sử Xuất Báo cáo</button>
                 </div>
             </header>
+
+            {/* Tabs Filter theo phong cách GHN */}
+            <div className="orders-tabs" style={{display: 'flex', gap: '24px', borderBottom: '1px solid #e5e7eb', marginBottom: '20px', paddingBottom: '10px', fontSize: '14px', fontWeight: 500, color: '#4b5563'}}>
+                <div 
+                    onClick={() => setActiveTab('ALL')} 
+                    style={{cursor: 'pointer', color: activeTab === 'ALL' ? '#ef4444' : 'inherit', borderBottom: activeTab === 'ALL' ? '2px solid #ef4444' : 'none', paddingBottom: '8px'}}>
+                    Tất cả
+                </div>
+                <div 
+                    onClick={() => setActiveTab('CHO_XAC_NHAN')} 
+                    style={{cursor: 'pointer', color: activeTab === 'CHO_XAC_NHAN' ? '#ef4444' : 'inherit', borderBottom: activeTab === 'CHO_XAC_NHAN' ? '2px solid #ef4444' : 'none', paddingBottom: '8px'}}>
+                    Chờ xác nhận
+                </div>
+                <div 
+                    onClick={() => setActiveTab('DA_XAC_NHAN')} 
+                    style={{cursor: 'pointer', color: activeTab === 'DA_XAC_NHAN' ? '#ef4444' : 'inherit', borderBottom: activeTab === 'DA_XAC_NHAN' ? '2px solid #ef4444' : 'none', paddingBottom: '8px'}}>
+                    Chờ lấy hàng
+                </div>
+                <div 
+                    onClick={() => setActiveTab('DANG_GIAO')} 
+                    style={{cursor: 'pointer', color: activeTab === 'DANG_GIAO' ? '#ef4444' : 'inherit', borderBottom: activeTab === 'DANG_GIAO' ? '2px solid #ef4444' : 'none', paddingBottom: '8px'}}>
+                    Đang giao
+                </div>
+                <div 
+                    onClick={() => setActiveTab('HOAN_THANH')} 
+                    style={{cursor: 'pointer', color: activeTab === 'HOAN_THANH' ? '#ef4444' : 'inherit', borderBottom: activeTab === 'HOAN_THANH' ? '2px solid #ef4444' : 'none', paddingBottom: '8px'}}>
+                    Đã giao
+                </div>
+                <div 
+                    onClick={() => setActiveTab('DA_HUY')} 
+                    style={{cursor: 'pointer', color: activeTab === 'DA_HUY' ? '#ef4444' : 'inherit', borderBottom: activeTab === 'DA_HUY' ? '2px solid #ef4444' : 'none', paddingBottom: '8px'}}>
+                    Trả hàng/Hoàn tiền/Hủy
+                </div>
+            </div>
 
             <div className="orders-table-wrapper">
                 <div className="table-header">
@@ -78,10 +114,10 @@ export default function DonHang() {
                 <div className="table-body">
                     {loading ? (
                         <div className="table-loading">Đang tải danh sách đơn hàng...</div>
-                    ) : orders.length === 0 ? (
-                        <div className="table-empty">Hệ thống chưa ghi nhận đơn hàng nào.</div>
+                    ) : orders.filter(o => activeTab === 'ALL' || o.trangThai === activeTab).length === 0 ? (
+                        <div className="table-empty">Hệ thống chưa ghi nhận đơn hàng nào ở trạng thái này.</div>
                     ) : (
-                        orders.map((item) => (
+                        orders.filter(o => activeTab === 'ALL' || o.trangThai === activeTab).map((item) => (
                             <div key={item.id} className="table-row">
                                 <div className="col-order-id">{item.maDonHang || `ORD-${item.id}`}</div>
                                 <div className="col-customer">

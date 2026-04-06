@@ -13,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/don-hang")
 @RequiredArgsConstructor
@@ -21,7 +23,7 @@ public class DonHangController {
     private final DonHangService donHangService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<DonHangResponse>> create(@Valid @RequestBody DonHangRequest request) {
+    public ResponseEntity<ApiResponse<List<DonHangResponse>>> create(@Valid @RequestBody DonHangRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.created(donHangService.create(request)));
     }

@@ -36,8 +36,19 @@ public class DonHang extends BaseEntity {
     @Column(name = "ghi_chu", columnDefinition = "TEXT")
     private String ghiChu;
 
-    @Column(name = "dia_chi_giao_hang", columnDefinition = "TEXT")
-    private String diaChiGiaoHang;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "dia_chi_giao_hang_id")
+    private DiaChiKhachHang diaChiGiaoHang;
+
+    @Column(name = "phi_van_chuyen", precision = 15, scale = 2)
+    private BigDecimal phiVanChuyen;
+
+    @Column(name = "ma_don_hang_ghn", length = 100)
+    private String maDonHangGhn;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "kho_hang_id")
+    private KhoHang khoXuatHang;
 
     @OneToMany(mappedBy = "donHang", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChiTietDonHang> chiTietDonHangs;

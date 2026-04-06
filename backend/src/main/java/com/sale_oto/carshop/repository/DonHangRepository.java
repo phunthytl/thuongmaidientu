@@ -17,6 +17,8 @@ import java.util.Optional;
 public interface DonHangRepository extends JpaRepository<DonHang, Long> {
 
     Optional<DonHang> findByMaDonHang(String maDonHang);
+    
+    Optional<DonHang> findByMaDonHangGhn(String maDonHangGhn);
 
     Page<DonHang> findByKhachHangId(Long khachHangId, Pageable pageable);
 

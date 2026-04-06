@@ -80,6 +80,7 @@ public class PhuKienService {
         pk.setHangSanXuat(request.getHangSanXuat());
         pk.setGia(request.getGia());
         pk.setSoLuong(request.getSoLuong() != null ? request.getSoLuong() : 0);
+        pk.setTrongLuong(request.getTrongLuong() != null ? request.getTrongLuong() : 500);
         pk.setMoTa(request.getMoTa());
     }
 
@@ -100,6 +101,7 @@ public class PhuKienService {
                 .hangSanXuat(pk.getHangSanXuat())
                 .gia(pk.getGia())
                 .soLuong(pk.getSoLuong())
+                .trongLuong(pk.getTrongLuong())
                 .moTa(pk.getMoTa())
                 .trangThai(pk.getTrangThai())
                 .hinhAnhs(hinhAnhs)

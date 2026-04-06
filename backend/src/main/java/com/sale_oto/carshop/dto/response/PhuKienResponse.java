@@ -17,6 +17,7 @@ public class PhuKienResponse {
     private String hangSanXuat;
     private BigDecimal gia;
     private Integer soLuong;
+    private Integer trongLuong;
     private String moTa;
     private Boolean trangThai;
     private List<String> hinhAnhs;
