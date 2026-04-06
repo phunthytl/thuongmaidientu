@@ -21,5 +21,7 @@ public class PhuKienRequest {
 
     private Integer soLuong;
 
+    private Integer trongLuong;
+
     private String moTa;
 }

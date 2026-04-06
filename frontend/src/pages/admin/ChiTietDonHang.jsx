@@ -3,204 +3,353 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../../services/api';
 import '../../assets/css/ChiTiet.css';
 
+const STATUS_MAP = {
+    CHO_XAC_NHAN: { label: 'Chờ Xác Nhận',      color: '#f59e0b' },
+    DA_XAC_NHAN:  { label: 'Đã Xác Nhận',        color: '#3b82f6' },
+    DANG_XU_LY:   { label: 'Đang Xử Lý',         color: '#8b5cf6' },
+    DANG_GIAO:    { label: 'Đang Giao Hàng',     color: '#06b6d4' },
+    HOAN_THANH:   { label: 'Hoàn Thành',         color: '#10b981' },
+    DA_HUY:       { label: 'Đã Hủy',             color: '#ef4444' },
+};
+
+const PAYMENT_MAP = {
+    VNPAY:       'VNPay',
+    MOMO:        'MoMo',
+    TIEN_MAT:    'Tiền Mặt (COD)',
+    CHUYEN_KHOAN:'Chuyển Khoản',
+};
+
+const PAYMENT_STATUS_MAP = {
+    CHO_THANH_TOAN: { label: 'Chờ Thanh Toán', color: '#f59e0b' },
+    DA_THANH_TOAN:  { label: 'Đã Thanh Toán',  color: '#10b981' },
+    THAT_BAI:       { label: 'Thất Bại',        color: '#ef4444' },
+    HOAN_TIEN:      { label: 'Đã Hoàn Tiền',   color: '#6b7280' },
+};
+
+const fmt = (price) =>
+    new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price || 0);
+
+const fmtDate = (d) => (d ? new Date(d).toLocaleString('vi-VN') : '---');
+
+const getProductName = (item) => {
+    if (item.loaiSanPham === 'OTO')     return item.oto?.tenXe     || 'Ô Tô';
+    if (item.loaiSanPham === 'PHU_KIEN') return item.phuKien?.tenPhuKien || 'Phụ Kiện';
+    if (item.loaiSanPham === 'DICH_VU') return item.dichVu?.tenDichVu   || 'Dịch Vụ';
+    return 'Sản phẩm';
+};
+
 export default function ChiTietDonHang() {
     const { id } = useParams();
     const navigate = useNavigate();
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [processing, setProcessing] = useState(false);
     const [status, setStatus] = useState('');
+    const [processing, setProcessing] = useState(false);
 
-    useEffect(() => {
-        const fetchDetails = async () => {
-            try {
-                const res = await api.get(`/don-hang/${id}`);
-                const data = res.data?.data;
-                setOrder(data);
-                setStatus(data?.trangThai || 'CHO_XAC_NHAN');
-            } catch (err) {
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchDetails();
-    }, [id]);
+    const fetchOrder = async () => {
+        try {
+            const res = await api.get(`/don-hang/${id}`);
+            const data = res.data?.data;
+            setOrder(data);
+            setStatus(data?.trangThai || 'CHO_XAC_NHAN');
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => { fetchOrder(); }, [id]);
 
     const handleUpdateStatus = async () => {
         if (!status || status === order.trangThai) return;
         setProcessing(true);
         try {
             await api.patch(`/don-hang/${id}/trang-thai?trangThai=${status}`);
-            setOrder(prev => ({ ...prev, trangThai: status }));
-            alert('Cập nhật trạng thái vận đơn thành công!');
+            await fetchOrder();
+            alert('Cập nhật trạng thái thành công!');
         } catch (err) {
-            alert(err.response?.data?.message || 'Có lỗi xảy ra khi cập nhật!');
+            alert(err.response?.data?.message || 'Lỗi hệ thống: ' + (err.response?.data?.error || 'Vui lòng thử lại'));
         } finally {
             setProcessing(false);
         }
     };
 
-    const formatPrice = (price) => {
-        if (!price) return '0 đ';
-        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
-    };
+    if (loading) return <div className="view-loading">Đang tải đơn hàng...</div>;
+    if (!order)  return <div className="view-empty">Không tìm thấy đơn hàng.</div>;
 
-    if (loading) return <div className="view-loading">Đang tải hồ sơ giao dịch...</div>;
-    if (!order) return <div className="view-empty">Không tìm thấy mã đơn hàng này.</div>;
-
-    const getProductName = (item) => {
-        switch (item.loaiSanPham) {
-            case 'OTO': return item.oto?.tenXe || 'Ô Tô (Chưa định danh)';
-            case 'PHU_KIEN': return item.phuKien?.tenPhuKien || 'Phụ Kiện (Chưa định danh)';
-            case 'DICH_VU': return item.dichVu?.tenDichVu || 'Dịch Vụ (Chưa định danh)';
-            default: return 'Sản phẩm chưa phân loại';
-        }
-    };
-
-    const getProductCode = (item) => {
-        switch (item.loaiSanPham) {
-            case 'OTO': return item.oto?.id ? `OTO-${item.oto.id}` : '';
-            case 'PHU_KIEN': return item.phuKien?.id ? `PK-${item.phuKien.id}` : '';
-            case 'DICH_VU': return item.dichVu?.id ? `DV-${item.dichVu.id}` : '';
-            default: return 'N/A';
-        }
-    };
-
-    const statusMap = {
-        'CHO_XAC_NHAN': 'Chờ Xác Nhận',
-        'DA_XAC_NHAN': 'Đã Xác Nhận',
-        'DANG_XU_LY': 'Đang Xử Lý',
-        'DANG_GIAO': 'Đang Giao Hàng',
-        'HOAN_THANH': 'Đã Hoàn Thành',
-        'DA_HUY': 'Đã Hủy'
-    };
-
-    const dateStr = order.createdAt || order.ngayTao || order.thoiGianCapNhat;
-    const formattedDate = dateStr ? new Date(dateStr).toLocaleString('vi-VN') : '---';
+    const dia = order.diaChiGiaoHang;
+    const kho = order.khoXuatHang;
+    const statusInfo = STATUS_MAP[order.trangThai] || { label: order.trangThai, color: '#6b7280' };
 
     return (
-        <div className="view-car-container" style={{maxWidth: '1000px', margin: '0 auto'}}>
-            <header className="view-header">
+        <div className="view-car-container" style={{ maxWidth: 1100, margin: '0 auto' }}>
+
+            {/* ── HEADER ── */}
+            <header className="view-header" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
                 <div>
-                     <button className="btn-back" onClick={() => navigate('/admin/orders')}>&larr; Quản Lý Giao Dịch</button>
-                     <h1 className="view-title">Mã Hóa Đơn: {order.maDonHang || `ORD-${order.id}`}</h1>
+                    <button className="btn-back" onClick={() => navigate('/admin/orders')}>← Quản lý đơn hàng</button>
+                    <h1 className="view-title" style={{ margin: '8px 0 4px' }}>
+                        {order.maDonHang || `ORD-${order.id}`}
+                    </h1>
+                    <div style={{ fontSize: 13, color: '#6b7280' }}>Ngày tạo: {fmtDate(order.ngayTao)}</div>
                 </div>
-                <div className={`view-status-badge status-${(order.trangThai || '').toLowerCase()}`}>
-                    {statusMap[order.trangThai] || order.trangThai}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
+                    <span style={{
+                        padding: '6px 16px', borderRadius: 20, fontWeight: 700, fontSize: 13,
+                        background: statusInfo.color + '22', color: statusInfo.color,
+                        border: `1.5px solid ${statusInfo.color}`
+                    }}>
+                        {statusInfo.label}
+                    </span>
+                    {order.maDonHangGhn && (
+                        <span style={{
+                            padding: '5px 12px', borderRadius: 6, fontSize: 12, fontWeight: 700,
+                            background: '#ecfdf5', color: '#065f46', border: '1px solid #a7f3d0'
+                        }}>
+                            🚚 GHN: {order.maDonHangGhn}
+                        </span>
+                    )}
                 </div>
             </header>
 
-            <div className="view-content-wrapper" style={{display: 'flex', flexDirection: 'column', gap: '24px'}}>
-                
-                <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px'}}>
-                    {/* Customer Info */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 20, marginTop: 24 }}>
+
+                {/* ── ROW 1: Khách hàng + Địa chỉ giao ── */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+
+                    {/* Khách hàng */}
                     <div className="desc-card">
-                        <h3>Thông Tin Nhận Hàng</h3>
-                        <ul className="spec-list" style={{marginTop: '12px'}}>
+                        <h3>👤 Thông Tin Khách Hàng</h3>
+                        <ul className="spec-list" style={{ marginTop: 12 }}>
                             <li>
-                                <span className="spec-label">Khách Hàng</span>
-                                <span className="spec-value">{order.tenKhachHang || order.khachHang?.hoTen || order.nguoiDung?.hoTen || 'Khách Vãng Lai'}</span>
+                                <span className="spec-label">Họ tên</span>
+                                <span className="spec-value" style={{ fontWeight: 600 }}>{order.tenKhachHang || '---'}</span>
                             </li>
                             <li>
-                                <span className="spec-label">Số Điện Thoại</span>
-                                <span className="spec-value" style={{fontWeight: 'bold'}}>{order.soDienThoaiKhachHang || order.khachHang?.soDienThoai || order.nguoiDung?.soDienThoai || order.soDienThoaiGiaoHang || '---'}</span>
+                                <span className="spec-label">Số điện thoại</span>
+                                <span className="spec-value">{order.soDienThoaiKhachHang || '---'}</span>
                             </li>
                             <li>
-                                <span className="spec-label">Email Điển Tử</span>
-                                <span className="spec-value">{order.emailKhachHang || order.khachHang?.email || order.nguoiDung?.email || '---'}</span>
+                                <span className="spec-label">Email</span>
+                                <span className="spec-value">{order.emailKhachHang || '---'}</span>
                             </li>
-                            <li>
-                                <span className="spec-label">Ngày Phát Sinh Đơn</span>
-                                <span className="spec-value">{formattedDate}</span>
-                            </li>
+                            {order.nhanVienXuLyTen && (
+                                <li>
+                                    <span className="spec-label">NV xử lý</span>
+                                    <span className="spec-value">{order.nhanVienXuLyTen}</span>
+                                </li>
+                            )}
                         </ul>
-                        <div style={{marginTop: '16px'}}>
-                            <div style={{fontSize: '13px', color: '#666', marginBottom: '4px'}}>Địa chỉ Vận Chuyển:</div>
-                            <div style={{fontWeight: 600, background: '#f9fafb', padding: '12px', borderRadius: '6px', border: '1px solid #eee'}}>
-                                {order.diaChiGiaoHang || 'Chưa cung cấp địa chỉ'}
-                            </div>
-                        </div>
                     </div>
 
-                    {/* Status Management */}
-                    <div className="desc-card" style={{borderTop: '3px solid #10b981'}}>
-                        <h3>Quản Trị Vận Đơn</h3>
-                        <div style={{marginTop: '16px'}}>
-                            <label style={{display: 'block', fontSize: '13px', color: '#666', marginBottom: '8px'}}>Cập Nhật Trạng Thái Giao Dịch</label>
-                            <div style={{display: 'flex', gap: '12px', flexWrap: 'wrap'}}>
-                                <select 
-                                    value={status} 
-                                    onChange={(e) => setStatus(e.target.value)}
-                                    style={{padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db', flex: 1, minWidth: '200px'}}
-                                >
-                                    <option value="CHO_XAC_NHAN">Chờ Xác Nhận (Mới)</option>
-                                    <option value="DA_XAC_NHAN">Duyệt - Chờ Lấy Hàng</option>
-                                    <option value="DANG_XU_LY">Đang Xử Lý Nội Bộ</option>
-                                    <option value="DANG_GIAO">Đang Luân Chuyển Hàng</option>
-                                    <option value="HOAN_THANH">Chót - Giao Thành Công</option>
-                                    <option value="DA_HUY">Hủy Bỏ Đơn Tuyến</option>
-                                </select>
-                                <button className="btn-submit" onClick={handleUpdateStatus} disabled={processing} style={{width: 'auto', padding: '0 20px', fontSize: '14px', background: '#059669', color: '#fff'}}>
-                                    Lưu Vết Trạng Thái
-                                </button>
-                            </div>
-                        </div>
+                    {/* Địa chỉ giao hàng */}
+                    <div className="desc-card">
+                        <h3>📍 Địa Chỉ Giao Hàng</h3>
+                        {dia ? (
+                            <ul className="spec-list" style={{ marginTop: 12 }}>
+                                <li>
+                                    <span className="spec-label">Người nhận</span>
+                                    <span className="spec-value" style={{ fontWeight: 600 }}>{dia.tenNguoiNhan}</span>
+                                </li>
+                                <li>
+                                    <span className="spec-label">SĐT nhận</span>
+                                    <span className="spec-value">{dia.soDienThoai}</span>
+                                </li>
+                                <li>
+                                    <span className="spec-label">Tỉnh / Thành</span>
+                                    <span className="spec-value">{dia.tinhThanhTen || dia.tinhThanhId}</span>
+                                </li>
+                                {dia.xaPhuongTen && (
+                                    <li>
+                                        <span className="spec-label">Phường / Xã</span>
+                                        <span className="spec-value">{dia.xaPhuongTen}</span>
+                                    </li>
+                                )}
+                                <li>
+                                    <span className="spec-label">Địa chỉ</span>
+                                    <span className="spec-value">{dia.diaChiChiTiet}</span>
+                                </li>
+                            </ul>
+                        ) : (
+                            <p style={{ color: '#9ca3af', marginTop: 12, fontStyle: 'italic' }}>
+                                Khách nhận tại showroom — không giao vận
+                            </p>
+                        )}
+                    </div>
+                </div>
 
+                {/* ── ROW 2: Kho xuất hàng + Quản trị trạng thái ── */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+
+                    {/* Kho */}
+                    <div className="desc-card">
+                        <h3>🏭 Kho Xuất Hàng</h3>
+                        {kho ? (
+                            <ul className="spec-list" style={{ marginTop: 12 }}>
+                                <li>
+                                    <span className="spec-label">Tên kho</span>
+                                    <span className="spec-value" style={{ fontWeight: 700 }}>{kho.tenKho}</span>
+                                </li>
+                                <li>
+                                    <span className="spec-label">Địa điểm</span>
+                                    <span className="spec-value">{kho.tinhThanhTen}</span>
+                                </li>
+                                <li>
+                                    <span className="spec-label">SĐT kho</span>
+                                    <span className="spec-value">{kho.soDienThoai}</span>
+                                </li>
+                                <li>
+                                    <span className="spec-label">Chi tiết</span>
+                                    <span className="spec-value">{kho.diaChiChiTiet}</span>
+                                </li>
+                            </ul>
+                        ) : (
+                            <p style={{ color: '#9ca3af', marginTop: 12, fontStyle: 'italic' }}>
+                                Chưa phân công kho xuất hàng
+                            </p>
+                        )}
+                    </div>
+
+                    {/* Quản trị trạng thái */}
+                    <div className="desc-card" style={{ borderTop: '3px solid #10b981' }}>
+                        <h3>⚙️ Cập Nhật Trạng Thái</h3>
+                        <div style={{ marginTop: 16, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                            <select
+                                value={status}
+                                onChange={(e) => setStatus(e.target.value)}
+                                style={{ flex: 1, minWidth: 180, padding: '10px 12px', borderRadius: 8, border: '1.5px solid #d1d5db', fontSize: 14 }}
+                            >
+                                <option value="CHO_XAC_NHAN">Chờ Xác Nhận</option>
+                                <option value="DA_XAC_NHAN">Duyệt — Chờ Lấy Hàng GHN</option>
+                                <option value="DANG_XU_LY">Đang Xử Lý Nội Bộ</option>
+                                <option value="DANG_GIAO">Đang Giao Hàng</option>
+                                <option value="HOAN_THANH">Giao Thành Công</option>
+                                <option value="DA_HUY">Hủy Đơn</option>
+                            </select>
+                            <button
+                                className="btn-submit"
+                                onClick={handleUpdateStatus}
+                                disabled={processing || status === order.trangThai}
+                                style={{ width: 'auto', padding: '0 20px', fontSize: 14, background: processing ? '#6b7280' : '#059669' }}
+                            >
+                                {processing ? 'Đang lưu...' : 'Lưu Trạng Thái'}
+                            </button>
+                        </div>
                         {order.ghiChu && (
-                            <div style={{marginTop: '24px'}}>
-                                <h3>Lời Nhắn Từ Khách Hàng</h3>
-                                <div style={{background: '#fefce8', padding: '16px', borderRadius: '8px', border: '1px solid #fef08a', marginTop: '12px'}}>
-                                    <p style={{whiteSpace: 'pre-wrap', lineHeight: '1.6', color: '#a16207'}}>{order.ghiChu}</p>
-                                </div>
+                            <div style={{ marginTop: 16, background: '#fefce8', padding: 12, borderRadius: 8, border: '1px solid #fef08a' }}>
+                                <div style={{ fontSize: 12, color: '#a16207', fontWeight: 600, marginBottom: 4 }}>Ghi chú khách hàng:</div>
+                                <div style={{ color: '#854d0e', lineHeight: 1.6 }}>{order.ghiChu}</div>
                             </div>
                         )}
                     </div>
                 </div>
 
-                {/* Items Info */}
+                {/* ── ROW 3: Sản phẩm ── */}
                 <div className="desc-card">
-                    <h3>Bảng Chẩn Kê Cấu Thành Giá (Giỏ Hàng)</h3>
-                    
-                    <div style={{marginTop: '16px', border: '1px solid #e5e7eb', borderRadius: '8px', overflow: 'hidden'}}>
-                        <table style={{width: '100%', borderCollapse: 'collapse', textAlign: 'left'}}>
-                            <thead style={{background: '#f9fafb', fontSize: '13px'}}>
+                    <h3>🛒 Chi Tiết Giỏ Hàng</h3>
+                    <div style={{ marginTop: 16, border: '1px solid #e5e7eb', borderRadius: 8, overflow: 'hidden' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: 14 }}>
+                            <thead style={{ background: '#f9fafb' }}>
                                 <tr>
-                                    <th style={{padding: '12px 16px', borderBottom: '1px solid #e5e7eb', fontWeight: 600}}>Hạng Mục Sản Phẩm</th>
-                                    <th style={{padding: '12px 16px', borderBottom: '1px solid #e5e7eb', fontWeight: 600}}>Đơn Giá Phân Phối</th>
-                                    <th style={{padding: '12px 16px', borderBottom: '1px solid #e5e7eb', fontWeight: 600}}>Hệ Số Tỉ Lượng</th>
-                                    <th style={{padding: '12px 16px', borderBottom: '1px solid #e5e7eb', fontWeight: 600, textAlign: 'right'}}>Thành Tiền Quy Đổi</th>
+                                    <th style={{ padding: '12px 16px', borderBottom: '1px solid #e5e7eb' }}>Sản phẩm</th>
+                                    <th style={{ padding: '12px 16px', borderBottom: '1px solid #e5e7eb' }}>Loại</th>
+                                    <th style={{ padding: '12px 16px', borderBottom: '1px solid #e5e7eb', textAlign: 'center' }}>SL</th>
+                                    <th style={{ padding: '12px 16px', borderBottom: '1px solid #e5e7eb', textAlign: 'right' }}>Đơn giá</th>
+                                    <th style={{ padding: '12px 16px', borderBottom: '1px solid #e5e7eb', textAlign: 'right' }}>Thành tiền</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {(order.chiTietDonHangs || order.items || []).length > 0 ? (
-                                    (order.chiTietDonHangs || order.items).map((item, index) => (
-                                        <tr key={index}>
-                                            <td style={{padding: '14px 16px', borderBottom: '1px solid #f3f4f6'}}>
-                                                <div style={{fontWeight: 600, fontSize: '14px'}}>{getProductName(item)}</div>
-                                                <div style={{fontSize: '12px', color: '#888', marginTop: '4px'}}>
-                                                    Phân loại: {item.loaiSanPham || 'Không xác định'} {getProductCode(item) ? `(Mã: ${getProductCode(item)})` : ''}
-                                                </div>
+                                {(order.chiTietDonHangs || []).length > 0 ? (
+                                    (order.chiTietDonHangs).map((item, i) => (
+                                        <tr key={i} style={{ background: i % 2 === 0 ? '#fff' : '#fafafa' }}>
+                                            <td style={{ padding: '12px 16px', borderBottom: '1px solid #f3f4f6', fontWeight: 600 }}>
+                                                {getProductName(item)}
                                             </td>
-                                            <td style={{padding: '14px 16px', borderBottom: '1px solid #f3f4f6'}}>{formatPrice(item.donGia)}</td>
-                                            <td style={{padding: '14px 16px', borderBottom: '1px solid #f3f4f6', fontWeight: 600}}>&times; {item.soLuong || 1}</td>
-                                            <td style={{padding: '14px 16px', borderBottom: '1px solid #f3f4f6', textAlign: 'right', fontWeight: 'bold'}}>{formatPrice(item.thanhTien)}</td>
+                                            <td style={{ padding: '12px 16px', borderBottom: '1px solid #f3f4f6' }}>
+                                                <span style={{
+                                                    padding: '2px 8px', borderRadius: 12, fontSize: 11, fontWeight: 600,
+                                                    background: item.loaiSanPham === 'OTO' ? '#dbeafe' : item.loaiSanPham === 'PHU_KIEN' ? '#dcfce7' : '#f3e8ff',
+                                                    color: item.loaiSanPham === 'OTO' ? '#1d4ed8' : item.loaiSanPham === 'PHU_KIEN' ? '#166534' : '#7c3aed',
+                                                }}>
+                                                    {item.loaiSanPham === 'OTO' ? 'Ô Tô' : item.loaiSanPham === 'PHU_KIEN' ? 'Phụ Kiện' : 'Dịch Vụ'}
+                                                </span>
+                                            </td>
+                                            <td style={{ padding: '12px 16px', borderBottom: '1px solid #f3f4f6', textAlign: 'center' }}>
+                                                {item.soLuong}
+                                            </td>
+                                            <td style={{ padding: '12px 16px', borderBottom: '1px solid #f3f4f6', textAlign: 'right' }}>
+                                                {fmt(item.donGia)}
+                                            </td>
+                                            <td style={{ padding: '12px 16px', borderBottom: '1px solid #f3f4f6', textAlign: 'right', fontWeight: 700 }}>
+                                                {fmt(item.thanhTien)}
+                                            </td>
                                         </tr>
                                     ))
                                 ) : (
-                                    <tr>
-                                        <td colSpan="4" style={{padding: '24px', textAlign: 'center', color: '#888'}}>Không thể trích xuất chi tiết giỏ hàng. Đây có thể là đơn hàng Legacy (Phiên bản hệ thống cũ).</td>
-                                    </tr>
+                                    <tr><td colSpan={5} style={{ padding: 24, textAlign: 'center', color: '#9ca3af' }}>Không có sản phẩm nào</td></tr>
                                 )}
                             </tbody>
                         </table>
-                        
-                        <div style={{padding: '20px', background: '#fff', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', borderTop: '1px solid #e5e7eb'}}>
-                            <div style={{fontSize: '15px', color: '#666', marginRight: '24px'}}>GIÁ TRỊ TỔNG HỢP SAU KHI QUA CỔNG: </div>
-                            <div style={{fontSize: '24px', fontWeight: 'bold', color: '#111'}}>{formatPrice(order.tongTien || order.tongGiaTri)}</div>
+
+                        {/* Tổng tiền */}
+                        <div style={{ padding: '16px 20px', background: '#f9fafb', borderTop: '1px solid #e5e7eb', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
+                            {order.phiVanChuyen > 0 && (
+                                <div style={{ display: 'flex', gap: 24, fontSize: 14, color: '#6b7280' }}>
+                                    <span>Phí vận chuyển GHN:</span>
+                                    <span style={{ fontWeight: 600, color: '#059669' }}>+ {fmt(order.phiVanChuyen)}</span>
+                                </div>
+                            )}
+                            <div style={{ display: 'flex', gap: 24, fontSize: 18, fontWeight: 700 }}>
+                                <span style={{ color: '#374151' }}>TỔNG THANH TOÁN:</span>
+                                <span style={{ color: '#111827', fontSize: 22 }}>{fmt(order.tongTien)}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                {/* ── ROW 4: Thanh toán ── */}
+                {order.thanhToan && (
+                    <div className="desc-card">
+                        <h3>💳 Thông Tin Thanh Toán</h3>
+                        <ul className="spec-list" style={{ marginTop: 12 }}>
+                            <li>
+                                <span className="spec-label">Phương thức</span>
+                                <span className="spec-value">{PAYMENT_MAP[order.thanhToan.phuongThuc] || order.thanhToan.phuongThuc}</span>
+                            </li>
+                            <li>
+                                <span className="spec-label">Trạng thái TT</span>
+                                <span className="spec-value">
+                                    <span style={{
+                                        padding: '3px 10px', borderRadius: 12, fontSize: 12, fontWeight: 700,
+                                        background: (PAYMENT_STATUS_MAP[order.thanhToan.trangThai]?.color || '#6b7280') + '22',
+                                        color: PAYMENT_STATUS_MAP[order.thanhToan.trangThai]?.color || '#6b7280',
+                                    }}>
+                                        {PAYMENT_STATUS_MAP[order.thanhToan.trangThai]?.label || order.thanhToan.trangThai}
+                                    </span>
+                                </span>
+                            </li>
+                            {order.thanhToan.maGiaoDich && (
+                                <li>
+                                    <span className="spec-label">Mã giao dịch</span>
+                                    <span className="spec-value">{order.thanhToan.maGiaoDich}</span>
+                                </li>
+                            )}
+                            {order.thanhToan.ngayThanhToan && (
+                                <li>
+                                    <span className="spec-label">Ngày TT</span>
+                                    <span className="spec-value">{fmtDate(order.thanhToan.ngayThanhToan)}</span>
+                                </li>
+                            )}
+                            <li>
+                                <span className="spec-label">Số tiền TT</span>
+                                <span className="spec-value" style={{ fontWeight: 700, color: '#059669', fontSize: 16 }}>
+                                    {fmt(order.thanhToan.soTien)}
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
+                )}
 
             </div>
         </div>

@@ -7,7 +7,7 @@ export default function ThemPhuKien() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     tenPhuKien: '', loaiPhuKien: '', hangSanXuat: '',
-    gia: '', soLuong: '', moTa: ''
+    gia: '', soLuong: '', trongLuong: '500', moTa: ''
   });
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -32,7 +32,8 @@ export default function ThemPhuKien() {
       const payload = {
         ...formData,
         gia: parseInt(formData.gia) || 0,
-        soLuong: parseInt(formData.soLuong) || 0
+        soLuong: parseInt(formData.soLuong) || 0,
+        trongLuong: parseInt(formData.trongLuong) || 500
       };
       
       const res = await api.post('/phu-kien', payload);
@@ -112,6 +113,10 @@ export default function ThemPhuKien() {
                  <div className="col">
                    <label>Số Lượng Tồn Kho Ban Đầu *</label>
                    <input required type="number" name="soLuong" value={formData.soLuong} onChange={handleChange} placeholder="50" />
+                 </div>
+                 <div className="col">
+                   <label>Cân nặng (gram) *</label>
+                   <input required type="number" name="trongLuong" value={formData.trongLuong} onChange={handleChange} placeholder="500" />
                  </div>
               </div>
            </div>

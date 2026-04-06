@@ -3,8 +3,10 @@ package com.sale_oto.carshop.service;
 import com.sale_oto.carshop.dto.request.ChiTietDonHangRequest;
 import com.sale_oto.carshop.dto.request.DonHangRequest;
 import com.sale_oto.carshop.dto.response.ChiTietDonHangResponse;
+import com.sale_oto.carshop.dto.response.DiaChiResponse;
 import com.sale_oto.carshop.dto.response.DonHangResponse;
 import com.sale_oto.carshop.entity.*;
+import com.sale_oto.carshop.enums.LoaiSanPham;
 import com.sale_oto.carshop.enums.TrangThaiDonHang;
 import com.sale_oto.carshop.exception.ResourceNotFoundException;
 import com.sale_oto.carshop.repository.*;
@@ -30,24 +32,58 @@ public class DonHangService {
     private final OToRepository oToRepository;
     private final PhuKienRepository phuKienRepository;
     private final DichVuRepository dichVuRepository;
+    private final DiaChiKhachHangRepository diaChiKhachHangRepository;
+    private final GhnService ghnService;
 
     @Transactional
-    public DonHangResponse create(DonHangRequest request) {
+    public List<DonHangResponse> create(DonHangRequest request) {
         KhachHang khachHang = khachHangRepository.findById(request.getKhachHangId())
                 .orElseThrow(() -> new ResourceNotFoundException("Khách hàng", request.getKhachHangId()));
 
+        DiaChiKhachHang diaChi = null;
+        if (request.getDiaChiGiaoHangId() != null) {
+            diaChi = diaChiKhachHangRepository.findById(request.getDiaChiGiaoHangId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Địa chỉ", request.getDiaChiGiaoHangId()));
+        }
+
+        List<ChiTietDonHangRequest> phuKienList = new ArrayList<>();
+        List<ChiTietDonHangRequest> khacList = new ArrayList<>();
+
+        for (ChiTietDonHangRequest ct : request.getChiTietDonHangs()) {
+            if (ct.getLoaiSanPham() == LoaiSanPham.PHU_KIEN) {
+                phuKienList.add(ct);
+            } else {
+                khacList.add(ct);
+            }
+        }
+
+        List<DonHangResponse> responses = new ArrayList<>();
+
+        if (!phuKienList.isEmpty()) {
+            DonHang dh1 = createSingleOrder(khachHang, diaChi, phuKienList, request.getGhiChu());
+            responses.add(toResponse(dh1));
+        }
+
+        if (!khacList.isEmpty()) {
+            DonHang dh2 = createSingleOrder(khachHang, diaChi, khacList, request.getGhiChu());
+            responses.add(toResponse(dh2));
+        }
+
+        return responses;
+    }
+
+    private DonHang createSingleOrder(KhachHang khachHang, DiaChiKhachHang diaChi, List<ChiTietDonHangRequest> items, String ghiChu) {
         DonHang donHang = new DonHang();
         donHang.setMaDonHang(generateMaDonHang());
         donHang.setKhachHang(khachHang);
         donHang.setTrangThai(TrangThaiDonHang.CHO_XAC_NHAN);
-        donHang.setGhiChu(request.getGhiChu());
-        donHang.setDiaChiGiaoHang(request.getDiaChiGiaoHang() != null
-                ? request.getDiaChiGiaoHang() : khachHang.getDiaChi());
+        donHang.setGhiChu(ghiChu);
+        donHang.setDiaChiGiaoHang(diaChi);
 
         List<ChiTietDonHang> chiTietList = new ArrayList<>();
         BigDecimal tongTien = BigDecimal.ZERO;
 
-        for (ChiTietDonHangRequest ctRequest : request.getChiTietDonHangs()) {
+        for (ChiTietDonHangRequest ctRequest : items) {
             ChiTietDonHang chiTiet = new ChiTietDonHang();
             chiTiet.setDonHang(donHang);
             chiTiet.setLoaiSanPham(ctRequest.getLoaiSanPham());
@@ -62,10 +98,23 @@ public class DonHangService {
         }
 
         donHang.setTongTien(tongTien);
-        donHang.setChiTietDonHangs(chiTietList);
+        
+        boolean isPhuKienOrder = items.stream().anyMatch(i -> i.getLoaiSanPham() == LoaiSanPham.PHU_KIEN);
+        if (isPhuKienOrder && diaChi != null) {
+            int totalWeight = donHang.getChiTietDonHangs().stream()
+                    .filter(ct -> ct.getLoaiSanPham() == LoaiSanPham.PHU_KIEN && ct.getPhuKien() != null)
+                    .mapToInt(ct -> ct.getSoLuong() * (ct.getPhuKien().getTrongLuong() != null ? ct.getPhuKien().getTrongLuong() : 500))
+                    .sum();
+            if (totalWeight <= 0) totalWeight = 500; // Tránh lỗi cân nặng = 0
 
-        donHang = donHangRepository.save(donHang);
-        return toResponse(donHang);
+            BigDecimal phiVanChuyen = ghnService.calculateFee(
+                null, null, totalWeight, 10, 10, 10);
+            donHang.setPhiVanChuyen(phiVanChuyen);
+            donHang.setTongTien(donHang.getTongTien().add(phiVanChuyen));
+        }
+        
+        donHang.setChiTietDonHangs(chiTietList);
+        return donHangRepository.save(donHang);
     }
 
     @Transactional(readOnly = true)
@@ -106,6 +155,20 @@ public class DonHangService {
     public DonHangResponse capNhatTrangThai(Long id, TrangThaiDonHang trangThai) {
         DonHang donHang = donHangRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Đơn hàng", id));
+                
+        if (trangThai == TrangThaiDonHang.DA_XAC_NHAN && donHang.getMaDonHangGhn() == null) {
+            boolean hasPhuKien = donHang.getChiTietDonHangs().stream()
+                    .anyMatch(ct -> ct.getLoaiSanPham() == LoaiSanPham.PHU_KIEN);
+            if (hasPhuKien && donHang.getDiaChiGiaoHang() != null) {
+                String orderCode = ghnService.createOrder(donHang);
+                donHang.setMaDonHangGhn(orderCode);
+            }
+        }
+        
+        if (trangThai == TrangThaiDonHang.DA_HUY && donHang.getMaDonHangGhn() != null) {
+            ghnService.cancelOrder(donHang.getMaDonHangGhn());
+        }
+
         donHang.setTrangThai(trangThai);
         donHang = donHangRepository.save(donHang);
         return toResponse(donHang);
@@ -154,6 +217,21 @@ public class DonHangService {
                 ? dh.getChiTietDonHangs().stream().map(this::toChiTietResponse).collect(Collectors.toList())
                 : List.of();
 
+        DiaChiResponse diaChiRes = null;
+        if (dh.getDiaChiGiaoHang() != null) {
+            diaChiRes = DiaChiResponse.builder()
+                    .id(dh.getDiaChiGiaoHang().getId())
+                    .tenNguoiNhan(dh.getDiaChiGiaoHang().getTenNguoiNhan())
+                    .soDienThoai(dh.getDiaChiGiaoHang().getSoDienThoai())
+                    .tinhThanhId(dh.getDiaChiGiaoHang().getTinhThanhId())
+                    .tinhThanhTen(dh.getDiaChiGiaoHang().getTinhThanhTen())
+                    .xaPhuongId(dh.getDiaChiGiaoHang().getXaPhuongId())
+                    .xaPhuongTen(dh.getDiaChiGiaoHang().getXaPhuongTen())
+                    .diaChiChiTiet(dh.getDiaChiGiaoHang().getDiaChiChiTiet())
+                    .isDefault(dh.getDiaChiGiaoHang().getIsDefault())
+                    .build();
+        }
+
         return DonHangResponse.builder()
                 .id(dh.getId())
                 .maDonHang(dh.getMaDonHang())
@@ -166,7 +244,9 @@ public class DonHangService {
                 .tongTien(dh.getTongTien())
                 .trangThai(dh.getTrangThai())
                 .ghiChu(dh.getGhiChu())
-                .diaChiGiaoHang(dh.getDiaChiGiaoHang())
+                .phiVanChuyen(dh.getPhiVanChuyen())
+                .maDonHangGhn(dh.getMaDonHangGhn())
+                .diaChiGiaoHang(diaChiRes)
                 .chiTietDonHangs(chiTietResponses)
                 .ngayTao(dh.getNgayTao())
                 .ngayCapNhat(dh.getNgayCapNhat())

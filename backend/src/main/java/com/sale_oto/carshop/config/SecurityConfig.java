@@ -78,6 +78,8 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.GET, "/api/dich-vu/**").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/danh-gia/**").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/media/**").permitAll()
+                    .requestMatchers("/api/ghn/**").permitAll()
+                    .requestMatchers("/api/webhook/ghn/**").permitAll()
 
                     // Media - Upload/Delete (Admin + NV)
                     .requestMatchers(HttpMethod.POST, "/api/media/**").hasAnyRole("ADMIN", "NHAN_VIEN")

@@ -33,6 +33,9 @@ public class PhuKien extends BaseEntity {
     @Column(name = "so_luong")
     private Integer soLuong = 0;
 
+    @Column(name = "trong_luong")
+    private Integer trongLuong = 500; // Gram
+
     @Column(name = "mo_ta", columnDefinition = "TEXT")
     private String moTa;
 

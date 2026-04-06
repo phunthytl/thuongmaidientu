@@ -17,5 +17,5 @@ public class DonHangRequest {
 
     private String ghiChu;
 
-    private String diaChiGiaoHang;
+    private Long diaChiGiaoHangId;
 }

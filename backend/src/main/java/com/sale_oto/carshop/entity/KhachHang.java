@@ -25,6 +25,9 @@ public class KhachHang extends NguoiDung {
     @OneToMany(mappedBy = "khachHang")
     private List<DonHang> donHangs;
 
+    @OneToMany(mappedBy = "khachHang", cascade = CascadeType.ALL)
+    private List<DiaChiKhachHang> diaChiKhachHangs;
+
     @OneToMany(mappedBy = "khachHang")
     private List<DanhGia> danhGias;
 
