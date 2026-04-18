@@ -79,6 +79,11 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.GET, "/api/danh-gia/**").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/media/**").permitAll()
                     .requestMatchers("/api/ghn/**").permitAll()
+
+                    // Đánh giá ô tô - user-facing
+                    // GET reviews + rating-summary: public (đã cover bởi rule GET /api/oto/** phía trên)
+                    // POST /api/user/reviews: yêu cầu đăng nhập (bất kỳ role nào)
+                    // GET /api/user/reviews: yêu cầu đăng nhập (bất kỳ role nào)
                     .requestMatchers("/api/webhook/ghn/**").permitAll()
 
                     // Media - Upload/Delete (Admin + NV)
