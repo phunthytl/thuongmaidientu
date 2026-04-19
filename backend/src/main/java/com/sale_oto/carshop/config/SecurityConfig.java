@@ -105,6 +105,10 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.PATCH, "/api/don-hang/*/trang-thai").hasAnyRole("ADMIN", "NHAN_VIEN")
                     .requestMatchers(HttpMethod.PATCH, "/api/don-hang/*/gan-nhan-vien/*").hasAnyRole("ADMIN", "NHAN_VIEN")
 
+                    // Giỏ hàng
+                    .requestMatchers(HttpMethod.POST, "/api/gio-hang/**").hasAnyRole("ADMIN", "NHAN_VIEN", "KHACH_HANG")
+                    .requestMatchers(HttpMethod.GET, "/api/gio-hang/**").hasAnyRole("ADMIN", "NHAN_VIEN", "KHACH_HANG")
+
                     // Khiếu nại - Admin/NV quản lý
                     .requestMatchers(HttpMethod.GET, "/api/khieu-nai").hasAnyRole("ADMIN", "NHAN_VIEN")
                     .requestMatchers(HttpMethod.PATCH, "/api/khieu-nai/**").hasAnyRole("ADMIN", "NHAN_VIEN")
