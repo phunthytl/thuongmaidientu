@@ -1,0 +1,135 @@
+.products-page-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 2rem;
+  padding: 3rem 5%;
+  background-color: #fbfbfb;
+  min-height: 80vh;
+}
+
+/* Sidebar Filters */
+.filters-sidebar {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  border: 1px solid #eee;
+  height: fit-content;
+  position: sticky;
+  top: 100px;
+}
+
+.filter-group h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  color: #111;
+}
+
+.filter-item {
+  margin-bottom: 2rem;
+}
+
+.filter-item label {
+  display: block;
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin-bottom: 0.8rem;
+  color: #333;
+}
+
+.filter-item select {
+  width: 100%;
+  padding: 0.8rem;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  background: #fff;
+  cursor: pointer;
+}
+
+.price-inputs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.price-inputs input {
+  width: 50%;
+  padding: 0.8rem;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-size: 0.85rem;
+}
+
+.btn-apply-filter {
+  width: 100%;
+  padding: 0.8rem;
+  background: #111;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.btn-apply-filter:hover {
+  background: #111;
+}
+
+/* Products Content */
+.content-header {
+  margin-bottom: 2.5rem;
+}
+
+.content-header h1 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+}
+
+.content-header p {
+  color: #666;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 4rem;
+}
+
+.page-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  background: #fff;
+  color: #333;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.page-btn.active {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+}
+
+.page-btn:hover:not(.active) {
+  border-color: #111;
+  color: #111;
+}
+
+@media (max-width: 992px) {
+  .products-page-layout {
+    grid-template-columns: 1fr;
+  }
+  .filters-sidebar {
+    position: static;
+    margin-bottom: 2rem;
+  }
+}

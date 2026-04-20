@@ -18,13 +18,24 @@ import DanhGia from './pages/admin/DanhGia';
 import KhieuNai from './pages/admin/KhieuNai';
 import ChiTietKhieuNai from './pages/admin/ChiTietKhieuNai';
 import ClientLogin from './pages/client/DangNhap';
+import Home from './pages/client/Home';
+import DanhSachOto from './pages/client/DanhSachOto';
+import DanhSachPhuKien from './pages/client/DanhSachPhuKien';
+import ClientChiTietPhuKien from './pages/client/ChiTietPhuKien';
+import GioHang from './pages/client/GioHang';
+import DangKy from './pages/client/DangKy';
 import ProtectedRoute from './components/routes/ProtectedRoute';
 
 function App() {
     return (
         <BrowserRouter>
             <Routes>
-                <Route path="/" element={<Navigate to="/admin" replace />} />
+                <Route path="/" element={<Home />} />
+                <Route path="/products" element={<DanhSachOto />} />
+                <Route path="/accessories" element={<DanhSachPhuKien />} />
+                <Route path="/products/accessory/:id" element={<ClientChiTietPhuKien />} />
+                <Route path="/cart" element={<GioHang />} />
+                <Route path="/register" element={<DangKy />} />
 
                 {/* Public Routes */}
                 <Route path="/admin/login" element={<AdminLogin />} />

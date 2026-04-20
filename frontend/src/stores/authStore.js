@@ -45,6 +45,21 @@ export const useAuthStore = create((set, get) => ({
         }
     },
 
+    register: async (userData) => {
+        set({ isLoading: true, error: null });
+        try {
+            const { data } = await api.post('/auth/dang-ky', userData);
+            set({ isLoading: false });
+            return data;
+        } catch (err) {
+            set({
+                isLoading: false,
+                error: err.response?.data?.message || err.message || 'Đăng ký thất bại'
+            });
+            throw err;
+        }
+    },
+
     logout: () => {
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
