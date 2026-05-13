@@ -14,7 +14,9 @@ public class ChiTietGioHangResponse {
     private LoaiSanPham loaiSanPham;
     private Long sanPhamId;
     private String tenSanPham;
+    private String hinhAnh;
     private Integer soLuong;
     private BigDecimal donGia;
     private BigDecimal thanhTien;
+    private Long khoHangId;
 }

@@ -12,6 +12,8 @@ import com.sale_oto.carshop.enums.VaiTro;
 import com.sale_oto.carshop.exception.BadRequestException;
 import com.sale_oto.carshop.exception.DuplicateResourceException;
 import com.sale_oto.carshop.exception.ResourceNotFoundException;
+import com.sale_oto.carshop.dto.request.CapNhatThongTinRequest;
+import com.sale_oto.carshop.dto.request.DoiMatKhauRequest;
 import com.sale_oto.carshop.repository.KhachHangRepository;
 import com.sale_oto.carshop.repository.NguoiDungRepository;
 import com.sale_oto.carshop.security.JwtTokenProvider;
@@ -115,9 +117,36 @@ public class NguoiDungService {
         return toNguoiDungResponse(nguoiDung);
     }
 
+    @Transactional
+    public NguoiDungResponse capNhatThongTin(Long id, CapNhatThongTinRequest request) {
+        NguoiDung nguoiDung = nguoiDungRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Người dùng", id));
+        nguoiDung.setHoTen(request.getHoTen());
+        nguoiDung.setSoDienThoai(request.getSoDienThoai());
+        return toNguoiDungResponse(nguoiDungRepository.save(nguoiDung));
+    }
+
+    @Transactional
+    public void doiMatKhau(Long id, DoiMatKhauRequest request) {
+        NguoiDung nguoiDung = nguoiDungRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Người dùng", id));
+        if (!passwordEncoder.matches(request.getMatKhauCu(), nguoiDung.getMatKhau())) {
+            throw new BadRequestException("Mật khẩu cũ không chính xác");
+        }
+        nguoiDung.setMatKhau(passwordEncoder.encode(request.getMatKhauMoi()));
+        nguoiDungRepository.save(nguoiDung);
+    }
+
     public NguoiDungResponse toNguoiDungResponse(NguoiDung nguoiDung) {
+        Long khachHangId = null;
+        if (nguoiDung.getVaiTro() == VaiTro.KHACH_HANG) {
+            // KhachHang kế thừa NguoiDung, nên lấy trực tiếp từ repository
+            khachHangId = khachHangRepository.findByEmail(nguoiDung.getEmail())
+                    .map(kh -> kh.getId()).orElse(nguoiDung.getId());
+        }
         return NguoiDungResponse.builder()
                 .id(nguoiDung.getId())
+                .khachHangId(khachHangId)
                 .hoTen(nguoiDung.getHoTen())
                 .email(nguoiDung.getEmail())
                 .soDienThoai(nguoiDung.getSoDienThoai())

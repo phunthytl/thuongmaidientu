@@ -19,6 +19,7 @@ const Menus = [
     { name: 'Khách Hàng', path: '/admin/customers' },
     { name: 'Đánh Giá', path: '/admin/reviews' },
     { name: 'Khiếu Nại', path: '/admin/disputes' },
+    { name: 'Kho Hàng', path: '/admin/warehouse' },
     { name: 'Tin Nhắn', path: '/admin/messages' },
 ];
 

@@ -17,13 +17,20 @@ import ChiTietDonHang from './pages/admin/ChiTietDonHang';
 import DanhGia from './pages/admin/DanhGia';
 import KhieuNai from './pages/admin/KhieuNai';
 import ChiTietKhieuNai from './pages/admin/ChiTietKhieuNai';
+import KhoHang from './pages/admin/KhoHang';
 import ClientLogin from './pages/client/DangNhap';
 import Home from './pages/client/Home';
 import DanhSachOto from './pages/client/DanhSachOto';
 import DanhSachPhuKien from './pages/client/DanhSachPhuKien';
 import ClientChiTietPhuKien from './pages/client/ChiTietPhuKien';
+import ClientChiTietOto from './pages/client/ClientChiTietOto';
 import GioHang from './pages/client/GioHang';
 import DangKy from './pages/client/DangKy';
+import LichSuDonHang from './pages/client/LichSuDonHang';
+import DanhSachDichVu from './pages/client/DanhSachDichVu';
+import ClientChiTietDichVu from './pages/client/ClientChiTietDichVu';
+import ThanhToan from './pages/client/ThanhToan';
+import Profile from './pages/client/Profile';
 import ProtectedRoute from './components/routes/ProtectedRoute';
 
 function App() {
@@ -32,10 +39,28 @@ function App() {
             <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/products" element={<DanhSachOto />} />
+                <Route path="/products/oto/:id" element={<ClientChiTietOto />} />
                 <Route path="/accessories" element={<DanhSachPhuKien />} />
                 <Route path="/products/accessory/:id" element={<ClientChiTietPhuKien />} />
+                <Route path="/services" element={<DanhSachDichVu />} />
+                <Route path="/services/:id" element={<ClientChiTietDichVu />} />
                 <Route path="/cart" element={<GioHang />} />
+                <Route path="/checkout" element={
+                    <ProtectedRoute allowedRoles={['KHACH_HANG', 'ADMIN', 'NHAN_VIEN']}>
+                        <ThanhToan />
+                    </ProtectedRoute>
+                } />
                 <Route path="/register" element={<DangKy />} />
+                <Route path="/my-orders" element={
+                    <ProtectedRoute allowedRoles={['KHACH_HANG', 'ADMIN', 'NHAN_VIEN']}>
+                        <LichSuDonHang />
+                    </ProtectedRoute>
+                } />
+                <Route path="/profile" element={
+                    <ProtectedRoute allowedRoles={['KHACH_HANG', 'ADMIN', 'NHAN_VIEN']}>
+                        <Profile />
+                    </ProtectedRoute>
+                } />
 
                 {/* Public Routes */}
                 <Route path="/admin/login" element={<AdminLogin />} />
@@ -81,6 +106,7 @@ function App() {
                     <Route path="reviews" element={<DanhGia />} />
                     <Route path="disputes" element={<KhieuNai />} />
                     <Route path="disputes/:id" element={<ChiTietKhieuNai />} />
+                    <Route path="warehouse" element={<KhoHang />} />
                 </Route>
             </Routes>
         </BrowserRouter>

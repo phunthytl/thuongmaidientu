@@ -38,6 +38,9 @@
   font-weight: 600;
   font-size: 0.95rem;
   transition: color 0.3s;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
 }
 
 .nav-links a.active, .nav-links a:hover {
@@ -64,7 +67,7 @@
   box-shadow: 0 10px 25px rgba(0,0,0,0.1);
   list-style: none;
   padding: 0.8rem 0;
-  min-width: 180px;
+  min-width: 240px;
   display: none;
   z-index: 100;
 }
@@ -76,7 +79,9 @@
 
 .dropdown-menu li a {
   padding: 0.8rem 1.5rem;
-  display: block;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
   color: #555;
   transition: all 0.3s;
 }

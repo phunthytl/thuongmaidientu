@@ -174,3 +174,214 @@
 @media (max-width: 1000px) {
     .car-details-grid { grid-template-columns: 1fr; gap: 20px;}
 }
+
+/* =====================================================
+   NEW LAYOUT — Chi tiết Ô Tô / Phụ Kiện (Admin)
+   ===================================================== */
+
+/* ── Header ─────────────────────────────────────────── */
+.view-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 1.75rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.view-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #111827;
+    margin: 0.25rem 0 0;
+}
+
+.view-status-badge {
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.status-available {
+    background: #dcfce7;
+    color: #15803d;
+    border: 1px solid #86efac;
+}
+
+/* ── Two-column content wrapper ─────────────────────── */
+.view-content-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: start;
+}
+
+/* ── Media Panel (left) ─────────────────────────────── */
+.view-media-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.main-image-wrapper {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #e5e7eb;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.main-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+}
+
+.gallery-item {
+    aspect-ratio: 1;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #e5e7eb;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.gallery-item:hover { opacity: 0.75; }
+
+.gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* ── Details Panel (right) ──────────────────────────── */
+.view-details-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+/* Shared card styles */
+.inventory-card,
+.desc-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e5e7eb;
+}
+
+/* Override for detail-card (already defined above, just add missing props) */
+.detail-card {
+    border-radius: 12px;
+    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06);
+}
+
+.detail-price {
+    font-size: 1.9rem;
+    font-weight: 800;
+    color: #ef4444;
+    margin: 0 0 1.25rem;
+    letter-spacing: -0.5px;
+}
+
+/* ── Spec list ─────────────────────────────────────── */
+.spec-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.spec-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 0.88rem;
+}
+
+.spec-list li:last-child { border-bottom: none; }
+
+.spec-label {
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.spec-value {
+    color: #111827;
+    font-weight: 600;
+    text-align: right;
+    max-width: 55%;
+}
+
+/* ── Inventory card ─────────────────────────────────── */
+.inventory-card {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+}
+
+.inventory-stat { text-align: center; flex: 1; }
+
+.stat-value {
+    font-size: 2.8rem;
+    font-weight: 800;
+    color: #111827;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 0.78rem;
+    color: #6b7280;
+    margin-top: 0.3rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ── Description card ───────────────────────────────── */
+.desc-card h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 0.75rem;
+}
+
+.desc-card p {
+    font-size: 0.88rem;
+    color: #4b5563;
+    line-height: 1.75;
+    margin: 0;
+}
+
+/* ── Loading / Empty ─────────────────────────────────── */
+.view-loading,
+.view-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    font-size: 1.05rem;
+    color: #6b7280;
+}
+
+/* ── Responsive ──────────────────────────────────────── */
+@media (max-width: 900px) {
+    .view-content-wrapper { grid-template-columns: 1fr; }
+    .view-car-container   { padding: 1.25rem; }
+    .gallery-grid         { grid-template-columns: repeat(3, 1fr); }
+}
+

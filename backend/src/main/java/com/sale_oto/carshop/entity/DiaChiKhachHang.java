@@ -21,12 +21,17 @@ public class DiaChiKhachHang extends BaseEntity {
     @Column(name = "so_dien_thoai", nullable = false, length = 15)
     private String soDienThoai;
 
-    // Địa chỉ 34 tỉnh thành mới (không còn cấp huyện)
     @Column(name = "tinh_thanh_id", nullable = false)
     private Integer tinhThanhId;
 
     @Column(name = "tinh_thanh_ten", nullable = false, length = 100)
     private String tinhThanhTen;
+
+    @Column(name = "quan_huyen_id")
+    private Integer quanHuyenId;
+
+    @Column(name = "quan_huyen_ten", length = 100)
+    private String quanHuyenTen;
 
     @Column(name = "xa_phuong_id")
     private Integer xaPhuongId;

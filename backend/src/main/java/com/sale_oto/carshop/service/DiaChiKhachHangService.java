@@ -84,6 +84,8 @@ public class DiaChiKhachHangService {
         diaChi.setSoDienThoai(request.getSoDienThoai());
         diaChi.setTinhThanhId(request.getTinhThanhId());
         diaChi.setTinhThanhTen(request.getTinhThanhTen());
+        diaChi.setQuanHuyenId(request.getQuanHuyenId());
+        diaChi.setQuanHuyenTen(request.getQuanHuyenTen());
         diaChi.setXaPhuongId(request.getXaPhuongId());
         diaChi.setXaPhuongTen(request.getXaPhuongTen());
         diaChi.setDiaChiChiTiet(request.getDiaChiChiTiet());
@@ -101,6 +103,8 @@ public class DiaChiKhachHangService {
                 .soDienThoai(diaChi.getSoDienThoai())
                 .tinhThanhId(diaChi.getTinhThanhId())
                 .tinhThanhTen(diaChi.getTinhThanhTen())
+                .quanHuyenId(diaChi.getQuanHuyenId())
+                .quanHuyenTen(diaChi.getQuanHuyenTen())
                 .xaPhuongId(diaChi.getXaPhuongId())
                 .xaPhuongTen(diaChi.getXaPhuongTen())
                 .diaChiChiTiet(diaChi.getDiaChiChiTiet())

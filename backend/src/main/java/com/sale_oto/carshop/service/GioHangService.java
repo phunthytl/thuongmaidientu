@@ -19,6 +19,9 @@ import com.sale_oto.carshop.repository.GioHangRepository;
 import com.sale_oto.carshop.repository.KhachHangRepository;
 import com.sale_oto.carshop.repository.OToRepository;
 import com.sale_oto.carshop.repository.PhuKienRepository;
+import com.sale_oto.carshop.repository.MediaRepository;
+import com.sale_oto.carshop.enums.LoaiDoiTuong;
+import com.sale_oto.carshop.entity.Media;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +41,7 @@ public class GioHangService {
     private final OToRepository oToRepository;
     private final PhuKienRepository phuKienRepository;
     private final DichVuRepository dichVuRepository;
+    private final MediaRepository mediaRepository;
 
     @Transactional
     public GioHangResponse themVaoGio(ThemVaoGioHangRequest request) {
@@ -66,12 +70,69 @@ public class GioHangService {
         validateAvailability(chiTiet, soLuongMoi);
 
         chiTiet.setSoLuong(soLuongMoi);
+        if (request.getKhoHangId() != null) {
+            chiTiet.setKhoHangId(request.getKhoHangId());
+        }
         chiTiet.setDonGia(donGia);
         chiTiet.setThanhTien(donGia.multiply(BigDecimal.valueOf(soLuongMoi)));
         chiTietGioHangRepository.save(chiTiet);
 
         capNhatTongTien(gioHang);
         return getByKhachHang(khachHang.getId());
+    }
+
+    @Transactional
+    public GioHangResponse capNhatSoLuong(Long chiTietId, Integer soLuongMoi) {
+        if (soLuongMoi == null || soLuongMoi < 1) {
+            throw new BadRequestException("Số lượng phải lớn hơn hoặc bằng 1");
+        }
+        ChiTietGioHang chiTiet = chiTietGioHangRepository.findById(chiTietId)
+                .orElseThrow(() -> new ResourceNotFoundException("Chi tiết giỏ hàng", chiTietId));
+        
+        validateAvailability(chiTiet, soLuongMoi);
+        chiTiet.setSoLuong(soLuongMoi);
+        chiTiet.setThanhTien(chiTiet.getDonGia().multiply(BigDecimal.valueOf(soLuongMoi)));
+        chiTietGioHangRepository.save(chiTiet);
+        
+        GioHang gioHang = chiTiet.getGioHang();
+        capNhatTongTien(gioHang);
+        return getByKhachHang(gioHang.getKhachHang().getId());
+    }
+
+    @Transactional
+    public GioHangResponse capNhatKho(Long chiTietId, Long khoHangId) {
+        ChiTietGioHang chiTiet = chiTietGioHangRepository.findById(chiTietId)
+                .orElseThrow(() -> new ResourceNotFoundException("Chi tiết giỏ hàng", chiTietId));
+
+        chiTiet.setKhoHangId(khoHangId);
+        chiTietGioHangRepository.save(chiTiet);
+
+        return getByKhachHang(chiTiet.getGioHang().getKhachHang().getId());
+    }
+
+    @Transactional
+    public GioHangResponse xoaKhoiGio(Long chiTietId) {
+        ChiTietGioHang chiTiet = chiTietGioHangRepository.findById(chiTietId)
+                .orElseThrow(() -> new ResourceNotFoundException("Chi tiết giỏ hàng", chiTietId));
+        
+        GioHang gioHang = chiTiet.getGioHang();
+        gioHang.getChiTietGioHangs().remove(chiTiet);
+        chiTietGioHangRepository.delete(chiTiet);
+        
+        capNhatTongTien(gioHang);
+        return getByKhachHang(gioHang.getKhachHang().getId());
+    }
+
+    @Transactional
+    public GioHangResponse xoaToanBoGio(Long khachHangId) {
+        GioHang gioHang = gioHangRepository.findByKhachHangId(khachHangId)
+                .orElseThrow(() -> new ResourceNotFoundException("Giỏ hàng của khách hàng", khachHangId));
+        
+        chiTietGioHangRepository.deleteAll(gioHang.getChiTietGioHangs());
+        gioHang.getChiTietGioHangs().clear();
+        gioHang.setTongTien(BigDecimal.ZERO);
+        gioHangRepository.save(gioHang);
+        return getByKhachHang(khachHangId);
     }
 
     @Transactional(readOnly = true)
@@ -225,14 +286,36 @@ public class GioHangService {
             case DICH_VU -> chiTiet.getDichVu() != null ? chiTiet.getDichVu().getId() : null;
         };
 
+        String hinhAnh = "";
+        Long idForMedia = null;
+        LoaiDoiTuong loaiDoiTuong = null;
+
+        if (chiTiet.getLoaiSanPham() == LoaiSanPham.OTO && chiTiet.getOto() != null) {
+            idForMedia = chiTiet.getOto().getId();
+            loaiDoiTuong = LoaiDoiTuong.OTO;
+        } else if (chiTiet.getLoaiSanPham() == LoaiSanPham.PHU_KIEN && chiTiet.getPhuKien() != null) {
+            idForMedia = chiTiet.getPhuKien().getId();
+            loaiDoiTuong = LoaiDoiTuong.PHU_KIEN;
+        } else if (chiTiet.getLoaiSanPham() == LoaiSanPham.DICH_VU && chiTiet.getDichVu() != null) {
+            idForMedia = chiTiet.getDichVu().getId();
+            loaiDoiTuong = LoaiDoiTuong.DICH_VU;
+        }
+
+        if (idForMedia != null && loaiDoiTuong != null) {
+            List<Media> medias = mediaRepository.findByLoaiDoiTuongAndDoiTuongIdOrderByThuTuAsc(loaiDoiTuong, idForMedia);
+            if (!medias.isEmpty()) hinhAnh = medias.get(0).getUrl();
+        }
+
         return ChiTietGioHangResponse.builder()
                 .id(chiTiet.getId())
                 .loaiSanPham(chiTiet.getLoaiSanPham())
                 .sanPhamId(sanPhamId)
                 .tenSanPham(tenSanPham)
+                .hinhAnh(hinhAnh)
                 .soLuong(chiTiet.getSoLuong())
                 .donGia(chiTiet.getDonGia())
                 .thanhTien(chiTiet.getThanhTien())
+                .khoHangId(chiTiet.getKhoHangId())
                 .build();
     }
 }
