@@ -33,6 +33,8 @@ public class DonHangService {
     private final PhuKienRepository phuKienRepository;
     private final DichVuRepository dichVuRepository;
     private final DiaChiKhachHangRepository diaChiKhachHangRepository;
+    private final KhoHangRepository khoHangRepository;
+    private final TonKhoService tonKhoService;
     private final GhnService ghnService;
 
     @Transactional
@@ -46,39 +48,46 @@ public class DonHangService {
                     .orElseThrow(() -> new ResourceNotFoundException("Địa chỉ", request.getDiaChiGiaoHangId()));
         }
 
-        List<ChiTietDonHangRequest> phuKienList = new ArrayList<>();
-        List<ChiTietDonHangRequest> khacList = new ArrayList<>();
+        List<DonHangResponse> responses = new ArrayList<>();
+        List<ChiTietDonHangRequest> phuKienDichVuList = new ArrayList<>();
+
+        KhoHang khoHangChung = null;
+        if (request.getKhoHangId() != null) {
+            khoHangChung = khoHangRepository.findById(request.getKhoHangId()).orElse(null);
+        }
 
         for (ChiTietDonHangRequest ct : request.getChiTietDonHangs()) {
-            if (ct.getLoaiSanPham() == LoaiSanPham.PHU_KIEN) {
-                phuKienList.add(ct);
+            if (ct.getLoaiSanPham() == LoaiSanPham.OTO) {
+                // Mỗi xe ô tô tách riêng thành 1 đơn hàng độc lập
+                KhoHang khoXe = khoHangChung;
+                if (ct.getKhoHangId() != null) {
+                    khoXe = khoHangRepository.findById(ct.getKhoHangId()).orElse(khoHangChung);
+                }
+                DonHang dhOto = createSingleOrder(khachHang, diaChi, khoXe, List.of(ct), request.getGhiChu());
+                responses.add(toResponse(dhOto));
             } else {
-                khacList.add(ct);
+                // Phụ kiện và dịch vụ gom chung
+                phuKienDichVuList.add(ct);
             }
         }
 
-        List<DonHangResponse> responses = new ArrayList<>();
-
-        if (!phuKienList.isEmpty()) {
-            DonHang dh1 = createSingleOrder(khachHang, diaChi, phuKienList, request.getGhiChu());
-            responses.add(toResponse(dh1));
-        }
-
-        if (!khacList.isEmpty()) {
-            DonHang dh2 = createSingleOrder(khachHang, diaChi, khacList, request.getGhiChu());
-            responses.add(toResponse(dh2));
+        if (!phuKienDichVuList.isEmpty()) {
+            DonHang dhGop = createSingleOrder(khachHang, diaChi, khoHangChung, phuKienDichVuList, request.getGhiChu());
+            responses.add(toResponse(dhGop));
         }
 
         return responses;
     }
 
-    private DonHang createSingleOrder(KhachHang khachHang, DiaChiKhachHang diaChi, List<ChiTietDonHangRequest> items, String ghiChu) {
+    private DonHang createSingleOrder(KhachHang khachHang, DiaChiKhachHang diaChi, KhoHang khoHang,
+            List<ChiTietDonHangRequest> items, String ghiChu) {
         DonHang donHang = new DonHang();
         donHang.setMaDonHang(generateMaDonHang());
         donHang.setKhachHang(khachHang);
         donHang.setTrangThai(TrangThaiDonHang.CHO_XAC_NHAN);
         donHang.setGhiChu(ghiChu);
         donHang.setDiaChiGiaoHang(diaChi);
+        donHang.setKhoXuatHang(khoHang);
 
         List<ChiTietDonHang> chiTietList = new ArrayList<>();
         BigDecimal tongTien = BigDecimal.ZERO;
@@ -88,6 +97,8 @@ public class DonHangService {
             chiTiet.setDonHang(donHang);
             chiTiet.setLoaiSanPham(ctRequest.getLoaiSanPham());
             chiTiet.setSoLuong(ctRequest.getSoLuong());
+            chiTiet.setKhoHangId(ctRequest.getKhoHangId() != null ? ctRequest.getKhoHangId()
+                    : (khoHang != null ? khoHang.getId() : null));
 
             BigDecimal donGia = resolveProductAndPrice(chiTiet, ctRequest);
             chiTiet.setDonGia(donGia);
@@ -98,23 +109,37 @@ public class DonHangService {
         }
 
         donHang.setTongTien(tongTien);
-        
+
         boolean isPhuKienOrder = items.stream().anyMatch(i -> i.getLoaiSanPham() == LoaiSanPham.PHU_KIEN);
         if (isPhuKienOrder && diaChi != null) {
             int totalWeight = donHang.getChiTietDonHangs().stream()
                     .filter(ct -> ct.getLoaiSanPham() == LoaiSanPham.PHU_KIEN && ct.getPhuKien() != null)
-                    .mapToInt(ct -> ct.getSoLuong() * (ct.getPhuKien().getTrongLuong() != null ? ct.getPhuKien().getTrongLuong() : 500))
+                    .mapToInt(ct -> ct.getSoLuong()
+                            * (ct.getPhuKien().getTrongLuong() != null ? ct.getPhuKien().getTrongLuong() : 500))
                     .sum();
-            if (totalWeight <= 0) totalWeight = 500; // Tránh lỗi cân nặng = 0
+            if (totalWeight <= 0)
+                totalWeight = 500; // Tránh lỗi cân nặng = 0
 
             BigDecimal phiVanChuyen = ghnService.calculateFee(
-                null, null, totalWeight, 10, 10, 10);
+                    null, null, totalWeight, 10, 10, 10);
             donHang.setPhiVanChuyen(phiVanChuyen);
             donHang.setTongTien(donHang.getTongTien().add(phiVanChuyen));
         }
-        
+
         donHang.setChiTietDonHangs(chiTietList);
-        return donHangRepository.save(donHang);
+        DonHang saved = donHangRepository.save(donHang);
+
+        // Trừ tồn kho cho xe ô tô và phụ kiện
+        for (ChiTietDonHang ct : chiTietList) {
+            Long targetKho = ct.getKhoHangId() != null ? ct.getKhoHangId() : (khoHang != null ? khoHang.getId() : null);
+            if (targetKho != null) {
+                if (ct.getLoaiSanPham() == LoaiSanPham.PHU_KIEN && ct.getPhuKien() != null) {
+                    tonKhoService.decreaseStock(ct.getPhuKien().getId(), targetKho, ct.getSoLuong());
+                }
+            }
+        }
+
+        return saved;
     }
 
     @Transactional(readOnly = true)
@@ -155,7 +180,7 @@ public class DonHangService {
     public DonHangResponse capNhatTrangThai(Long id, TrangThaiDonHang trangThai) {
         DonHang donHang = donHangRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Đơn hàng", id));
-                
+
         if (trangThai == TrangThaiDonHang.DA_XAC_NHAN && donHang.getMaDonHangGhn() == null) {
             boolean hasPhuKien = donHang.getChiTietDonHangs().stream()
                     .anyMatch(ct -> ct.getLoaiSanPham() == LoaiSanPham.PHU_KIEN);
@@ -164,9 +189,22 @@ public class DonHangService {
                 donHang.setMaDonHangGhn(orderCode);
             }
         }
-        
+
         if (trangThai == TrangThaiDonHang.DA_HUY && donHang.getMaDonHangGhn() != null) {
             ghnService.cancelOrder(donHang.getMaDonHangGhn());
+        }
+
+        // Hoàn kho khi hủy đơn
+        if (trangThai == TrangThaiDonHang.DA_HUY) {
+            for (ChiTietDonHang ct : donHang.getChiTietDonHangs()) {
+                Long targetKho = ct.getKhoHangId() != null ? ct.getKhoHangId()
+                        : (donHang.getKhoXuatHang() != null ? donHang.getKhoXuatHang().getId() : null);
+                if (targetKho != null) {
+                    if (ct.getLoaiSanPham() == LoaiSanPham.PHU_KIEN && ct.getPhuKien() != null) {
+                        tonKhoService.increaseStock(ct.getPhuKien().getId(), targetKho, ct.getSoLuong());
+                    }
+                }
+            }
         }
 
         donHang.setTrangThai(trangThai);
@@ -274,6 +312,7 @@ public class DonHangService {
                 .soLuong(ct.getSoLuong())
                 .donGia(ct.getDonGia())
                 .thanhTien(ct.getThanhTien())
+                .khoHangId(ct.getKhoHangId())
                 .build();
     }
 }

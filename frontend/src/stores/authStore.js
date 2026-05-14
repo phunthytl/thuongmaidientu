@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { api } from '../services/api';
+import { useCartStore } from './cartStore';
 
 export const useAuthStore = create((set, get) => ({
     user: null,
@@ -31,6 +32,11 @@ export const useAuthStore = create((set, get) => ({
                 isAuthenticated: true,
                 isLoading: false
             });
+
+            // Gộp giỏ hàng guest vào DB, sau đó tải giỏ hàng theo user
+            const khachHangId = userData.khachHangId ?? userData.id;
+            await useCartStore.getState().mergeGuestCart(khachHangId);
+            await useCartStore.getState().setCurrentUser(userData.id, khachHangId);
             return userData;
         } catch (err) {
             localStorage.removeItem('access_token');
@@ -45,11 +51,27 @@ export const useAuthStore = create((set, get) => ({
         }
     },
 
+    register: async (userData) => {
+        set({ isLoading: true, error: null });
+        try {
+            const { data } = await api.post('/auth/dang-ky', userData);
+            set({ isLoading: false });
+            return data;
+        } catch (err) {
+            set({
+                isLoading: false,
+                error: err.response?.data?.message || err.message || 'Đăng ký thất bại'
+            });
+            throw err;
+        }
+    },
+
     logout: () => {
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
         delete api.defaults.headers.common['Authorization'];
         set({ user: null, isAuthenticated: false });
+        useCartStore.getState().setCurrentUser(null, null);
         window.location.href = '/login';
     },
 
@@ -60,10 +82,14 @@ export const useAuthStore = create((set, get) => ({
         set({ isLoading: true });
         try {
             const res = await api.get('/auth/me');
-            set({ user: res.data.data, isAuthenticated: true, isLoading: false });
+            const userData = res.data.data;
+            set({ user: userData, isAuthenticated: true, isLoading: false });
+            const khachHangId = userData.khachHangId ?? userData.id;
+            await useCartStore.getState().setCurrentUser(userData.id, khachHangId);
             return true;
         } catch (error) {
             set({ user: null, isAuthenticated: false, isLoading: false });
+            useCartStore.getState().setCurrentUser(null, null);
             return false;
         }
     }

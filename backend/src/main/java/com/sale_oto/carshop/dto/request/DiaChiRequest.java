@@ -17,7 +17,10 @@ public class DiaChiRequest {
 
     private String tinhThanhTen;
 
-    // Xã/Phường theo cấu trúc 34 tỉnh thành mới (không có huyện)
+    private Integer quanHuyenId;
+
+    private String quanHuyenTen;
+
     private Integer xaPhuongId;
 
     private String xaPhuongTen;

@@ -85,12 +85,6 @@ export default function ChiTietOto() {
                         </ul>
                     </div>
 
-                    <div className="inventory-card">
-                         <div className="inventory-stat">
-                             <div className="stat-value">{car.soLuong || 0}</div>
-                             <div className="stat-label">Chiếc trong kho</div>
-                         </div>
-                    </div>
 
                     <div className="desc-card">
                         <h3>Giới thiệu chuyên sâu</h3>

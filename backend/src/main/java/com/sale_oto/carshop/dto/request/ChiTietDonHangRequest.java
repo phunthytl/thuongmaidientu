@@ -19,4 +19,6 @@ public class ChiTietDonHangRequest {
 
     @Min(value = 1, message = "Số lượng phải >= 1")
     private Integer soLuong = 1;
+
+    private Long khoHangId;
 }

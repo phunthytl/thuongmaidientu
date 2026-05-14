@@ -90,6 +90,15 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.POST, "/api/media/**").hasAnyRole("ADMIN", "NHAN_VIEN")
                     .requestMatchers(HttpMethod.DELETE, "/api/media/**").hasAnyRole("ADMIN", "NHAN_VIEN")
 
+                    // Tồn kho - GET public, POST Admin/NV
+                    .requestMatchers(HttpMethod.GET, "/api/ton-kho/**").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/api/ton-kho/**").hasAnyRole("ADMIN", "NHAN_VIEN")
+
+                    // Kho hàng - GET public, POST/PUT Admin/NV
+                    .requestMatchers(HttpMethod.GET, "/api/kho-hang/**").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/api/kho-hang/**").hasAnyRole("ADMIN", "NHAN_VIEN")
+                    .requestMatchers(HttpMethod.PUT, "/api/kho-hang/**").hasAnyRole("ADMIN", "NHAN_VIEN")
+
                     // Admin only
                     .requestMatchers("/api/nhan-vien/**").hasRole("ADMIN")
                     .requestMatchers(HttpMethod.DELETE, "/api/oto/**").hasRole("ADMIN")
@@ -121,6 +130,11 @@ public class SecurityConfig {
                     // Quản lý KH - Admin only
                     .requestMatchers("/api/nguoi-dung/khach-hang/**").hasRole("ADMIN")
                     .requestMatchers(HttpMethod.PATCH, "/api/nguoi-dung/*/trang-thai").hasRole("ADMIN")
+
+                    // Đặt lịch (LichHen)
+                    .requestMatchers(HttpMethod.POST, "/api/lich-hen").permitAll()
+                    .requestMatchers("/api/lich-hen/my-lich-hen").authenticated()
+                    .requestMatchers("/api/lich-hen/**").hasAnyRole("ADMIN", "NHAN_VIEN")
 
                     // Tất cả request còn lại cần authentication
                     .anyRequest().authenticated()

@@ -38,4 +38,17 @@ public class NguoiDungController {
             @PathVariable Long id, @RequestParam Boolean trangThai) {
         return ResponseEntity.ok(ApiResponse.success(nguoiDungService.capNhatTrangThai(id, trangThai)));
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<NguoiDungResponse>> capNhatThongTin(
+            @PathVariable Long id, @RequestBody @jakarta.validation.Valid com.sale_oto.carshop.dto.request.CapNhatThongTinRequest request) {
+        return ResponseEntity.ok(ApiResponse.success(nguoiDungService.capNhatThongTin(id, request)));
+    }
+
+    @PutMapping("/{id}/mat-khau")
+    public ResponseEntity<ApiResponse<Void>> doiMatKhau(
+            @PathVariable Long id, @RequestBody @jakarta.validation.Valid com.sale_oto.carshop.dto.request.DoiMatKhauRequest request) {
+        nguoiDungService.doiMatKhau(id, request);
+        return ResponseEntity.ok(ApiResponse.success("Đổi mật khẩu thành công", null));
+    }
 }

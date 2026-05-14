@@ -34,6 +34,9 @@ public class ChiTietDonHang extends BaseEntity {
     @JoinColumn(name = "dich_vu_id")
     private DichVu dichVu;
 
+    @Column(name = "kho_hang_id")
+    private Long khoHangId;
+
     @Column(name = "so_luong", nullable = false)
     private Integer soLuong = 1;
 

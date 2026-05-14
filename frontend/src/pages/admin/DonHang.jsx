@@ -58,8 +58,8 @@ export default function DonHang() {
         <div className="orders-container">
             <header className="orders-header">
                 <div className="title-group">
-                    <h2 className="orders-subtitle">Hệ Thống Phân Phối</h2>
-                    <h1 className="orders-title">Quản Lý Đơn Hàng</h1>
+                    <h2 className="orders-subtitle">Hệ Thống Bán Lẻ</h2>
+                    <h1 className="orders-title">Quản Lý Đơn Phụ Kiện</h1>
                 </div>
                 <div className="action-group">
                     <button className="btn-export-orders">Xuất Báo Cáo</button>

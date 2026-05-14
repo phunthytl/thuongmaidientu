@@ -18,4 +18,8 @@ public class DonHangRequest {
     private String ghiChu;
 
     private Long diaChiGiaoHangId;
+
+    private String diaChiGiaoHang;
+
+    private Long khoHangId;
 }

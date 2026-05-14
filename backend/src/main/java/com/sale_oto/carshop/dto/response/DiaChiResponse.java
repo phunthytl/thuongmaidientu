@@ -11,6 +11,8 @@ public class DiaChiResponse {
     private String soDienThoai;
     private Integer tinhThanhId;
     private String tinhThanhTen;
+    private Integer quanHuyenId;
+    private String quanHuyenTen;
     private Integer xaPhuongId;
     private String xaPhuongTen;
     private String diaChiChiTiet;

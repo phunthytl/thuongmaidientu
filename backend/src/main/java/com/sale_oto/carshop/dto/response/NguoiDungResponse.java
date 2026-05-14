@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 public class NguoiDungResponse {
 
     private Long id;
+    private Long khachHangId;   // ID bảng khach_hang (dùng cho giỏ hàng)
     private String hoTen;
     private String email;
     private String soDienThoai;

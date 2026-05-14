@@ -108,7 +108,6 @@ public class OToService {
         oto.setNhienLieu(request.getNhienLieu());
         oto.setSoKm(request.getSoKm());
         oto.setGia(request.getGia());
-        oto.setSoLuong(request.getSoLuong() != null ? request.getSoLuong() : 0);
         oto.setMoTa(request.getMoTa());
     }
 
@@ -134,7 +133,6 @@ public class OToService {
                 .nhienLieu(oto.getNhienLieu())
                 .soKm(oto.getSoKm())
                 .gia(oto.getGia())
-                .soLuong(oto.getSoLuong())
                 .moTa(oto.getMoTa())
                 .trangThai(oto.getTrangThai())
                 .hinhAnhs(hinhAnhs)

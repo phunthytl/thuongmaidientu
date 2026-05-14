@@ -12,13 +12,24 @@ const Menus = [
         subs: [
             { name: 'Ô tô', path: '/admin/products' },
             { name: 'Phụ kiện', path: '/admin/products/accessories' },
+            { name: 'Tồn kho phụ kiện', path: '/admin/inventory/accessories' },
         ]
     },
     { name: 'Dịch Vụ', path: '/admin/services' },
-    { name: 'Đơn Hàng', path: '/admin/orders' },
+    {
+        name: 'Quản Lý Đơn',
+        path: '/admin/bookings',
+        hasSubs: true,
+        subs: [
+            { name: 'Lịch lái thử', path: '/admin/bookings/test-drive' },
+            { name: 'Đơn phụ kiện', path: '/admin/orders' },
+            { name: 'Lịch dịch vụ', path: '/admin/bookings/service' },
+        ]
+    },
     { name: 'Khách Hàng', path: '/admin/customers' },
     { name: 'Đánh Giá', path: '/admin/reviews' },
     { name: 'Khiếu Nại', path: '/admin/disputes' },
+    { name: 'Kho Hàng', path: '/admin/warehouse' },
     { name: 'Tin Nhắn', path: '/admin/messages' },
 ];
 

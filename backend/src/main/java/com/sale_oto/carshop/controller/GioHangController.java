@@ -11,6 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,5 +35,29 @@ public class GioHangController {
     @GetMapping("/khach-hang/{khachHangId}")
     public ResponseEntity<ApiResponse<GioHangResponse>> getByKhachHang(@PathVariable Long khachHangId) {
         return ResponseEntity.ok(ApiResponse.success(gioHangService.getByKhachHang(khachHangId)));
+    }
+
+    @PutMapping("/cap-nhat/{chiTietId}")
+    public ResponseEntity<ApiResponse<GioHangResponse>> capNhatSoLuong(
+            @PathVariable Long chiTietId,
+            @RequestParam Integer soLuong) {
+        return ResponseEntity.ok(ApiResponse.success(gioHangService.capNhatSoLuong(chiTietId, soLuong)));
+    }
+
+    @PutMapping("/cap-nhat-kho/{chiTietId}")
+    public ResponseEntity<ApiResponse<GioHangResponse>> capNhatKho(
+            @PathVariable Long chiTietId,
+            @RequestParam Long khoHangId) {
+        return ResponseEntity.ok(ApiResponse.success(gioHangService.capNhatKho(chiTietId, khoHangId)));
+    }
+
+    @DeleteMapping("/xoa/{chiTietId}")
+    public ResponseEntity<ApiResponse<GioHangResponse>> xoaKhoiGio(@PathVariable Long chiTietId) {
+        return ResponseEntity.ok(ApiResponse.success(gioHangService.xoaKhoiGio(chiTietId)));
+    }
+
+    @DeleteMapping("/xoa-het/{khachHangId}")
+    public ResponseEntity<ApiResponse<GioHangResponse>> xoaToanBoGio(@PathVariable Long khachHangId) {
+        return ResponseEntity.ok(ApiResponse.success(gioHangService.xoaToanBoGio(khachHangId)));
     }
 }

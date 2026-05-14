@@ -22,4 +22,6 @@ public class ThemVaoGioHangRequest {
 
     @Min(value = 1, message = "Số lượng phải >= 1")
     private Integer soLuong = 1;
+
+    private Long khoHangId;
 }
