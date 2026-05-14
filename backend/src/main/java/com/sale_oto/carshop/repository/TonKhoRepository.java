@@ -8,10 +8,6 @@ import java.util.Optional;
 
 public interface TonKhoRepository extends JpaRepository<TonKho, Long> {
 
-    List<TonKho> findByOtoId(Long otoId);
-
-    Optional<TonKho> findByOtoIdAndKhoHangId(Long otoId, Long khoHangId);
-
     List<TonKho> findByKhoHangId(Long khoHangId);
 
     List<TonKho> findByPhuKienId(Long phuKienId);

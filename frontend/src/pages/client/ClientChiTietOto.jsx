@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { FaGasPump, FaCogs, FaStar, FaUserCircle, FaCalendarAlt, FaCar, FaInfoCircle, FaComments, FaWarehouse, FaCheckCircle, FaMapMarkerAlt, FaShoppingCart } from 'react-icons/fa';
+import { FaGasPump, FaCogs, FaStar, FaUserCircle, FaCalendarAlt, FaCar, FaInfoCircle, FaComments, FaWarehouse, FaCheckCircle, FaMapMarkerAlt, FaHeadset } from 'react-icons/fa';
 import Navbar from '../../components/layout/Navbar';
 import { productService } from '../../services/productService';
 import { inventoryService } from '../../services/inventoryService';
-import { useCartStore } from '../../stores/cartStore';
 import { api } from '../../services/api';
+import BookingModal from '../../components/client/BookingModal';
 import '../../assets/css/Home.css';
 
 export default function ClientChiTietOto() {
@@ -18,8 +18,7 @@ export default function ClientChiTietOto() {
     const [loading, setLoading] = useState(true);
     const [activeImage, setActiveImage] = useState(null);
     const [activeTab, setActiveTab] = useState('details');
-    const [addingToCart, setAddingToCart] = useState(false);
-    const { addToCart } = useCartStore();
+    const [isBookingOpen, setIsBookingOpen] = useState(false);
 
     useEffect(() => {
         fetchCarData();
@@ -28,11 +27,11 @@ export default function ClientChiTietOto() {
     const fetchCarData = async () => {
         try {
             setLoading(true);
-            const [carRes, imgRes, reviewRes, stockRes] = await Promise.all([
+            const [carRes, imgRes, reviewRes, branchRes] = await Promise.all([
                 productService.getCarDetail(id),
                 productService.getCarImages(id).catch(() => ({ data: [] })),
                 api.get(`/danh-gia/oto/${id}?size=10`).catch(() => ({ data: { data: { content: [] } } })),
-                inventoryService.getStockByOto(id).catch(() => ({ data: [] }))
+                api.get('/kho-hang/active').catch(() => ({ data: { data: [] } }))
             ]);
             
             const carData = carRes?.data || carRes;
@@ -45,11 +44,10 @@ export default function ClientChiTietOto() {
             const revs = reviewRes?.data?.data?.content || reviewRes?.data?.content || [];
             setReviews(revs);
 
-            const stocks = stockRes?.data || [];
-            setWarehouses(stocks);
-            // Auto-chọn kho có hàng đầu tiên
-            const firstAvailable = stocks.find(w => w.soLuong > 0);
-            if (firstAvailable) setSelectedKho(firstAvailable.khoHangId);
+            const branches = branchRes?.data?.data || [];
+            setWarehouses(branches);
+            // Auto-chọn chi nhánh đầu tiên
+            if (branches.length > 0) setSelectedKho(branches[0].id);
         } catch (error) {
             console.error('Error fetching car details:', error);
         } finally {
@@ -68,24 +66,12 @@ export default function ClientChiTietOto() {
         return (total / reviews.length).toFixed(1);
     };
 
-    const handleAddToCart = async () => {
-        if (!selectedKho || addingToCart) return;
-        setAddingToCart(true);
-        try {
-            await addToCart({
-                id: car.id,
-                type: 'OTO',
-                name: car.tenXe,
-                gia: car.gia,
-                hinhAnh: images[0]?.url || '',
-                khoHangId: selectedKho,
-            }, 1);
-            alert('Đã thêm xe vào giỏ hàng!');
-        } catch (err) {
-            alert('Thêm vào giỏ thất bại: ' + (err.response?.data?.message || err.message));
-        } finally {
-            setAddingToCart(false);
+    const handleOpenBooking = () => {
+        if (!selectedKho) {
+            alert('Vui lòng chọn chi nhánh bạn muốn đăng ký lái thử!');
+            return;
         }
+        setIsBookingOpen(true);
     };
 
     if (loading) {
@@ -110,7 +96,7 @@ export default function ClientChiTietOto() {
         );
     }
 
-    const totalStock = warehouses.reduce((s, w) => s + w.soLuong, 0);
+    const selectedBranchData = warehouses.find(w => w.id === selectedKho);
 
     return (
         <div className="home-container" style={{ backgroundColor: '#f9fafb', minHeight: '100vh', paddingBottom: '60px' }}>
@@ -224,28 +210,27 @@ export default function ClientChiTietOto() {
                             <div style={{ marginBottom: '24px' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
                                     <FaWarehouse style={{ fontSize: '18px', color: '#4b5563' }} />
-                                    <span style={{ fontSize: '16px', fontWeight: 700, color: '#111' }}>Chọn kho nhận xe</span>
-                                    <span style={{ fontSize: '13px', color: '#6b7280' }}>({totalStock} xe có sẵn)</span>
+                                    <span style={{ fontSize: '16px', fontWeight: 700, color: '#111' }}>Chọn chi nhánh lái thử</span>
+                                    <span style={{ fontSize: '13px', color: '#6b7280' }}>(Vui lòng chọn chi nhánh gần bạn nhất)</span>
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                     {warehouses.map(wh => {
-                                        const available = wh.soLuong > 0;
-                                        const isSelected = selectedKho === wh.khoHangId;
+                                        const isSelected = selectedKho === wh.id;
                                         return (
                                             <div
-                                                key={wh.khoHangId}
-                                                className={`warehouse-card ${isSelected ? 'selected' : ''} ${!available ? 'disabled' : ''}`}
-                                                onClick={() => available && setSelectedKho(wh.khoHangId)}
+                                                key={wh.id}
+                                                className={`warehouse-card ${isSelected ? 'selected' : ''}`}
+                                                onClick={() => setSelectedKho(wh.id)}
                                             >
                                                 <div className={`wh-radio ${isSelected ? 'checked' : ''}`} />
                                                 <div style={{ flex: 1, minWidth: 0 }}>
                                                     <div style={{ fontWeight: 700, fontSize: '15px', color: '#111', marginBottom: '2px' }}>{wh.tenKho}</div>
                                                     <div style={{ fontSize: '13px', color: '#6b7280', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                        <FaMapMarkerAlt size={11} /> {wh.tinhThanhTen} — {wh.diaChiChiTiet}
+                                                        <FaMapMarkerAlt size={11} /> {wh.tinhThanhName} — {wh.diaChiChiTiet}
                                                     </div>
                                                 </div>
-                                                <span className={`stock-badge ${available ? 'in-stock' : 'out-of-stock'}`}>
-                                                    {available ? `Còn ${wh.soLuong} xe` : 'Hết hàng'}
+                                                <span className="stock-badge in-stock">
+                                                    Sẵn sàng
                                                 </span>
                                             </div>
                                         );
@@ -258,13 +243,12 @@ export default function ClientChiTietOto() {
                             <button 
                                 className="btn-primary" 
                                 style={{ flex: 1, padding: '18px', fontSize: '18px', fontWeight: 'bold', borderRadius: '12px', boxShadow: '0 4px 14px 0 rgba(17, 17, 17, 0.39)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', opacity: selectedKho ? 1 : 0.5, cursor: selectedKho ? 'pointer' : 'not-allowed' }}
-                                onClick={handleAddToCart}
-                                disabled={!selectedKho || addingToCart}
+                                onClick={handleOpenBooking}
                             >
-                                <FaShoppingCart /> {addingToCart ? 'Đang thêm...' : 'Thêm Vào Giỏ'}
+                                <FaCalendarAlt /> Đăng ký lái thử
                             </button>
-                            <button style={{ padding: '18px 24px', fontSize: '18px', fontWeight: 'bold', borderRadius: '12px', backgroundColor: '#fff', border: '2px solid #e5e7eb', color: '#111', cursor: 'pointer', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.borderColor = '#111'} onMouseOut={e => e.currentTarget.style.borderColor = '#e5e7eb'}>
-                                Liên Hệ Tư Vấn
+                            <button style={{ padding: '18px 24px', fontSize: '18px', fontWeight: 'bold', borderRadius: '12px', backgroundColor: '#fff', border: '2px solid #e5e7eb', color: '#111', cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '10px' }} onMouseOver={e => e.currentTarget.style.borderColor = '#111'} onMouseOut={e => e.currentTarget.style.borderColor = '#e5e7eb'}>
+                                <FaHeadset /> Liên hệ tư vấn
                             </button>
                         </div>
                     </div>
@@ -331,7 +315,7 @@ export default function ClientChiTietOto() {
                         <div>
                             {reviews.length === 0 ? (
                                 <div style={{ padding: '60px 20px', textAlign: 'center', background: '#f9fafb', borderRadius: '12px', color: '#6b7280' }}>
-                                    <FaComments style={{ fontSize: '48px', color: '#d1d5db', marginBottom: '16px' }} />
+                                    <FaComments style={{ fontSize: '48px', color: '#d1d5db', marginBottom: '166px' }} />
                                     <h3 style={{ margin: '0 0 8px 0', color: '#111' }}>Chưa có đánh giá</h3>
                                     <p style={{ margin: 0 }}>Chưa có khách hàng nào đánh giá sản phẩm này.</p>
                                 </div>
@@ -368,6 +352,17 @@ export default function ClientChiTietOto() {
                     )}
                 </div>
             </div>
+
+            {/* Booking Modal */}
+            {isBookingOpen && (
+                <BookingModal 
+                    isOpen={isBookingOpen} 
+                    onClose={() => setIsBookingOpen(false)} 
+                    product={car}
+                    type="LAI_THU"
+                    selectedBranch={{ ...selectedBranchData, khoHangId: selectedBranchData?.id }}
+                />
+            )}
         </div>
     );
 }

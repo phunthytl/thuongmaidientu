@@ -165,7 +165,7 @@ public class GioHangService {
         return chiTietGioHangRepository.findByGioHangId(gioHangId).stream()
                 .filter(item -> item.getLoaiSanPham() == request.getLoaiSanPham())
                 .filter(item -> switch (request.getLoaiSanPham()) {
-                    case OTO -> item.getOto() != null && item.getOto().getId().equals(request.getOtoId());
+                    case OTO -> false;
                     case PHU_KIEN -> item.getPhuKien() != null && item.getPhuKien().getId().equals(request.getPhuKienId());
                     case DICH_VU -> item.getDichVu() != null && item.getDichVu().getId().equals(request.getDichVuId());
                 })
@@ -174,17 +174,7 @@ public class GioHangService {
 
     private BigDecimal resolveProductAndPrice(ChiTietGioHang chiTiet, ThemVaoGioHangRequest request) {
         return switch (request.getLoaiSanPham()) {
-            case OTO -> {
-                if (request.getOtoId() == null) {
-                    throw new BadRequestException("otoId không được để trống");
-                }
-                OTo oto = oToRepository.findById(request.getOtoId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Ô tô", request.getOtoId()));
-                chiTiet.setOto(oto);
-                chiTiet.setPhuKien(null);
-                chiTiet.setDichVu(null);
-                yield oto.getGia();
-            }
+            case OTO -> throw new BadRequestException("Ô tô hiện tại chỉ hỗ trợ đặt lịch lái thử, không thể thêm vào giỏ hàng.");
             case PHU_KIEN -> {
                 if (request.getPhuKienId() == null) {
                     throw new BadRequestException("phuKienId không được để trống");
@@ -212,18 +202,6 @@ public class GioHangService {
 
     private void validateAvailability(ChiTietGioHang chiTiet, int soLuongMoi) {
         switch (chiTiet.getLoaiSanPham()) {
-            case OTO -> {
-                OTo oto = chiTiet.getOto();
-                if (oto == null) {
-                    throw new BadRequestException("Sản phẩm ô tô không hợp lệ");
-                }
-                if (oto.getTrangThai() != TrangThaiOTo.DANG_BAN) {
-                    throw new BadRequestException("Ô tô hiện không còn kinh doanh");
-                }
-                if (oto.getSoLuong() == null || oto.getSoLuong() < soLuongMoi) {
-                    throw new BadRequestException("Số lượng ô tô trong kho không đủ");
-                }
-            }
             case PHU_KIEN -> {
                 PhuKien phuKien = chiTiet.getPhuKien();
                 if (phuKien == null) {
@@ -275,13 +253,13 @@ public class GioHangService {
 
     private ChiTietGioHangResponse toChiTietResponse(ChiTietGioHang chiTiet) {
         String tenSanPham = switch (chiTiet.getLoaiSanPham()) {
-            case OTO -> chiTiet.getOto() != null ? chiTiet.getOto().getTenXe() : "";
+            case OTO -> "";
             case PHU_KIEN -> chiTiet.getPhuKien() != null ? chiTiet.getPhuKien().getTenPhuKien() : "";
             case DICH_VU -> chiTiet.getDichVu() != null ? chiTiet.getDichVu().getTenDichVu() : "";
         };
 
         Long sanPhamId = switch (chiTiet.getLoaiSanPham()) {
-            case OTO -> chiTiet.getOto() != null ? chiTiet.getOto().getId() : null;
+            case OTO -> null;
             case PHU_KIEN -> chiTiet.getPhuKien() != null ? chiTiet.getPhuKien().getId() : null;
             case DICH_VU -> chiTiet.getDichVu() != null ? chiTiet.getDichVu().getId() : null;
         };
@@ -290,10 +268,7 @@ public class GioHangService {
         Long idForMedia = null;
         LoaiDoiTuong loaiDoiTuong = null;
 
-        if (chiTiet.getLoaiSanPham() == LoaiSanPham.OTO && chiTiet.getOto() != null) {
-            idForMedia = chiTiet.getOto().getId();
-            loaiDoiTuong = LoaiDoiTuong.OTO;
-        } else if (chiTiet.getLoaiSanPham() == LoaiSanPham.PHU_KIEN && chiTiet.getPhuKien() != null) {
+        if (chiTiet.getLoaiSanPham() == LoaiSanPham.PHU_KIEN && chiTiet.getPhuKien() != null) {
             idForMedia = chiTiet.getPhuKien().getId();
             loaiDoiTuong = LoaiDoiTuong.PHU_KIEN;
         } else if (chiTiet.getLoaiSanPham() == LoaiSanPham.DICH_VU && chiTiet.getDichVu() != null) {

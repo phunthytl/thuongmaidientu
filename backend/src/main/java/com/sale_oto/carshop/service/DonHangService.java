@@ -10,7 +10,6 @@ import com.sale_oto.carshop.enums.LoaiSanPham;
 import com.sale_oto.carshop.enums.TrangThaiDonHang;
 import com.sale_oto.carshop.exception.ResourceNotFoundException;
 import com.sale_oto.carshop.repository.*;
-import com.sale_oto.carshop.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -80,7 +79,8 @@ public class DonHangService {
         return responses;
     }
 
-    private DonHang createSingleOrder(KhachHang khachHang, DiaChiKhachHang diaChi, KhoHang khoHang, List<ChiTietDonHangRequest> items, String ghiChu) {
+    private DonHang createSingleOrder(KhachHang khachHang, DiaChiKhachHang diaChi, KhoHang khoHang,
+            List<ChiTietDonHangRequest> items, String ghiChu) {
         DonHang donHang = new DonHang();
         donHang.setMaDonHang(generateMaDonHang());
         donHang.setKhachHang(khachHang);
@@ -97,7 +97,8 @@ public class DonHangService {
             chiTiet.setDonHang(donHang);
             chiTiet.setLoaiSanPham(ctRequest.getLoaiSanPham());
             chiTiet.setSoLuong(ctRequest.getSoLuong());
-            chiTiet.setKhoHangId(ctRequest.getKhoHangId() != null ? ctRequest.getKhoHangId() : (khoHang != null ? khoHang.getId() : null));
+            chiTiet.setKhoHangId(ctRequest.getKhoHangId() != null ? ctRequest.getKhoHangId()
+                    : (khoHang != null ? khoHang.getId() : null));
 
             BigDecimal donGia = resolveProductAndPrice(chiTiet, ctRequest);
             chiTiet.setDonGia(donGia);
@@ -108,21 +109,23 @@ public class DonHangService {
         }
 
         donHang.setTongTien(tongTien);
-        
+
         boolean isPhuKienOrder = items.stream().anyMatch(i -> i.getLoaiSanPham() == LoaiSanPham.PHU_KIEN);
         if (isPhuKienOrder && diaChi != null) {
             int totalWeight = donHang.getChiTietDonHangs().stream()
                     .filter(ct -> ct.getLoaiSanPham() == LoaiSanPham.PHU_KIEN && ct.getPhuKien() != null)
-                    .mapToInt(ct -> ct.getSoLuong() * (ct.getPhuKien().getTrongLuong() != null ? ct.getPhuKien().getTrongLuong() : 500))
+                    .mapToInt(ct -> ct.getSoLuong()
+                            * (ct.getPhuKien().getTrongLuong() != null ? ct.getPhuKien().getTrongLuong() : 500))
                     .sum();
-            if (totalWeight <= 0) totalWeight = 500; // Tránh lỗi cân nặng = 0
+            if (totalWeight <= 0)
+                totalWeight = 500; // Tránh lỗi cân nặng = 0
 
             BigDecimal phiVanChuyen = ghnService.calculateFee(
-                null, null, totalWeight, 10, 10, 10);
+                    null, null, totalWeight, 10, 10, 10);
             donHang.setPhiVanChuyen(phiVanChuyen);
             donHang.setTongTien(donHang.getTongTien().add(phiVanChuyen));
         }
-        
+
         donHang.setChiTietDonHangs(chiTietList);
         DonHang saved = donHangRepository.save(donHang);
 
@@ -130,10 +133,8 @@ public class DonHangService {
         for (ChiTietDonHang ct : chiTietList) {
             Long targetKho = ct.getKhoHangId() != null ? ct.getKhoHangId() : (khoHang != null ? khoHang.getId() : null);
             if (targetKho != null) {
-                if (ct.getLoaiSanPham() == LoaiSanPham.OTO && ct.getOto() != null) {
-                    tonKhoService.decreaseStock(ct.getOto().getId(), null, targetKho, ct.getSoLuong());
-                } else if (ct.getLoaiSanPham() == LoaiSanPham.PHU_KIEN && ct.getPhuKien() != null) {
-                    tonKhoService.decreaseStock(null, ct.getPhuKien().getId(), targetKho, ct.getSoLuong());
+                if (ct.getLoaiSanPham() == LoaiSanPham.PHU_KIEN && ct.getPhuKien() != null) {
+                    tonKhoService.decreaseStock(ct.getPhuKien().getId(), targetKho, ct.getSoLuong());
                 }
             }
         }
@@ -179,7 +180,7 @@ public class DonHangService {
     public DonHangResponse capNhatTrangThai(Long id, TrangThaiDonHang trangThai) {
         DonHang donHang = donHangRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Đơn hàng", id));
-                
+
         if (trangThai == TrangThaiDonHang.DA_XAC_NHAN && donHang.getMaDonHangGhn() == null) {
             boolean hasPhuKien = donHang.getChiTietDonHangs().stream()
                     .anyMatch(ct -> ct.getLoaiSanPham() == LoaiSanPham.PHU_KIEN);
@@ -188,7 +189,7 @@ public class DonHangService {
                 donHang.setMaDonHangGhn(orderCode);
             }
         }
-        
+
         if (trangThai == TrangThaiDonHang.DA_HUY && donHang.getMaDonHangGhn() != null) {
             ghnService.cancelOrder(donHang.getMaDonHangGhn());
         }
@@ -196,12 +197,11 @@ public class DonHangService {
         // Hoàn kho khi hủy đơn
         if (trangThai == TrangThaiDonHang.DA_HUY) {
             for (ChiTietDonHang ct : donHang.getChiTietDonHangs()) {
-                Long targetKho = ct.getKhoHangId() != null ? ct.getKhoHangId() : (donHang.getKhoXuatHang() != null ? donHang.getKhoXuatHang().getId() : null);
+                Long targetKho = ct.getKhoHangId() != null ? ct.getKhoHangId()
+                        : (donHang.getKhoXuatHang() != null ? donHang.getKhoXuatHang().getId() : null);
                 if (targetKho != null) {
-                    if (ct.getLoaiSanPham() == LoaiSanPham.OTO && ct.getOto() != null) {
-                        tonKhoService.increaseStock(ct.getOto().getId(), null, targetKho, ct.getSoLuong());
-                    } else if (ct.getLoaiSanPham() == LoaiSanPham.PHU_KIEN && ct.getPhuKien() != null) {
-                        tonKhoService.increaseStock(null, ct.getPhuKien().getId(), targetKho, ct.getSoLuong());
+                    if (ct.getLoaiSanPham() == LoaiSanPham.PHU_KIEN && ct.getPhuKien() != null) {
+                        tonKhoService.increaseStock(ct.getPhuKien().getId(), targetKho, ct.getSoLuong());
                     }
                 }
             }

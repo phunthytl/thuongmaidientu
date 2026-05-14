@@ -32,7 +32,6 @@ public class OToRequest {
     @NotNull(message = "Giá không được để trống")
     private BigDecimal gia;
 
-    private Integer soLuong;
 
     private String moTa;
 }

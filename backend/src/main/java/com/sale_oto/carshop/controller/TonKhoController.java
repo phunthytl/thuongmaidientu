@@ -20,15 +20,6 @@ public class TonKhoController {
     private final TonKhoService tonKhoService;
 
     /**
-     * Lấy tồn kho tại TẤT CẢ kho đang hoạt động cho 1 xe.
-     * Kho nào hết hàng → soLuong = 0 (frontend sẽ disable).
-     */
-    @GetMapping("/oto/{otoId}")
-    public ResponseEntity<ApiResponse<List<TonKhoResponse>>> getByOto(@PathVariable Long otoId) {
-        return ResponseEntity.ok(ApiResponse.success(tonKhoService.getByOtoId(otoId)));
-    }
-
-    /**
      * Lấy tồn kho tại TẤT CẢ kho đang hoạt động cho 1 phụ kiện.
      */
     @GetMapping("/phu-kien/{phuKienId}")

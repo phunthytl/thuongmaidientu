@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { FaWrench, FaClock, FaCheckCircle, FaStar, FaUserCircle, FaWarehouse, FaMapMarkerAlt, FaInfoCircle } from 'react-icons/fa';
+import { useParams } from 'react-router-dom';
+import { FaWrench, FaClock, FaCheckCircle, FaStar, FaUserCircle, FaWarehouse, FaMapMarkerAlt, FaInfoCircle, FaHeadset } from 'react-icons/fa';
 import Navbar from '../../components/layout/Navbar';
 import { api } from '../../services/api';
-import { useCartStore } from '../../stores/cartStore';
+import BookingModal from '../../components/client/BookingModal';
 import '../../assets/css/Home.css';
 
 export default function ClientChiTietDichVu() {
@@ -11,10 +11,9 @@ export default function ClientChiTietDichVu() {
     const [service, setService] = useState(null);
     const [reviews, setReviews] = useState([]);
     const [branches, setBranches] = useState([]);
-    const [selectedBranch, setSelectedBranch] = useState(null);
+    const [selectedBranchId, setSelectedBranchId] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [addingToCart, setAddingToCart] = useState(false);
-    const { addToCart } = useCartStore();
+    const [isBookingOpen, setIsBookingOpen] = useState(false);
 
     useEffect(() => {
         fetchServiceData();
@@ -36,7 +35,7 @@ export default function ClientChiTietDichVu() {
             const activeBranches = list.filter(b => b.trangThai);
             setBranches(activeBranches);
             if (activeBranches.length > 0) {
-                setSelectedBranch(activeBranches[0].id);
+                setSelectedBranchId(activeBranches[0].id);
             }
         } catch (error) {
             console.error('Error fetching service details:', error);
@@ -56,29 +55,12 @@ export default function ClientChiTietDichVu() {
         return (total / reviews.length).toFixed(1);
     };
 
-    const handleAddToCart = async () => {
-        if (!service || addingToCart) return;
-        if (!selectedBranch) {
-            alert('Vui lòng chọn chi nhánh hỗ trợ!');
+    const handleOpenBooking = () => {
+        if (!selectedBranchId) {
+            alert('Vui lòng chọn chi nhánh bạn muốn đăng ký dịch vụ!');
             return;
         }
-
-        setAddingToCart(true);
-        try {
-            await addToCart({
-                id: service.id,
-                name: service.tenDichVu,
-                gia: service.gia,
-                image: '',
-                type: 'DICH_VU',
-                khoHangId: selectedBranch
-            }, 1);
-            alert('Đã thêm dịch vụ vào giỏ hàng!');
-        } catch (err) {
-            alert('Thêm vào giỏ thất bại!');
-        } finally {
-            setAddingToCart(false);
-        }
+        setIsBookingOpen(true);
     };
 
     if (loading) {
@@ -93,6 +75,8 @@ export default function ClientChiTietDichVu() {
     }
 
     if (!service) return <div style={{padding: '100px', textAlign: 'center'}}>Không tìm thấy thông tin dịch vụ.</div>;
+
+    const selectedBranchData = branches.find(b => b.id === selectedBranchId);
 
     return (
         <div className="home-container" style={{ backgroundColor: '#f9fafb', minHeight: '100vh', paddingBottom: '60px' }}>
@@ -146,7 +130,7 @@ export default function ClientChiTietDichVu() {
                             </div>
                         </div>
 
-                        {/* ── Branch/Warehouse Selection ── */}
+                        {/* ── Branch Selection ── */}
                         <div style={{ marginBottom: '32px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
                                 <FaWarehouse style={{ fontSize: '18px', color: '#4b5563' }} />
@@ -159,18 +143,18 @@ export default function ClientChiTietDichVu() {
                             ) : (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                     {branches.map(branch => {
-                                        const isSelected = selectedBranch === branch.id;
+                                        const isSelected = selectedBranchId === branch.id;
                                         return (
                                             <div
                                                 key={branch.id}
                                                 className={`warehouse-card ${isSelected ? 'selected' : ''}`}
-                                                onClick={() => setSelectedBranch(branch.id)}
+                                                onClick={() => setSelectedBranchId(branch.id)}
                                             >
                                                 <div className={`wh-radio ${isSelected ? 'checked' : ''}`} />
                                                 <div style={{ flex: 1 }}>
                                                     <div style={{ fontWeight: 700, fontSize: '15px', color: '#111', marginBottom: '2px' }}>{branch.tenKho}</div>
                                                     <div style={{ fontSize: '13px', color: '#6b7280', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                        <FaMapMarkerAlt size={11} /> {branch.tinhThanhTen} — {branch.diaChiChiTiet}
+                                                        <FaMapMarkerAlt size={11} /> {branch.tinhThanhName} — {branch.diaChiChiTiet}
                                                     </div>
                                                 </div>
                                             </div>
@@ -180,14 +164,18 @@ export default function ClientChiTietDichVu() {
                             )}
                         </div>
 
-                        <button 
-                            onClick={handleAddToCart} 
-                            className="btn-primary" 
-                            disabled={addingToCart || !selectedBranch}
-                            style={{width: '100%', padding: '18px', fontSize: '18px', fontWeight: 'bold', borderRadius: '12px', boxShadow: '0 4px 14px 0 rgba(239, 68, 68, 0.39)'}}
-                        >
-                            {addingToCart ? 'Đang đăng ký...' : 'ĐĂNG KÝ DỊCH VỤ'}
-                        </button>
+                        <div style={{ display: 'flex', gap: '16px', marginTop: 'auto' }}>
+                            <button 
+                                className="btn-primary" 
+                                style={{ flex: 1, padding: '18px', fontSize: '18px', fontWeight: 'bold', borderRadius: '12px', boxShadow: '0 4px 14px 0 rgba(239, 68, 68, 0.39)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', opacity: selectedBranchId ? 1 : 0.5, cursor: selectedBranchId ? 'pointer' : 'not-allowed' }}
+                                onClick={handleOpenBooking}
+                            >
+                                <FaClock /> Đặt lịch dịch vụ
+                            </button>
+                            <button style={{ padding: '18px 24px', fontSize: '18px', fontWeight: 'bold', borderRadius: '12px', backgroundColor: '#fff', border: '2px solid #e5e7eb', color: '#111', cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '10px' }} onMouseOver={e => e.currentTarget.style.borderColor = '#111'} onMouseOut={e => e.currentTarget.style.borderColor = '#e5e7eb'}>
+                                <FaHeadset /> Liên hệ tư vấn
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -240,6 +228,17 @@ export default function ClientChiTietDichVu() {
                     )}
                 </div>
             </div>
+
+            {/* Booking Modal */}
+            {isBookingOpen && (
+                <BookingModal 
+                    isOpen={isBookingOpen} 
+                    onClose={() => setIsBookingOpen(false)} 
+                    product={service}
+                    type="DICH_VU"
+                    selectedBranch={{ khoHangId: selectedBranchId, tenKho: selectedBranchData?.tenKho }}
+                />
+            )}
         </div>
     );
 }

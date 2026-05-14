@@ -131,6 +131,11 @@ public class SecurityConfig {
                     .requestMatchers("/api/nguoi-dung/khach-hang/**").hasRole("ADMIN")
                     .requestMatchers(HttpMethod.PATCH, "/api/nguoi-dung/*/trang-thai").hasRole("ADMIN")
 
+                    // Đặt lịch (LichHen)
+                    .requestMatchers(HttpMethod.POST, "/api/lich-hen").permitAll()
+                    .requestMatchers("/api/lich-hen/my-lich-hen").authenticated()
+                    .requestMatchers("/api/lich-hen/**").hasAnyRole("ADMIN", "NHAN_VIEN")
+
                     // Tất cả request còn lại cần authentication
                     .anyRequest().authenticated()
             )

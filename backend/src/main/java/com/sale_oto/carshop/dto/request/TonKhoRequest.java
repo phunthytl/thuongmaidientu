@@ -7,8 +7,7 @@ import lombok.Data;
 @Data
 public class TonKhoRequest {
 
-    private Long otoId;
-
+    @NotNull(message = "Phụ kiện không được để trống")
     private Long phuKienId;
 
     @NotNull(message = "Kho hàng không được để trống")

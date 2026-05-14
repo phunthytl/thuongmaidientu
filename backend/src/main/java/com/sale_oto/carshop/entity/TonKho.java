@@ -5,7 +5,6 @@ import lombok.*;
 
 @Entity
 @Table(name = "ton_kho", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"oto_id", "kho_hang_id"}),
         @UniqueConstraint(columnNames = {"phu_kien_id", "kho_hang_id"})
 })
 @Getter
@@ -16,11 +15,7 @@ import lombok.*;
 public class TonKho extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "oto_id")
-    private OTo oto;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "phu_kien_id")
+    @JoinColumn(name = "phu_kien_id", nullable = false)
     private PhuKien phuKien;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -28,12 +28,40 @@ export default function ThanhToan() {
     const [isCalculatingFee, setIsCalculatingFee] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    // Address Book states
+    const [addresses, setAddresses] = useState([]);
+    const [selectedAddressId, setSelectedAddressId] = useState('');
+    const [isAddingNew, setIsAddingNew] = useState(false);
+
     useEffect(() => {
         if (items.length === 0) {
             navigate('/cart');
         }
         fetchProvinces();
+        fetchUserAddresses();
     }, [items, navigate]);
+
+    const fetchUserAddresses = async () => {
+        if (!user) return;
+        try {
+            const res = await api.get(`/khach-hang/${user.id}/dia-chi`);
+            const addrList = res.data || [];
+            setAddresses(addrList);
+            
+            // Mặc định chọn địa chỉ ưu tiên
+            if (addrList.length > 0) {
+                const defaultAddr = addrList.find(a => a.isDefault) || addrList[0];
+                setSelectedAddressId(defaultAddr.id);
+                setIsAddingNew(false);
+                calculateShippingFee(defaultAddr.ghnDistrictId, defaultAddr.ghnWardCode);
+            } else {
+                setIsAddingNew(true);
+            }
+        } catch (error) {
+            console.error('Lỗi tải sổ địa chỉ:', error);
+            setIsAddingNew(true);
+        }
+    };
 
     useEffect(() => {
         if (selectedProvince) {
@@ -53,15 +81,15 @@ export default function ThanhToan() {
     }, [selectedDistrict]);
 
     useEffect(() => {
-        if (selectedDistrict && selectedWard) {
+        if (selectedDistrict && selectedWard && isAddingNew) {
             calculateShippingFee(selectedDistrict, selectedWard);
         }
-    }, [selectedDistrict, selectedWard]);
+    }, [selectedDistrict, selectedWard, isAddingNew]);
 
     const fetchProvinces = async () => {
         try {
             const res = await api.get('/ghn/provinces');
-            const data = JSON.parse(res.data);
+            const data = typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
             setProvinces(data.data || []);
         } catch (error) {
             console.error('Lỗi tải danh sách tỉnh thành:', error);
@@ -71,7 +99,7 @@ export default function ThanhToan() {
     const fetchDistricts = async (provinceId) => {
         try {
             const res = await api.get(`/ghn/districts?provinceId=${provinceId}`);
-            const data = JSON.parse(res.data);
+            const data = typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
             setDistricts(data.data || []);
         } catch (error) {
             console.error('Lỗi tải danh sách quận huyện:', error);
@@ -81,7 +109,7 @@ export default function ThanhToan() {
     const fetchWards = async (districtId) => {
         try {
             const res = await api.get(`/ghn/wards?districtId=${districtId}`);
-            const data = JSON.parse(res.data);
+            const data = typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
             setWards(data.data || []);
         } catch (error) {
             console.error('Lỗi tải danh sách phường xã:', error);
@@ -89,35 +117,73 @@ export default function ThanhToan() {
     };
 
     const calculateShippingFee = async (districtId, wardCode) => {
+        if (!districtId || !wardCode) return;
         try {
             setIsCalculatingFee(true);
-            const totalWeight = items.reduce((sum, item) => sum + (item.type === 'OTO' ? 2000000 : 500) * item.quantity, 0); // Giả lập weight
+            const totalWeight = items.reduce((sum, item) => sum + 500 * item.quantity, 0); 
             
             const res = await api.post(`/ghn/fee?toDistrictId=${districtId}&toWardCode=${wardCode}&weight=${Math.min(totalWeight, 30000)}`);
-            const data = JSON.parse(res.data);
+            const data = typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
             if (data && data.data && data.data.total) {
                 setShippingFee(data.data.total);
             }
         } catch (error) {
             console.error('Lỗi tính phí ship:', error);
-            // Fallback fee if GHN fails (for testing)
-            setShippingFee(45000);
+            setShippingFee(45000); // Fallback
         } finally {
             setIsCalculatingFee(false);
         }
     };
 
+    const handleSelectAddress = (addr) => {
+        setSelectedAddressId(addr.id);
+        setIsAddingNew(false);
+        calculateShippingFee(addr.ghnDistrictId, addr.ghnWardCode);
+    };
+
     const handlePlaceOrder = async () => {
-        if (!selectedProvince || !selectedDistrict || !selectedWard || !detailAddress) {
-            alert('Vui lòng điền đầy đủ địa chỉ giao hàng!');
-            return;
+        let finalAddressId = selectedAddressId;
+
+        if (isAddingNew) {
+            if (!selectedProvince || !selectedDistrict || !selectedWard || !detailAddress) {
+                alert('Vui lòng điền đầy đủ địa chỉ giao hàng mới!');
+                return;
+            }
+
+            // Tạo địa chỉ mới trước
+            try {
+                setIsSubmitting(true);
+                const provinceName = provinces.find(p => p.ProvinceID.toString() === selectedProvince)?.ProvinceName || '';
+                const districtName = districts.find(d => d.DistrictID.toString() === selectedDistrict)?.DistrictName || '';
+                const wardName = wards.find(w => w.WardCode === selectedWard)?.WardName || '';
+
+                const newAddrRes = await api.post(`/khach-hang/${user.id}/dia-chi`, {
+                    tenNguoiNhan: user.hoTen,
+                    soDienThoai: user.soDienThoai,
+                    tinhThanhId: parseInt(selectedProvince),
+                    tinhThanhTen: provinceName,
+                    quanHuyenId: parseInt(selectedDistrict),
+                    quanHuyenTen: districtName,
+                    xaPhuongId: parseInt(selectedWard), // Lưu ý: GHN WardCode có thể là string
+                    xaPhuongTen: wardName,
+                    diaChiChiTiet: detailAddress,
+                    ghnDistrictId: parseInt(selectedDistrict),
+                    ghnWardCode: selectedWard,
+                    isDefault: addresses.length === 0
+                });
+                finalAddressId = newAddrRes.data.id;
+            } catch (err) {
+                console.error('Lỗi tạo địa chỉ mới:', err);
+                alert('Không thể tạo địa chỉ mới. Vui lòng thử lại!');
+                setIsSubmitting(false);
+                return;
+            }
         }
 
-        const provinceName = provinces.find(p => p.ProvinceID.toString() === selectedProvince)?.ProvinceName || '';
-        const districtName = districts.find(d => d.DistrictID.toString() === selectedDistrict)?.DistrictName || '';
-        const wardName = wards.find(w => w.WardCode === selectedWard)?.WardName || '';
-        
-        const fullAddress = `${detailAddress}, ${wardName}, ${districtName}, ${provinceName}`;
+        if (!finalAddressId) {
+            alert('Vui lòng chọn địa chỉ giao hàng!');
+            return;
+        }
 
         const chiTietDonHangs = items.map(item => ({
             loaiSanPham: item.type,
@@ -132,7 +198,7 @@ export default function ThanhToan() {
             khachHangId: user.id,
             chiTietDonHangs: chiTietDonHangs,
             ghiChu: ghiChu,
-            diaChiGiaoHang: fullAddress
+            diaChiGiaoHangId: finalAddressId
         };
 
         try {
@@ -171,94 +237,151 @@ export default function ThanhToan() {
                     {/* Left Column: Forms */}
                     <div style={{flex: 1, display: 'flex', flexDirection: 'column', gap: '24px'}}>
                         
-                        {/* Customer Info */}
-                        <div style={{background: '#fff', padding: '24px', borderRadius: '8px', border: '1px solid #e5e7eb'}}>
-                            <h2 style={{fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid #e5e7eb', paddingBottom: '16px', marginBottom: '20px'}}>
-                                <FaCheckCircle color="#10b981" /> Thông tin liên hệ
-                            </h2>
-                            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px'}}>
-                                <div>
-                                    <label style={{display: 'block', marginBottom: '8px', fontSize: '14px', color: '#4b5563'}}>Họ và tên</label>
-                                    <input type="text" value={user?.hoTen || ''} readOnly style={{width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #d1d5db', background: '#f3f4f6'}} />
-                                </div>
-                                <div>
-                                    <label style={{display: 'block', marginBottom: '8px', fontSize: '14px', color: '#4b5563'}}>Số điện thoại</label>
-                                    <input type="text" value={user?.soDienThoai || ''} readOnly style={{width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #d1d5db', background: '#f3f4f6'}} />
-                                </div>
-                                <div style={{gridColumn: '1 / -1'}}>
-                                    <label style={{display: 'block', marginBottom: '8px', fontSize: '14px', color: '#4b5563'}}>Email</label>
-                                    <input type="text" value={user?.email || ''} readOnly style={{width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #d1d5db', background: '#f3f4f6'}} />
-                                </div>
-                            </div>
-                        </div>
 
                         {/* Shipping Address */}
                         <div style={{background: '#fff', padding: '24px', borderRadius: '8px', border: '1px solid #e5e7eb'}}>
                             <h2 style={{fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid #e5e7eb', paddingBottom: '16px', marginBottom: '20px'}}>
                                 <FaMapMarkerAlt color="#3b82f6" /> Địa chỉ giao hàng
                             </h2>
-                            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px'}}>
-                                <div>
-                                    <label style={{display: 'block', marginBottom: '8px', fontSize: '14px', color: '#4b5563'}}>Tỉnh / Thành phố *</label>
-                                    <select 
-                                        value={selectedProvince} 
-                                        onChange={(e) => setSelectedProvince(e.target.value)}
-                                        style={{width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #d1d5db'}}
+
+                            {/* Saved Addresses List */}
+                            {addresses.length > 0 && (
+                                <div style={{marginBottom: '20px', display: 'flex', flexDirection: 'column', gap: '12px'}}>
+                                    <p style={{fontSize: '14px', fontWeight: 600, color: '#374151', marginBottom: '8px'}}>Chọn từ sổ địa chỉ:</p>
+                                    {addresses.map(addr => (
+                                        <div 
+                                            key={addr.id}
+                                            onClick={() => handleSelectAddress(addr)}
+                                            style={{
+                                                padding: '16px',
+                                                borderRadius: '8px',
+                                                border: `2px solid ${selectedAddressId === addr.id && !isAddingNew ? '#3b82f6' : '#e5e7eb'}`,
+                                                background: selectedAddressId === addr.id && !isAddingNew ? '#eff6ff' : '#fff',
+                                                cursor: 'pointer',
+                                                position: 'relative',
+                                                transition: 'all 0.2s'
+                                            }}
+                                        >
+                                            <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '4px'}}>
+                                                <span style={{fontWeight: 700, fontSize: '15px'}}>{addr.tenNguoiNhan}</span>
+                                                <span style={{color: '#6b7280', fontSize: '14px'}}>{addr.soDienThoai}</span>
+                                            </div>
+                                            <p style={{margin: 0, fontSize: '14px', color: '#4b5563', lineHeight: 1.5}}>
+                                                {addr.diaChiChiTiet}, {addr.xaPhuongTen}, {addr.quanHuyenTen}, {addr.tinhThanhTen}
+                                            </p>
+                                            {addr.isDefault && (
+                                                <span style={{marginTop: '8px', display: 'inline-block', fontSize: '11px', background: '#dcfce7', color: '#166534', padding: '2px 8px', borderRadius: '4px', fontWeight: 600}}>
+                                                    Mặc định
+                                                </span>
+                                            )}
+                                        </div>
+                                    ))}
+                                    
+                                    <button 
+                                        onClick={() => { setIsAddingNew(true); setSelectedAddressId(''); setShippingFee(0); }}
+                                        style={{
+                                            padding: '12px',
+                                            borderRadius: '8px',
+                                            border: '2px dashed #d1d5db',
+                                            background: isAddingNew ? '#f9fafb' : '#fff',
+                                            color: '#4b5563',
+                                            cursor: 'pointer',
+                                            fontWeight: 600,
+                                            textAlign: 'center',
+                                            marginTop: '8px'
+                                        }}
                                     >
-                                        <option value="">Chọn Tỉnh/Thành phố</option>
-                                        {provinces.map(p => (
-                                            <option key={p.ProvinceID} value={p.ProvinceID}>{p.ProvinceName}</option>
-                                        ))}
-                                    </select>
+                                        + Thêm địa chỉ mới
+                                    </button>
                                 </div>
-                                <div>
-                                    <label style={{display: 'block', marginBottom: '8px', fontSize: '14px', color: '#4b5563'}}>Quận / Huyện *</label>
-                                    <select 
-                                        value={selectedDistrict} 
-                                        onChange={(e) => setSelectedDistrict(e.target.value)}
-                                        disabled={!selectedProvince}
-                                        style={{width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #d1d5db'}}
-                                    >
-                                        <option value="">Chọn Quận/Huyện</option>
-                                        {districts.map(d => (
-                                            <option key={d.DistrictID} value={d.DistrictID}>{d.DistrictName}</option>
-                                        ))}
-                                    </select>
+                            )}
+
+                            {/* New Address Form */}
+                            {(isAddingNew || addresses.length === 0) && (
+                                <div style={{
+                                    marginTop: addresses.length > 0 ? '24px' : 0,
+                                    paddingTop: addresses.length > 0 ? '24px' : 0,
+                                    borderTop: addresses.length > 0 ? '1px dashed #e5e7eb' : 'none'
+                                }}>
+                                    {addresses.length > 0 && (
+                                        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px'}}>
+                                            <p style={{fontSize: '14px', fontWeight: 600, color: '#374151', margin: 0}}>Nhập địa chỉ mới:</p>
+                                            <button 
+                                                onClick={() => {
+                                                    const defaultAddr = addresses.find(a => a.isDefault) || addresses[0];
+                                                    handleSelectAddress(defaultAddr);
+                                                }}
+                                                style={{background: 'none', border: 'none', color: '#3b82f6', cursor: 'pointer', fontSize: '13px', fontWeight: 600}}
+                                            >
+                                                Sử dụng địa chỉ đã lưu
+                                            </button>
+                                        </div>
+                                    )}
+                                    <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px'}}>
+                                        <div>
+                                            <label style={{display: 'block', marginBottom: '8px', fontSize: '14px', color: '#4b5563'}}>Tỉnh / Thành phố *</label>
+                                            <select 
+                                                value={selectedProvince} 
+                                                onChange={(e) => setSelectedProvince(e.target.value)}
+                                                style={{width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #d1d5db'}}
+                                            >
+                                                <option value="">Chọn Tỉnh/Thành phố</option>
+                                                {provinces.map(p => (
+                                                    <option key={p.ProvinceID} value={p.ProvinceID}>{p.ProvinceName}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label style={{display: 'block', marginBottom: '8px', fontSize: '14px', color: '#4b5563'}}>Quận / Huyện *</label>
+                                            <select 
+                                                value={selectedDistrict} 
+                                                onChange={(e) => setSelectedDistrict(e.target.value)}
+                                                disabled={!selectedProvince}
+                                                style={{width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #d1d5db'}}
+                                            >
+                                                <option value="">Chọn Quận/Huyện</option>
+                                                {districts.map(d => (
+                                                    <option key={d.DistrictID} value={d.DistrictID}>{d.DistrictName}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label style={{display: 'block', marginBottom: '8px', fontSize: '14px', color: '#4b5563'}}>Phường / Xã *</label>
+                                            <select 
+                                                value={selectedWard} 
+                                                onChange={(e) => setSelectedWard(e.target.value)}
+                                                disabled={!selectedDistrict}
+                                                style={{width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #d1d5db'}}
+                                            >
+                                                <option value="">Chọn Phường/Xã</option>
+                                                {wards.map(w => (
+                                                    <option key={w.WardCode} value={w.WardCode}>{w.WardName}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div style={{gridColumn: '1 / -1'}}>
+                                            <label style={{display: 'block', marginBottom: '8px', fontSize: '14px', color: '#4b5563'}}>Số nhà, Tên đường *</label>
+                                            <input 
+                                                type="text" 
+                                                placeholder="Ví dụ: Số 123, Đường Nguyễn Văn Cừ"
+                                                value={detailAddress}
+                                                onChange={(e) => setDetailAddress(e.target.value)}
+                                                style={{width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #d1d5db'}} 
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
-                                <div>
-                                    <label style={{display: 'block', marginBottom: '8px', fontSize: '14px', color: '#4b5563'}}>Phường / Xã *</label>
-                                    <select 
-                                        value={selectedWard} 
-                                        onChange={(e) => setSelectedWard(e.target.value)}
-                                        disabled={!selectedDistrict}
-                                        style={{width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #d1d5db'}}
-                                    >
-                                        <option value="">Chọn Phường/Xã</option>
-                                        {wards.map(w => (
-                                            <option key={w.WardCode} value={w.WardCode}>{w.WardName}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div style={{gridColumn: '1 / -1'}}>
-                                    <label style={{display: 'block', marginBottom: '8px', fontSize: '14px', color: '#4b5563'}}>Số nhà, Tên đường *</label>
-                                    <input 
-                                        type="text" 
-                                        placeholder="Ví dụ: Số 123, Đường Nguyễn Văn Cừ"
-                                        value={detailAddress}
-                                        onChange={(e) => setDetailAddress(e.target.value)}
-                                        style={{width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #d1d5db'}} 
-                                    />
-                                </div>
-                                <div style={{gridColumn: '1 / -1'}}>
-                                    <label style={{display: 'block', marginBottom: '8px', fontSize: '14px', color: '#4b5563'}}>Ghi chú đơn hàng (Tùy chọn)</label>
-                                    <textarea 
-                                        rows="3"
-                                        placeholder="Lưu ý cho người giao hàng..."
-                                        value={ghiChu}
-                                        onChange={(e) => setGhiChu(e.target.value)}
-                                        style={{width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #d1d5db', resize: 'vertical'}} 
-                                    />
-                                </div>
+                            )}
+
+                            <div style={{marginTop: '20px', paddingTop: '20px', borderTop: '1px solid #f3f4f6'}}>
+                                <label style={{display: 'block', marginBottom: '8px', fontSize: '14px', color: '#4b5563'}}>Ghi chú đơn hàng (Tùy chọn)</label>
+                                <textarea 
+                                    rows="3"
+                                    placeholder="Lưu ý cho người giao hàng..."
+                                    value={ghiChu}
+                                    onChange={(e) => setGhiChu(e.target.value)}
+                                    style={{width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #d1d5db', resize: 'vertical'}} 
+                                />
                             </div>
                         </div>
                         

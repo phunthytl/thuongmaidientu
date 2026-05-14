@@ -42,7 +42,6 @@ public class DataInitializer implements CommandLineRunner {
             car1.setDongXe("Camry");
             car1.setNamSanXuat(2023);
             car1.setGia(new java.math.BigDecimal("1400000000"));
-            car1.setSoLuong(5);
             car1.setTrangThai(TrangThaiOTo.DANG_BAN);
             car1.setMoTa("Xe sedan hạng D sang trọng, nhập khẩu Thái Lan.");
             oToRepository.save(car1);
@@ -53,7 +52,6 @@ public class DataInitializer implements CommandLineRunner {
             car2.setDongXe("CR-V");
             car2.setNamSanXuat(2024);
             car2.setGia(new java.math.BigDecimal("1100000000"));
-            car2.setSoLuong(3);
             car2.setTrangThai(TrangThaiOTo.DANG_BAN);
             car2.setMoTa("Mẫu Crossover 7 chỗ đa dụng, công nghệ Honda Sensing.");
             oToRepository.save(car2);

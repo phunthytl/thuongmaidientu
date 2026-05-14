@@ -16,7 +16,6 @@ public class TonKhoResponse {
     private String diaChiChiTiet;
     private String tinhThanhTen;
     private Boolean khoTrangThai;
-    private Long otoId;
     private Long phuKienId;
     private Integer soLuong;
 }

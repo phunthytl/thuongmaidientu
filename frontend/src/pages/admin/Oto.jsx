@@ -62,7 +62,6 @@ export default function Oto() {
                 <div className="table-header">
                     <div className="col-id">Mã Xe</div>
                     <div className="col-name">Tên Xe (Hãng)</div>
-                    <div className="col-amount">Tồn Kho</div>
                     <div className="col-price">Định Giá</div>
                     <div className="col-status">Trạng Thái</div>
                     <div className="col-actions">Thao Tác</div>
@@ -81,7 +80,6 @@ export default function Oto() {
                                     {item.tenXe || 'Không tên'}
                                     {item.hangXe && <span className="brand-badge">{item.hangXe}</span>}
                                 </div>
-                                <div className="col-amount">{item.soLuong || 0} chiếc</div>
                                 <div className="col-price">{formatPrice(item.gia)}</div>
                                 <div className="col-status">
                                     <span className={`status-badge status-${(item.trangThai || '').toLowerCase()}`}>

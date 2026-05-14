@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import MinimalistAdminLayout from './components/layout/MinimalistAdminLayout';
 import AdminLogin from './pages/admin/DangNhap';
 import Dashboard from './pages/admin/TongQuan';
@@ -14,10 +14,13 @@ import ChiTietDichVu from './pages/admin/ChiTietDichVu';
 import KhachHang from './pages/admin/KhachHang';
 import DonHang from './pages/admin/DonHang';
 import ChiTietDonHang from './pages/admin/ChiTietDonHang';
+import LichLaiThu from './pages/admin/LichLaiThu';
+import LichDichVu from './pages/admin/LichDichVu';
 import DanhGia from './pages/admin/DanhGia';
 import KhieuNai from './pages/admin/KhieuNai';
 import ChiTietKhieuNai from './pages/admin/ChiTietKhieuNai';
 import KhoHang from './pages/admin/KhoHang';
+import TonKhoPhuKien from './pages/admin/TonKhoPhuKien';
 import ClientLogin from './pages/client/DangNhap';
 import Home from './pages/client/Home';
 import DanhSachOto from './pages/client/DanhSachOto';
@@ -101,12 +104,15 @@ function App() {
                     <Route path="services/new" element={<ThemDichVu />} />
                     <Route path="services/:id" element={<ChiTietDichVu />} />
                     <Route path="customers" element={<KhachHang />} />
+                    <Route path="bookings/test-drive" element={<LichLaiThu />} />
+                    <Route path="bookings/service" element={<LichDichVu />} />
                     <Route path="orders" element={<DonHang />} />
                     <Route path="orders/:id" element={<ChiTietDonHang />} />
                     <Route path="reviews" element={<DanhGia />} />
                     <Route path="disputes" element={<KhieuNai />} />
                     <Route path="disputes/:id" element={<ChiTietKhieuNai />} />
                     <Route path="warehouse" element={<KhoHang />} />
+                    <Route path="inventory/accessories" element={<TonKhoPhuKien />} />
                 </Route>
             </Routes>
         </BrowserRouter>
