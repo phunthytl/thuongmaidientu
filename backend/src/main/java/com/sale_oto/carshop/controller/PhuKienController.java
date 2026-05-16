@@ -43,6 +43,16 @@ public class PhuKienController {
         return ResponseEntity.ok(ApiResponse.success(phuKienService.search(keyword, pageable)));
     }
 
+    @GetMapping("/loc")
+    public ResponseEntity<ApiResponse<Page<PhuKienResponse>>> filter(
+            @RequestParam(required = false) String loaiPhuKien,
+            @RequestParam(required = false) java.math.BigDecimal giaMin,
+            @RequestParam(required = false) java.math.BigDecimal giaMax,
+            @RequestParam(required = false) String keyword,
+            Pageable pageable) {
+        return ResponseEntity.ok(ApiResponse.success(phuKienService.filter(loaiPhuKien, giaMin, giaMax, keyword, pageable)));
+    }
+
     @GetMapping("/loai")
     public ResponseEntity<ApiResponse<List<String>>> getAllLoaiPhuKien() {
         return ResponseEntity.ok(ApiResponse.success(phuKienService.getAllLoaiPhuKien()));

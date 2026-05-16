@@ -6,6 +6,14 @@
 -- 3. Media URLs use public images from official brand pages where practical, plus representative
 --    category images for accessories/services.
 
+-- Clear old records
+SET FOREIGN_KEY_CHECKS = 0;
+TRUNCATE TABLE media;
+TRUNCATE TABLE oto;
+TRUNCATE TABLE phu_kien;
+TRUNCATE TABLE dich_vu;
+SET FOREIGN_KEY_CHECKS = 1;
+
 START TRANSACTION;
 
 -- =========================

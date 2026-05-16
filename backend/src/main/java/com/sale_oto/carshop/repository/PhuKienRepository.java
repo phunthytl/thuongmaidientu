@@ -20,6 +20,19 @@ public interface PhuKienRepository extends JpaRepository<PhuKien, Long> {
     @Query("SELECT pk FROM PhuKien pk WHERE pk.tenPhuKien LIKE %:keyword% OR pk.loaiPhuKien LIKE %:keyword% OR pk.hangSanXuat LIKE %:keyword%")
     Page<PhuKien> search(@Param("keyword") String keyword, Pageable pageable);
 
+    @Query("SELECT pk FROM PhuKien pk WHERE " +
+            "(:loaiPhuKien IS NULL OR :loaiPhuKien = '' OR pk.loaiPhuKien = :loaiPhuKien) AND " +
+            "(:giaMin IS NULL OR pk.gia >= :giaMin) AND " +
+            "(:giaMax IS NULL OR pk.gia <= :giaMax) AND " +
+            "(:keyword IS NULL OR :keyword = '' OR LOWER(pk.tenPhuKien) LIKE LOWER(:keyword) OR LOWER(pk.loaiPhuKien) LIKE LOWER(:keyword) OR LOWER(pk.hangSanXuat) LIKE LOWER(:keyword)) AND " +
+            "pk.trangThai = true")
+    Page<PhuKien> filter(
+            @Param("loaiPhuKien") String loaiPhuKien,
+            @Param("giaMin") java.math.BigDecimal giaMin,
+            @Param("giaMax") java.math.BigDecimal giaMax,
+            @Param("keyword") String keyword,
+            Pageable pageable);
+
     @Query("SELECT DISTINCT pk.loaiPhuKien FROM PhuKien pk WHERE pk.loaiPhuKien IS NOT NULL ORDER BY pk.loaiPhuKien")
     List<String> findAllLoaiPhuKien();
 }

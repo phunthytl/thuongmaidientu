@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import {
     FaCar,
     FaShoppingCart,
@@ -18,43 +18,75 @@ import {
 import { productService } from '../../services/productService';
 import Navbar from '../../components/layout/Navbar';
 import { fallbackImages, getSafeImage } from '../../utils/imageFallback';
-import '../../assets/css/Home.css'; // Reusing some base styles
+import '../../assets/css/Home.css'; 
 import '../../assets/css/DanhSachOto.css';
 
 export default function DanhSachOto() {
+    const location = useLocation();
     const [cars, setCars] = useState([]);
+    const [brands, setBrands] = useState([]);
     const [loading, setLoading] = useState(true);
+    
+    // Parse keyword from URL query params
+    const queryParams = new URLSearchParams(location.search);
+    const initialKeyword = queryParams.get('keyword') || '';
+
     const [params, setParams] = useState({
         page: 0,
         size: 12,
-        keyword: '',
+        keyword: initialKeyword,
         hangXe: '',
         giaMin: '',
-        giaMax: ''
+        giaMax: '',
+        sort: 'ngayTao,desc'
     });
     const [totalPages, setTotalPages] = useState(0);
 
+    // Temp price state to avoid fetching on every keystroke
+    const [priceRange, setPriceRange] = useState({ min: '', max: '' });
+
+    useEffect(() => {
+        const fetchBrands = async () => {
+            try {
+                const res = await productService.getBrands();
+                if (res.status === 200) {
+                    setBrands(res.data);
+                }
+            } catch (error) {
+                console.error('Error fetching brands:', error);
+            }
+        };
+        fetchBrands();
+    }, []);
+
+    useEffect(() => {
+        // Update keyword if URL changes
+        const currentKeyword = new URLSearchParams(location.search).get('keyword') || '';
+        setParams(prev => ({ ...prev, keyword: currentKeyword, page: 0 }));
+    }, [location.search]);
+
     useEffect(() => {
         fetchCars();
-    }, [params.page, params.hangXe]); // Refresh when page or brand changes
+    }, [params.page, params.hangXe, params.keyword, params.giaMin, params.giaMax, params.sort]);
 
     const fetchCars = async () => {
         try {
             setLoading(true);
-            let res;
-            if (params.hangXe) {
-                res = await productService.getCarsByBrand(params.hangXe, params.page, params.size);
-            } else if (params.keyword) {
-                res = await productService.searchCars(params.keyword, params.page, params.size);
-            } else {
-                res = await productService.getCars({ page: params.page, size: params.size, sort: 'ngayTao,desc' });
-            }
+            const res = await productService.getFilteredCars({
+                page: params.page,
+                size: params.size,
+                keyword: params.keyword,
+                hangXe: params.hangXe,
+                giaMin: params.giaMin,
+                giaMax: params.giaMax,
+                sort: params.sort
+            });
 
-            const cars = res?.data?.content || res?.content || [];
+            const cars = res?.data?.content || [];
             const carsWithImages = await Promise.all(cars.map(async (car) => {
                 try {
                     const imgRes = await productService.getCarImages(car.id);
-                    const images = imgRes?.data || imgRes || [];
+                    const images = imgRes?.data || [];
                     return {
                         ...car,
                         displayImage: getSafeImage(images.length > 0 ? images[0].url : '', 'car')
@@ -65,12 +97,21 @@ export default function DanhSachOto() {
             }));
 
             setCars(carsWithImages);
-            setTotalPages(res?.data?.totalPages || res?.totalPages || 0);
+            setTotalPages(res?.data?.totalPages || 0);
         } catch (error) {
             console.error('Error fetching cars:', error);
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleApplyPriceFilter = () => {
+        setParams({
+            ...params,
+            giaMin: priceRange.min,
+            giaMax: priceRange.max,
+            page: 0
+        });
     };
 
     const formatPrice = (price) => {
@@ -94,30 +135,54 @@ export default function DanhSachOto() {
                                 onChange={(e) => setParams({ ...params, hangXe: e.target.value, page: 0 })}
                             >
                                 <option value="">Tất cả</option>
-                                <option value="Mercedes-Benz">Mercedes-Benz</option>
-                                <option value="BMW">BMW</option>
-                                <option value="Audi">Audi</option>
-                                <option value="Porsche">Porsche</option>
-                                <option value="Toyota">Toyota</option>
+                                {brands.map(brand => (
+                                    <option key={brand} value={brand}>{brand}</option>
+                                ))}
                             </select>
                         </div>
 
                         <div className="filter-item">
-                            <label>Khoảng giá</label>
+                            <label>Khoảng giá (VNĐ)</label>
                             <div className="price-inputs">
-                                <input type="number" placeholder="Từ" />
-                                <input type="number" placeholder="Đến" />
+                                <input 
+                                    type="number" 
+                                    placeholder="Từ" 
+                                    value={priceRange.min}
+                                    onChange={(e) => setPriceRange({ ...priceRange, min: e.target.value })}
+                                />
+                                <input 
+                                    type="number" 
+                                    placeholder="Đến" 
+                                    value={priceRange.max}
+                                    onChange={(e) => setPriceRange({ ...priceRange, max: e.target.value })}
+                                />
                             </div>
-                            <button className="btn-apply-filter">Áp dụng</button>
+                            <button className="btn-apply-filter" onClick={handleApplyPriceFilter}>Áp dụng</button>
                         </div>
                     </div>
                 </aside>
 
                 {/* Main Content */}
                 <main className="products-content">
-                    <div className="content-header">
-                        <h1>Danh sách xe hơi</h1>
-                        <p>Hiển thị {cars.length} mẫu xe mới nhất</p>
+                    <div className="content-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
+                        <div>
+                            <h1>Danh sách xe hơi</h1>
+                            <p>Hiển thị {cars.length} mẫu xe mới nhất</p>
+                        </div>
+                        <div className="sort-box">
+                            <label style={{ marginRight: '0.5rem', fontWeight: '500' }}>Sắp xếp:</label>
+                            <select 
+                                value={params.sort} 
+                                onChange={(e) => setParams({ ...params, sort: e.target.value, page: 0 })}
+                                style={{ padding: '0.5rem', borderRadius: '8px', border: '1px solid #ddd' }}
+                            >
+                                <option value="ngayTao,desc">Mới nhất</option>
+                                <option value="gia,asc">Giá thấp đến cao</option>
+                                <option value="gia,desc">Giá cao đến thấp</option>
+                                <option value="tenXe,asc">Tên A-Z</option>
+                                <option value="tenXe,desc">Tên Z-A</option>
+                            </select>
+                        </div>
                     </div>
 
                     {loading ? (

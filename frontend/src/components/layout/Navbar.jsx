@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
   FaCar, 
@@ -12,18 +12,52 @@ import {
 } from 'react-icons/fa';
 import { useAuthStore } from '../../stores/authStore';
 import { useCartStore } from '../../stores/cartStore';
+import { api } from '../../services/api';
 import '../../assets/css/Home.css';
 
 export default function Navbar() {
   const { user, isAuthenticated, logout } = useAuthStore();
   const { getItemCount } = useCartStore();
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const navigate = useNavigate();
+
+  // Autocomplete logic
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (searchKeyword.trim().length < 2) {
+        setSuggestions([]);
+        return;
+      }
+
+      try {
+        const response = await api.get(`/search/suggestions?keyword=${searchKeyword}`);
+        // Kiem tra status 200 theo ApiResponse.java
+        if (response.data.status === 200) {
+          setSuggestions(response.data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching suggestions:', error);
+      }
+    };
+
+    const timeoutId = setTimeout(fetchSuggestions, 300);
+    return () => clearTimeout(timeoutId);
+  }, [searchKeyword]);
 
   const handleSearch = (e) => {
     if (e.key === 'Enter') {
-      navigate(`/products?keyword=${searchKeyword}`);
+      setShowSuggestions(false);
+      navigate(`/search?keyword=${searchKeyword}`);
     }
+  };
+
+  const handleSuggestionClick = (url) => {
+    setSearchKeyword('');
+    setSuggestions([]);
+    setShowSuggestions(false);
+    navigate(url);
   };
 
   const handleLogout = () => {
@@ -57,10 +91,35 @@ export default function Navbar() {
           <input 
             type="text" 
             placeholder="Tìm kiếm xe..." 
+            autoComplete="off"
             value={searchKeyword}
-            onChange={(e) => setSearchKeyword(e.target.value)}
+            onChange={(e) => {
+              setSearchKeyword(e.target.value);
+              setShowSuggestions(true);
+            }}
             onKeyDown={handleSearch}
+            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+            onFocus={() => setShowSuggestions(true)}
           />
+          
+          {showSuggestions && suggestions.length > 0 && (
+            <div className="search-suggestions">
+              {suggestions.map((item, index) => (
+                <div 
+                  key={index} 
+                  className="suggestion-item"
+                  onClick={() => handleSuggestionClick(item.url)}
+                >
+                  <div className="suggestion-info">
+                    <span className="suggestion-name">{item.name}</span>
+                    <span className="suggestion-type">
+                      {item.type === 'OTO' ? 'Ô tô' : item.type === 'PHU_KIEN' ? 'Phụ kiện' : 'Dịch vụ'}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
         <div className="icon-btns">
           <Link to="/cart" className="icon-btn">

@@ -67,6 +67,13 @@ public class OToService {
                 .map(this::toResponse);
     }
 
+    public Page<OToResponse> filter(String hangXe, BigDecimal giaMin, BigDecimal giaMax, String keyword, Pageable pageable) {
+        String searchKeyword = (keyword != null && !keyword.isEmpty()) ? "%" + keyword + "%" : null;
+        return oToRepository
+                .filter(hangXe, giaMin, giaMax, searchKeyword, TrangThaiOTo.DANG_BAN, pageable)
+                .map(this::toResponse);
+    }
+
     public List<String> getAllHangXe() {
         return oToRepository.findAllHangXe();
     }

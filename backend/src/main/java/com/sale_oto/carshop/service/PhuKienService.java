@@ -53,6 +53,13 @@ public class PhuKienService {
         return phuKienRepository.search(keyword, pageable).map(this::toResponse);
     }
 
+    public Page<PhuKienResponse> filter(String loaiPhuKien, java.math.BigDecimal giaMin, java.math.BigDecimal giaMax, String keyword, Pageable pageable) {
+        String searchKeyword = (keyword != null && !keyword.isEmpty()) ? "%" + keyword + "%" : null;
+        return phuKienRepository
+                .filter(loaiPhuKien, giaMin, giaMax, searchKeyword, pageable)
+                .map(this::toResponse);
+    }
+
     public List<String> getAllLoaiPhuKien() {
         return phuKienRepository.findAllLoaiPhuKien();
     }

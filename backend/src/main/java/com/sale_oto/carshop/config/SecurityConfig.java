@@ -75,6 +75,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                     // Public - Authentication
                     .requestMatchers("/api/auth/**").permitAll()
+                    .requestMatchers("/api/search/**").permitAll()
 
                     // Public - Xem sản phẩm (GET only)
                     .requestMatchers(HttpMethod.GET, "/api/oto/**").permitAll()

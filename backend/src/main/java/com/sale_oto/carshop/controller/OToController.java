@@ -63,6 +63,16 @@ public class OToController {
         return ResponseEntity.ok(ApiResponse.success(oToService.search(keyword, pageable)));
     }
 
+    @GetMapping("/loc")
+    public ResponseEntity<ApiResponse<Page<OToResponse>>> filter(
+            @RequestParam(required = false) String hangXe,
+            @RequestParam(required = false) BigDecimal giaMin,
+            @RequestParam(required = false) BigDecimal giaMax,
+            @RequestParam(required = false) String keyword,
+            Pageable pageable) {
+        return ResponseEntity.ok(ApiResponse.success(oToService.filter(hangXe, giaMin, giaMax, keyword, pageable)));
+    }
+
     @GetMapping("/hang-xe")
     public ResponseEntity<ApiResponse<List<String>>> getAllHangXe() {
         return ResponseEntity.ok(ApiResponse.success(oToService.getAllHangXe()));

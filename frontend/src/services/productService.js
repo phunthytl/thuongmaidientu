@@ -28,6 +28,16 @@ export const productService = {
     return response.data;
   },
 
+  getFilteredCars: async (params) => {
+    const response = await api.get('/oto/loc', { params });
+    return response.data;
+  },
+
+  getBrands: async () => {
+    const response = await api.get('/oto/hang-xe');
+    return response.data;
+  },
+
   getCarImages: async (id) => {
     const response = await api.get(`/media/OTO/${id}/images`);
     return response.data;
@@ -46,6 +56,16 @@ export const productService = {
 
   getAccessoryDetail: async (id) => {
     const response = await api.get(`/phu-kien/${id}`);
+    return response.data;
+  },
+
+  getFilteredAccessories: async (params) => {
+    const response = await api.get('/phu-kien/loc', { params });
+    return response.data;
+  },
+
+  getAccessoryTypes: async () => {
+    const response = await api.get('/phu-kien/loai');
     return response.data;
   }
 };

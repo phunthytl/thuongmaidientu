@@ -34,6 +34,7 @@ import DanhSachDichVu from './pages/client/DanhSachDichVu';
 import ClientChiTietDichVu from './pages/client/ClientChiTietDichVu';
 import ThanhToan from './pages/client/ThanhToan';
 import Profile from './pages/client/Profile';
+import SearchResults from './pages/client/SearchResults';
 import ProtectedRoute from './components/routes/ProtectedRoute';
 
 function App() {
@@ -41,6 +42,7 @@ function App() {
         <BrowserRouter>
             <Routes>
                 <Route path="/" element={<Home />} />
+                <Route path="/search" element={<SearchResults />} />
                 <Route path="/products" element={<DanhSachOto />} />
                 <Route path="/products/oto/:id" element={<ClientChiTietOto />} />
                 <Route path="/accessories" element={<DanhSachPhuKien />} />

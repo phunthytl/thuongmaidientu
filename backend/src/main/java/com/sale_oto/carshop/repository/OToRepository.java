@@ -31,6 +31,20 @@ public interface OToRepository extends JpaRepository<OTo, Long> {
             "AND o.trangThai = :trangThai")
     Page<OTo> search(@Param("keyword") String keyword, @Param("trangThai") TrangThaiOTo trangThai, Pageable pageable);
 
+    @Query("SELECT o FROM OTo o WHERE " +
+            "(:hangXe IS NULL OR :hangXe = '' OR o.hangXe = :hangXe) AND " +
+            "(:giaMin IS NULL OR o.gia >= :giaMin) AND " +
+            "(:giaMax IS NULL OR o.gia <= :giaMax) AND " +
+            "(:keyword IS NULL OR :keyword = '' OR LOWER(o.tenXe) LIKE LOWER(:keyword) OR LOWER(o.hangXe) LIKE LOWER(:keyword) OR LOWER(o.dongXe) LIKE LOWER(:keyword)) AND " +
+            "o.trangThai = :trangThai")
+    Page<OTo> filter(
+            @Param("hangXe") String hangXe,
+            @Param("giaMin") BigDecimal giaMin,
+            @Param("giaMax") BigDecimal giaMax,
+            @Param("keyword") String keyword,
+            @Param("trangThai") TrangThaiOTo trangThai,
+            Pageable pageable);
+
     @Query("SELECT DISTINCT o.hangXe FROM OTo o ORDER BY o.hangXe")
     List<String> findAllHangXe();
 
