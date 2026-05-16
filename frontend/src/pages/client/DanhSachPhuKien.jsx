@@ -16,6 +16,7 @@ import {
 } from 'react-icons/fa';
 import { productService } from '../../services/productService';
 import Navbar from '../../components/layout/Navbar';
+import { fallbackImages, getSafeImage } from '../../utils/imageFallback';
 import '../../assets/css/Home.css';
 import '../../assets/css/DanhSachOto.css'; // Reusing layout styles
 
@@ -44,9 +45,12 @@ export default function DanhSachPhuKien() {
         sort: 'ngayTao,desc' 
       });
 
-      // Mapping data to match card structure
-      setAccessories(res.data.content);
-      setTotalPages(res.data.totalPages);
+      const data = res?.data?.content || res?.content || [];
+      setAccessories(data.map((item) => ({
+        ...item,
+        displayImage: getSafeImage(item?.hinhAnhs?.[0], 'accessory')
+      })));
+      setTotalPages(res?.data?.totalPages || res?.totalPages || 0);
     } catch (error) {
       console.error('Error fetching accessories:', error);
     } finally {
@@ -102,9 +106,15 @@ export default function DanhSachPhuKien() {
                   <div key={item.id} className="car-card">
                     <div className="car-image-container">
                       <span className="car-tag">{item.loaiPhuKien || 'Accessory'}</span>
-                      <div className="image-placeholder">
-                         <FaTools size={40} color="#ddd" />
-                      </div>
+                      <img
+                        src={item.displayImage || fallbackImages.accessory}
+                        alt={item.tenPhuKien}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = fallbackImages.accessory;
+                        }}
+                      />
                     </div>
                     <div className="car-info">
                       <h3>{item.tenPhuKien}</h3>

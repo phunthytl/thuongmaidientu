@@ -1,0 +1,632 @@
+﻿[
+    {
+        "dbType":  "OTO",
+        "objectId":  2,
+        "objectName":  "Honda CR-V L",
+        "query":  "Honda CR-V 2024 car official photo",
+        "error":  "No usable image found for query: Honda CR-V 2024 car official photo"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  4,
+        "objectName":  "Ford Ranger Wildtrak",
+        "query":  "Ford Ranger 2024 car official photo",
+        "error":  "No usable image found for query: Ford Ranger 2024 car official photo"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  7,
+        "objectName":  "Hyundai Tucson 2.0 ATH",
+        "query":  "Hyundai Tucson 2024 car official photo",
+        "error":  "No usable image found for query: Hyundai Tucson 2024 car official photo"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  8,
+        "objectName":  "Mazda CX-5 Premium",
+        "query":  "Mazda CX-5 2024 car official photo",
+        "error":  "No usable image found for query: Mazda CX-5 2024 car official photo"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  11,
+        "objectName":  "Toyota Camry 2.5HEV Q",
+        "query":  "Toyota Camry 2024 car official photo",
+        "error":  "No usable image found for query: Toyota Camry 2024 car official photo"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  14,
+        "objectName":  "Toyota Yaris Cross",
+        "query":  "Toyota Yaris Cross 2024 car official photo",
+        "error":  "No usable image found for query: Toyota Yaris Cross 2024 car official photo"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  15,
+        "objectName":  "Toyota Yaris Cross HEV",
+        "query":  "Toyota Yaris Cross HEV 2024 car official photo",
+        "error":  "No usable image found for query: Toyota Yaris Cross HEV 2024 car official photo"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  19,
+        "objectName":  "Honda BR-V L",
+        "query":  "Honda BR-V 2024 car official photo",
+        "error":  "No usable image found for query: Honda BR-V 2024 car official photo"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  22,
+        "objectName":  "Honda Civic e:HEV RS",
+        "query":  "Honda Civic 2024 car official photo",
+        "error":  "No usable image found for query: Honda Civic 2024 car official photo"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  23,
+        "objectName":  "Mazda3 2.0 Premium",
+        "query":  "Mazda3 2.0 car official photo",
+        "error":  "No usable image found for query: Mazda3 2.0 car official photo"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  25,
+        "objectName":  "Mazda CX-8 Premium AWD",
+        "query":  "Mazda CX-8 2024 car official photo",
+        "error":  "No usable image found for query: Mazda CX-8 2024 car official photo"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  26,
+        "objectName":  "Hyundai Accent 1.5 AT Dac biet",
+        "query":  "Hyundai Accent 2024 car official photo",
+        "error":  "No usable image found for query: Hyundai Accent 2024 car official photo"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  28,
+        "objectName":  "Hyundai Santa Fe 2.5 Turbo Calligraphy",
+        "query":  "Hyundai Santa Fe 2024 car official photo",
+        "error":  "No usable image found for query: Hyundai Santa Fe 2024 car official photo"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  29,
+        "objectName":  "Kia Seltos 1.5 Turbo GT-Line",
+        "query":  "Kia Seltos 2024 car official photo",
+        "error":  "No usable image found for query: Kia Seltos 2024 car official photo"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  31,
+        "objectName":  "Ford Ranger Wildtrak 2.0L 4x4 AT",
+        "query":  "Ford Ranger 2024 car official photo",
+        "error":  "No usable image found for query: Ford Ranger 2024 car official photo"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  33,
+        "objectName":  "Mitsubishi Xpander Cross",
+        "query":  "Mitsubishi Xpander Cross 2024 car official photo",
+        "error":  "No usable image found for query: Mitsubishi Xpander Cross 2024 car official photo"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  35,
+        "objectName":  "Toyota Veloz Cross CVT",
+        "query":  "Toyota Veloz Cross 2024 car official photo",
+        "error":  "No usable image found for query: Toyota Veloz Cross 2024 car official photo"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  38,
+        "objectName":  "Hyundai Creta Dac biet",
+        "query":  "Hyundai Creta 2024 car official photo",
+        "error":  "No usable image found for query: Hyundai Creta 2024 car official photo"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  39,
+        "objectName":  "Hyundai Elantra 2.0 AT",
+        "query":  "Hyundai Elantra 2024 car official photo",
+        "error":  "No usable image found for query: Hyundai Elantra 2024 car official photo"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  40,
+        "objectName":  "Kia K3 1.5 Luxury",
+        "query":  "Kia K3 2024 car official photo",
+        "error":  "No usable image found for query: Kia K3 2024 car official photo"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  41,
+        "objectName":  "Kia Sportage 2.0G Premium",
+        "query":  "Kia Sportage 2024 car official photo",
+        "error":  "No usable image found for query: Kia Sportage 2024 car official photo"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  42,
+        "objectName":  "Mazda2 1.5 Luxury",
+        "query":  "Mazda2 1.5 car official photo",
+        "error":  "No usable image found for query: Mazda2 1.5 car official photo"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  43,
+        "objectName":  "Mazda CX-30 Luxury",
+        "query":  "Mazda CX-30 2024 car official photo",
+        "error":  "No usable image found for query: Mazda CX-30 2024 car official photo"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  44,
+        "objectName":  "Ford Territory Titanium X",
+        "query":  "Ford Territory 2024 car official photo",
+        "error":  "No usable image found for query: Ford Territory 2024 car official photo"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  45,
+        "objectName":  "Mitsubishi Attrage CVT Premium",
+        "query":  "Mitsubishi Attrage 2024 car official photo",
+        "error":  "No usable image found for query: Mitsubishi Attrage 2024 car official photo"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  46,
+        "objectName":  "Mitsubishi Outlander 2.4 CVT Premium",
+        "query":  "Mitsubishi Outlander 2024 car official photo",
+        "error":  "No usable image found for query: Mitsubishi Outlander 2024 car official photo"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  50,
+        "objectName":  "Honda City Hatchback RS",
+        "query":  "Honda City Hatchback 2024 car official photo",
+        "error":  "No usable image found for query: Honda City Hatchback 2024 car official photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  1,
+        "objectName":  "L???p xe Michelin 215/60R16",
+        "query":  "Michelin 215 60R16 tire product photo",
+        "error":  "No usable image found for query: Michelin 215 60R16 tire product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  3,
+        "objectName":  "D???u nh???t Castrol 5W-30 (4L)",
+        "query":  "Castrol 5W-30 4L engine oil product photo",
+        "error":  "No usable image found for query: Castrol 5W-30 4L engine oil product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  4,
+        "objectName":  "Camera l??i 360 ????? HD",
+        "query":  "HD rear view camera car product photo",
+        "error":  "No usable image found for query: HD rear view camera car product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  5,
+        "objectName":  "C???m bi???n ??p su???t l???p TPMS",
+        "query":  "TPMS tire pressure sensor product photo",
+        "error":  "No usable image found for query: TPMS tire pressure sensor product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  7,
+        "objectName":  "G????ng chi???u h???u g???p ??i???n",
+        "query":  "power folding side mirror car product photo",
+        "error":  "No usable image found for query: power folding side mirror car product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  8,
+        "objectName":  "????n LED n???i th???t 12V b??? 4",
+        "query":  "12V interior LED light kit car product photo",
+        "error":  "No usable image found for query: 12V interior LED light kit car product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  10,
+        "objectName":  "B??? k???p ??i???n c???u h??? Stanley",
+        "query":  "Stanley jumper cable product photo",
+        "error":  "No usable image found for query: Stanley jumper cable product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  14,
+        "objectName":  "Man hinh Android Gotech GT8 Max",
+        "query":  "Man hinh Android Gotech GT8 Max product photo",
+        "error":  "No usable image found for query: Man hinh Android Gotech GT8 Max product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  16,
+        "objectName":  "Cam bien ap suat lop ICAR Ellisafe C398",
+        "query":  "Cam bien ap suat lop ICAR Ellisafe C398 product photo",
+        "error":  "No usable image found for query: Cam bien ap suat lop ICAR Ellisafe C398 product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  17,
+        "objectName":  "Lop Michelin Primacy 4 215/55R17",
+        "query":  "Michelin Primacy 4 215/55R17 tire product photo",
+        "error":  "No usable image found for query: Michelin Primacy 4 215/55R17 tire product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  19,
+        "objectName":  "Phim cach nhiet 3M Crystalline goi co ban",
+        "query":  "Phim cach nhiet 3M Crystalline goi co ban product photo",
+        "error":  "No usable image found for query: Phim cach nhiet 3M Crystalline goi co ban product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  20,
+        "objectName":  "Gia do dien thoai Baseus Air Vent",
+        "query":  "Gia do dien thoai Baseus Air Vent product photo",
+        "error":  "No usable image found for query: Gia do dien thoai Baseus Air Vent product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  21,
+        "objectName":  "Sac o to Baseus 65W USB-C",
+        "query":  "Sac o to Baseus 65W USB-C product photo",
+        "error":  "No usable image found for query: Sac o to Baseus 65W USB-C product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  23,
+        "objectName":  "Boc ghe da cao cap 5 cho mau den",
+        "query":  "Boc ghe da cao cap 5 cho mau den product photo",
+        "error":  "No usable image found for query: Boc ghe da cao cap 5 cho mau den product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  24,
+        "objectName":  "Boc vo lang Sparco da tron",
+        "query":  "Boc vo lang Sparco da tron product photo",
+        "error":  "No usable image found for query: Boc vo lang Sparco da tron product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  25,
+        "objectName":  "Goi tua co memory foam cho ghe lai",
+        "query":  "Goi tua co memory foam cho ghe lai product photo",
+        "error":  "No usable image found for query: Goi tua co memory foam cho ghe lai product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  27,
+        "objectName":  "Can gat mua Bosch AeroTwin 24/18",
+        "query":  "Can gat mua Bosch AeroTwin 24/18 product photo",
+        "error":  "No usable image found for query: Can gat mua Bosch AeroTwin 24/18 product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  28,
+        "objectName":  "Dung dich ve sinh kinh Liqui Moly",
+        "query":  "Dung dich ve sinh kinh Liqui Moly product photo",
+        "error":  "No usable image found for query: Dung dich ve sinh kinh Liqui Moly product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  31,
+        "objectName":  "Ac quy GS MF DIN45L 12V",
+        "query":  "GS MF DIN45L 12V car battery product photo",
+        "error":  "No usable image found for query: GS MF DIN45L 12V car battery product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  32,
+        "objectName":  "Bo day cau binh Stanley 500A",
+        "query":  "Bo day cau binh Stanley 500A product photo",
+        "error":  "No usable image found for query: Bo day cau binh Stanley 500A product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  33,
+        "objectName":  "Bat phu xe chong nang size M",
+        "query":  "Bat phu xe chong nang size M product photo",
+        "error":  "No usable image found for query: Bat phu xe chong nang size M product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  36,
+        "objectName":  "Dung dich duong taplo Turtle Wax",
+        "query":  "Dung dich duong taplo Turtle Wax product photo",
+        "error":  "No usable image found for query: Dung dich duong taplo Turtle Wax product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  37,
+        "objectName":  "Mat camera 360 do phan giai HD",
+        "query":  "Mat camera 360 do phan giai HD product photo",
+        "error":  "No usable image found for query: Mat camera 360 do phan giai HD product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  38,
+        "objectName":  "Sac o to Anker PowerDrive PD+2",
+        "query":  "Sac o to Anker PowerDrive PD+2 product photo",
+        "error":  "No usable image found for query: Sac o to Anker PowerDrive PD+2 product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  41,
+        "objectName":  "The nho camera hanh trinh 128GB",
+        "query":  "The nho camera hanh trinh 128GB product photo",
+        "error":  "No usable image found for query: The nho camera hanh trinh 128GB product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  42,
+        "objectName":  "Hop ty tay phu cho sedan hang B",
+        "query":  "Hop ty tay phu cho sedan hang B product photo",
+        "error":  "No usable image found for query: Hop ty tay phu cho sedan hang B product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  43,
+        "objectName":  "Bo den LED noi that 4 vi tri mau trang",
+        "query":  "white interior LED light kit car product photo",
+        "error":  "No usable image found for query: white interior LED light kit car product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  44,
+        "objectName":  "May hut bui mini cam tay cho o to",
+        "query":  "May hut bui mini cam tay cho o to product photo",
+        "error":  "No usable image found for query: May hut bui mini cam tay cho o to product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  45,
+        "objectName":  "Loc gio dieu hoa than hoat tinh hang C",
+        "query":  "Loc gio dieu hoa than hoat tinh hang C product photo",
+        "error":  "No usable image found for query: Loc gio dieu hoa than hoat tinh hang C product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  46,
+        "objectName":  "Dung dich rua xe khong cham Wurth",
+        "query":  "Dung dich rua xe khong cham Wurth product photo",
+        "error":  "No usable image found for query: Dung dich rua xe khong cham Wurth product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  47,
+        "objectName":  "Nuoc rua kinh Sonax Clear View",
+        "query":  "Nuoc rua kinh Sonax Clear View product photo",
+        "error":  "No usable image found for query: Nuoc rua kinh Sonax Clear View product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  48,
+        "objectName":  "Bec buoc len xuong cho SUV hang C",
+        "query":  "Bec buoc len xuong cho SUV hang C product photo",
+        "error":  "No usable image found for query: Bec buoc len xuong cho SUV hang C product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  49,
+        "objectName":  "Gia noc nhom cho SUV 5 cho",
+        "query":  "Gia noc nhom cho SUV 5 cho product photo",
+        "error":  "No usable image found for query: Gia noc nhom cho SUV 5 cho product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  51,
+        "objectName":  "Camera sau bo sung cho camera hanh trinh",
+        "query":  "Camera sau bo sung cho camera hanh trinh product photo",
+        "error":  "No usable image found for query: Camera sau bo sung cho camera hanh trinh product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  52,
+        "objectName":  "Mieng dan chong xuoc tay nam cua",
+        "query":  "Mieng dan chong xuoc tay nam cua product photo",
+        "error":  "No usable image found for query: Mieng dan chong xuoc tay nam cua product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  53,
+        "objectName":  "Nep bac cua inox 4 canh",
+        "query":  "Nep bac cua inox 4 canh product photo",
+        "error":  "No usable image found for query: Nep bac cua inox 4 canh product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  56,
+        "objectName":  "Rem che nang cua sau nam cham",
+        "query":  "Rem che nang cua sau nam cham product photo",
+        "error":  "No usable image found for query: Rem che nang cua sau nam cham product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  57,
+        "objectName":  "Thung rac mini cho o to co nap",
+        "query":  "Thung rac mini cho o to co nap product photo",
+        "error":  "No usable image found for query: Thung rac mini cho o to co nap product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  58,
+        "objectName":  "Nem hoi hoi mini cho ghe sau",
+        "query":  "Nem hoi hoi mini cho ghe sau product photo",
+        "error":  "No usable image found for query: Nem hoi hoi mini cho ghe sau product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  60,
+        "objectName":  "Bo ho tro mo cop sau tu dong",
+        "query":  "automatic tailgate lift kit car product photo",
+        "error":  "No usable image found for query: automatic tailgate lift kit car product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  61,
+        "objectName":  "Bo lot ly cao su chong truot",
+        "query":  "Bo lot ly cao su chong truot product photo",
+        "error":  "No usable image found for query: Bo lot ly cao su chong truot product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  62,
+        "objectName":  "Khay chia ngan hoc ty tay",
+        "query":  "center armrest organizer tray car product photo",
+        "error":  "No usable image found for query: center armrest organizer tray car product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  63,
+        "objectName":  "Dau khoa day an toan gia lap",
+        "query":  "Dau khoa day an toan gia lap product photo",
+        "error":  "No usable image found for query: Dau khoa day an toan gia lap product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  64,
+        "objectName":  "May khuu mui mini cho o to",
+        "query":  "May khuu mui mini cho o to product photo",
+        "error":  "No usable image found for query: May khuu mui mini cho o to product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  65,
+        "objectName":  "Quat mini kep cua gio dieu hoa",
+        "query":  "Quat mini kep cua gio dieu hoa product photo",
+        "error":  "No usable image found for query: Quat mini kep cua gio dieu hoa product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  66,
+        "objectName":  "May loc khong khi mini cabin",
+        "query":  "May loc khong khi mini cabin product photo",
+        "error":  "No usable image found for query: May loc khong khi mini cabin product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  67,
+        "objectName":  "Den pin cuu ho da nang nam cham",
+        "query":  "Den pin cuu ho da nang nam cham product photo",
+        "error":  "No usable image found for query: Den pin cuu ho da nang nam cham product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  68,
+        "objectName":  "Bo bugi Bosch iridium 4 may",
+        "query":  "Bo bugi Bosch iridium 4 may product photo",
+        "error":  "No usable image found for query: Bo bugi Bosch iridium 4 may product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  69,
+        "objectName":  "Loc dau dong co thay the",
+        "query":  "Loc dau dong co thay the product photo",
+        "error":  "No usable image found for query: Loc dau dong co thay the product photo"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  70,
+        "objectName":  "Loc gio dong co SUV hang C",
+        "query":  "Loc gio dong co SUV hang C product photo",
+        "error":  "No usable image found for query: Loc gio dong co SUV hang C product photo"
+    },
+    {
+        "dbType":  "DICH_VU",
+        "objectId":  2,
+        "objectName":  "Bao duong dinh ky 10.000 km",
+        "query":  "10,000 km car maintenance service",
+        "error":  "No usable image found for query: 10,000 km car maintenance service"
+    },
+    {
+        "dbType":  "DICH_VU",
+        "objectId":  3,
+        "objectName":  "Thay dau dong co tong hop",
+        "query":  "synthetic engine oil change service car",
+        "error":  "No usable image found for query: synthetic engine oil change service car"
+    },
+    {
+        "dbType":  "DICH_VU",
+        "objectId":  6,
+        "objectName":  "Phu ceramic 1 lop",
+        "query":  "ceramic coating service car",
+        "error":  "No usable image found for query: ceramic coating service car"
+    },
+    {
+        "dbType":  "DICH_VU",
+        "objectId":  7,
+        "objectName":  "Phu ceramic cao cap 3 lop",
+        "query":  "premium ceramic coating car service",
+        "error":  "No usable image found for query: premium ceramic coating car service"
+    },
+    {
+        "dbType":  "DICH_VU",
+        "objectId":  11,
+        "objectName":  "Khu mui noi that bang ozone",
+        "query":  "car ozone odor removal service",
+        "error":  "No usable image found for query: car ozone odor removal service"
+    },
+    {
+        "dbType":  "DICH_VU",
+        "objectId":  13,
+        "objectName":  "Kiem tra tong quat truoc chuyen di",
+        "query":  "pre trip car inspection service",
+        "error":  "No usable image found for query: pre trip car inspection service"
+    },
+    {
+        "dbType":  "DICH_VU",
+        "objectId":  14,
+        "objectName":  "Can chinh goc dat banh xe",
+        "query":  "wheel alignment service car",
+        "error":  "No usable image found for query: wheel alignment service car"
+    },
+    {
+        "dbType":  "DICH_VU",
+        "objectId":  16,
+        "objectName":  "Dao lop dinh ky 4 banh",
+        "query":  "tire rotation service car",
+        "error":  "No usable image found for query: tire rotation service car"
+    },
+    {
+        "dbType":  "DICH_VU",
+        "objectId":  17,
+        "objectName":  "Bao duong hop so tu dong",
+        "query":  "automatic transmission maintenance service",
+        "error":  "No usable image found for query: automatic transmission maintenance service"
+    },
+    {
+        "dbType":  "DICH_VU",
+        "objectId":  18,
+        "objectName":  "Phu nano kinh xe",
+        "query":  "car windshield nano coating service",
+        "error":  "No usable image found for query: car windshield nano coating service"
+    },
+    {
+        "dbType":  "DICH_VU",
+        "objectId":  19,
+        "objectName":  "Ve sinh gam xe",
+        "query":  "car underbody cleaning service",
+        "error":  "No usable image found for query: car underbody cleaning service"
+    },
+    {
+        "dbType":  "DICH_VU",
+        "objectId":  21,
+        "objectName":  "Kiem tra he thong dien co ban",
+        "query":  "car electrical system inspection service",
+        "error":  "No usable image found for query: car electrical system inspection service"
+    },
+    {
+        "dbType":  "DICH_VU",
+        "objectId":  24,
+        "objectName":  "Ve sinh cum phanh 4 banh",
+        "query":  "brake caliper cleaning service car",
+        "error":  "No usable image found for query: brake caliper cleaning service car"
+    }
+]

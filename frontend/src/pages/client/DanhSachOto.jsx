@@ -17,6 +17,7 @@ import {
 } from 'react-icons/fa';
 import { productService } from '../../services/productService';
 import Navbar from '../../components/layout/Navbar';
+import { fallbackImages, getSafeImage } from '../../utils/imageFallback';
 import '../../assets/css/Home.css'; // Reusing some base styles
 import '../../assets/css/DanhSachOto.css';
 
@@ -49,20 +50,22 @@ export default function DanhSachOto() {
                 res = await productService.getCars({ page: params.page, size: params.size, sort: 'ngayTao,desc' });
             }
 
-            const carsWithImages = await Promise.all(res.data.content.map(async (car) => {
+            const cars = res?.data?.content || res?.content || [];
+            const carsWithImages = await Promise.all(cars.map(async (car) => {
                 try {
                     const imgRes = await productService.getCarImages(car.id);
+                    const images = imgRes?.data || imgRes || [];
                     return {
                         ...car,
-                        displayImage: imgRes.data && imgRes.data.length > 0 ? imgRes.data[0].url : ''
+                        displayImage: getSafeImage(images.length > 0 ? images[0].url : '', 'car')
                     };
                 } catch (e) {
-                    return { ...car, displayImage: '' };
+                    return { ...car, displayImage: fallbackImages.car };
                 }
             }));
 
             setCars(carsWithImages);
-            setTotalPages(res.data.totalPages);
+            setTotalPages(res?.data?.totalPages || res?.totalPages || 0);
         } catch (error) {
             console.error('Error fetching cars:', error);
         } finally {
@@ -129,7 +132,14 @@ export default function DanhSachOto() {
                                         <div className="car-image-container">
                                             <span className="car-tag">{car.dongXe || 'New'}</span>
                                             {car.displayImage ? (
-                                                <img src={car.displayImage} alt={car.tenXe} />
+                                                <img
+                                                    src={car.displayImage}
+                                                    alt={car.tenXe}
+                                                    onError={(e) => {
+                                                        e.currentTarget.onerror = null;
+                                                        e.currentTarget.src = fallbackImages.car;
+                                                    }}
+                                                />
                                             ) : (
                                                 <div className="image-placeholder">No Image Available</div>
                                             )}

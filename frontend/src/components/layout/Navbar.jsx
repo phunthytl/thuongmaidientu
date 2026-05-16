@@ -49,7 +49,7 @@ export default function Navbar() {
           </ul>
         </li>
         <li><Link to="/services">Dịch vụ</Link></li>
-        <li><Link to="/support">Hỗ trợ</Link></li>
+        <li><Link to="/services">Hỗ trợ</Link></li>
       </ul>
       <div className="nav-actions">
         <div className="search-bar">
@@ -87,7 +87,7 @@ export default function Navbar() {
                 </li>
                 {user?.vaiTro !== 'KHACH_HANG' && (
                   <li>
-                    <Link to="/admin/dashboard"><FaCar /> Trang quản trị</Link>
+                    <Link to="/admin"><FaCar /> Trang quản trị</Link>
                   </li>
                 )}
                 <hr />

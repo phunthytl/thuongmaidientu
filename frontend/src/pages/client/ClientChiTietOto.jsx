@@ -6,6 +6,7 @@ import { productService } from '../../services/productService';
 import { inventoryService } from '../../services/inventoryService';
 import { api } from '../../services/api';
 import BookingModal from '../../components/client/BookingModal';
+import { fallbackImages, getSafeImage } from '../../utils/imageFallback';
 import '../../assets/css/Home.css';
 
 export default function ClientChiTietOto() {
@@ -37,9 +38,13 @@ export default function ClientChiTietOto() {
             const carData = carRes?.data || carRes;
             setCar(carData);
             
-            const imgs = imgRes?.data || [];
+            const imgs = (imgRes?.data || []).map((img) => ({
+                ...img,
+                url: getSafeImage(img?.url, 'car')
+            }));
             setImages(imgs);
             if (imgs.length > 0) setActiveImage(imgs[0].url);
+            else setActiveImage(fallbackImages.car);
 
             const revs = reviewRes?.data?.data?.content || reviewRes?.data?.content || [];
             setReviews(revs);
@@ -131,7 +136,15 @@ export default function ClientChiTietOto() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                         <div style={{ width: '100%', aspectRatio: '16/10', backgroundColor: '#f3f4f6', borderRadius: '12px', overflow: 'hidden', position: 'relative' }}>
                             {activeImage ? (
-                                <img src={activeImage} alt={car.tenXe} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'opacity 0.3s' }} />
+                                <img
+                                    src={activeImage}
+                                    alt={car.tenXe}
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'opacity 0.3s' }}
+                                    onError={(e) => {
+                                        e.currentTarget.onerror = null;
+                                        e.currentTarget.src = fallbackImages.car;
+                                    }}
+                                />
                             ) : (
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#9ca3af', flexDirection: 'column', gap: '12px' }}>
                                     <FaCar size={48} />
@@ -153,7 +166,15 @@ export default function ClientChiTietOto() {
                                         className={`thumbnail-img ${activeImage === img.url ? 'active' : ''}`}
                                         style={{ width: '80px', height: '60px', borderRadius: '8px', overflow: 'hidden', flexShrink: 0 }}
                                     >
-                                        <img src={img.url} alt="thumbnail" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        <img
+                                            src={img.url}
+                                            alt="thumbnail"
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                            onError={(e) => {
+                                                e.currentTarget.onerror = null;
+                                                e.currentTarget.src = fallbackImages.car;
+                                            }}
+                                        />
                                     </div>
                                 ))}
                             </div>

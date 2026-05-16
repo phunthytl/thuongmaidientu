@@ -1,0 +1,387 @@
+﻿[
+    {
+        "dbType":  "OTO",
+        "objectId":  1,
+        "objectName":  "Toyota Camry 2.5Q",
+        "sourceUrl":  "https://static0.carbuzzimages.com/wordpress/wp-content/uploads/2024/09/2024-toyota-camry-1.jpg",
+        "localUrl":  "/demo-images/cars/001-toyota-camry-2-5q.jpg"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  3,
+        "objectName":  "Kia Sorento Signature",
+        "sourceUrl":  "https://cdn.motor1.com/images/mgl/koB2KN/s1/2024-kia-sorento-facelift.jpg",
+        "localUrl":  "/demo-images/cars/003-kia-sorento-signature.jpg"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  5,
+        "objectName":  "Mercedes C200 Avantgarde",
+        "sourceUrl":  "https://drive.gianhangvn.com/image/mercedes-benz-c200-avantgarde-35-2250718j30214.jpg",
+        "localUrl":  "/demo-images/cars/005-mercedes-c200-avantgarde.jpg"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  6,
+        "objectName":  "VinFast VF8 Plus",
+        "sourceUrl":  "https://st.arenaev.com/specs/vinfast/vinfast-vf8-front1.jpg",
+        "localUrl":  "/demo-images/cars/006-vinfast-vf8-plus.jpg"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  9,
+        "objectName":  "Mitsubishi Xpander Cross",
+        "sourceUrl":  "http://img95.699pic.com/photo/40015/2987.jpg_wh860.jpg",
+        "localUrl":  "/demo-images/cars/009-mitsubishi-xpander-cross.jpg"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  10,
+        "objectName":  "Toyota Fortuner Legender",
+        "sourceUrl":  "https://images.hitpaw.com/topics/fotorpea/sketch-naruto-full-body-drawing.jpg",
+        "localUrl":  "/demo-images/cars/010-toyota-fortuner-legender.jpg"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  12,
+        "objectName":  "Toyota Corolla Cross 1.8V",
+        "sourceUrl":  "https://static0.carbuzzimages.com/wordpress/wp-content/uploads/2024/11/2024-toyota-corolla-cross-4.jpg",
+        "localUrl":  "/demo-images/cars/012-toyota-corolla-cross-1-8v.jpg"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  13,
+        "objectName":  "Toyota Corolla Cross 1.8HEV",
+        "sourceUrl":  "https://plus.unsplash.com/premium_photo-1717325378227-3a953b43bd6a?fm=jpg\u0026q=60\u0026w=3000\u0026ixlib=rb-4.1.0\u0026ixid=M3wxMjA3fDB8MHxleHBsb3JlLWZlZWR8MXx8fGVufDB8fHx8fA%3D%3D",
+        "localUrl":  "/demo-images/cars/013-toyota-corolla-cross-1-8hev.jpg"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  16,
+        "objectName":  "Toyota Vios G CVT",
+        "sourceUrl":  "https://calendar.mammycares.com/wp-content/uploads/2025/03/2026-calendar-with-week-numbers-us-and-iso-week-numbers-2-1024x724.jpg",
+        "localUrl":  "/demo-images/cars/016-toyota-vios-g-cvt.jpg"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  17,
+        "objectName":  "Toyota Fortuner Legender 2.4AT 4x2",
+        "sourceUrl":  "https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1441272474i/25203591.jpg",
+        "localUrl":  "/demo-images/cars/017-toyota-fortuner-legender-2-4at-4x2.jpg"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  18,
+        "objectName":  "Honda City RS",
+        "sourceUrl":  "https://paultan.org/image/2024/09/2024-Honda-City-SE_Ext-1.jpg",
+        "localUrl":  "/demo-images/cars/018-honda-city-rs.jpg"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  20,
+        "objectName":  "Honda HR-V L",
+        "sourceUrl":  "https://www.motortrend.com/uploads/2023/05/2024-Honda-HR-V-AWD-EX-L-front-view-20.jpg",
+        "localUrl":  "/demo-images/cars/020-honda-hr-v-l.jpg"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  21,
+        "objectName":  "Honda CR-V e:HEV RS",
+        "sourceUrl":  "https://paultan.org/image/2023/11/2024-Honda-CR-V-Malaysia-bookings-open-1-e1700014599230-BM.jpeg",
+        "localUrl":  "/demo-images/cars/021-honda-cr-v-e-hev-rs.jpeg"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  24,
+        "objectName":  "Mazda CX-5 2.5 Signature Sport",
+        "sourceUrl":  "https://static0.carbuzzimages.com/wordpress/wp-content/uploads/2025/01/2024-mazda-cx-5.jpg",
+        "localUrl":  "/demo-images/cars/024-mazda-cx-5-2-5-signature-sport.jpg"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  27,
+        "objectName":  "Hyundai Tucson 2.0 Xang Dac biet",
+        "sourceUrl":  "https://www.motortrend.com/uploads/2023/08/2024-Hyundai-Tucson-Limited-AWD-front-view-26.jpg",
+        "localUrl":  "/demo-images/cars/027-hyundai-tucson-2-0-xang-dac-biet.jpg"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  30,
+        "objectName":  "Kia Carnival 3.5G Premium",
+        "sourceUrl":  "https://static.wikia.nocookie.net/4bbdd245-5349-4c54-a611-f004a0b58587/scale-to-width/755",
+        "localUrl":  "/demo-images/cars/030-kia-carnival-3-5g-premium.webp"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  32,
+        "objectName":  "Ford Everest Titanium+ 2.0L 4x4 AT",
+        "sourceUrl":  "https://m.media-amazon.com/images/I/81Nt3riNRML.jpg",
+        "localUrl":  "/demo-images/cars/032-ford-everest-titanium-2-0l-4x4-at.jpg"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  34,
+        "objectName":  "VinFast VF 8 Plus",
+        "sourceUrl":  "https://www.rutamotor.com/wp-content/uploads/2023/11/VinFast-VF7-rutamotor-03-1170x785.jpg",
+        "localUrl":  "/demo-images/cars/034-vinfast-vf-8-plus.jpg"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  36,
+        "objectName":  "Honda Civic G",
+        "sourceUrl":  "https://i.gaw.to/vehicles/photos/40/34/403433-2024-honda-civic.jpg?1024x640",
+        "localUrl":  "/demo-images/cars/036-honda-civic-g.jpg"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  37,
+        "objectName":  "Honda HR-V G",
+        "sourceUrl":  "https://kambingguling.id/wp-content/uploads/2020/11/Kambing-Guling-Foto-2-1024x768.jpg",
+        "localUrl":  "/demo-images/cars/037-honda-hr-v-g.jpg"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  47,
+        "objectName":  "VinFast VF 6 Plus",
+        "sourceUrl":  "https://ev.iphonemod.net/wp-content/uploads/2023/05/vinfast_vf8_001-608x405.jpeg",
+        "localUrl":  "/demo-images/cars/047-vinfast-vf-6-plus.jpeg"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  48,
+        "objectName":  "VinFast VF 7 Plus",
+        "sourceUrl":  "https://www.rutamotor.com/wp-content/uploads/2023/11/VinFast-VF7-rutamotor-01.webp",
+        "localUrl":  "/demo-images/cars/048-vinfast-vf-7-plus.webp"
+    },
+    {
+        "dbType":  "OTO",
+        "objectId":  49,
+        "objectName":  "Toyota Raize Turbo",
+        "sourceUrl":  "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgo4TmJ_lNHJiT-NYM9PrXWgVCYGs1Na0iuvGjtoz6rp1HxEb68LWLc4-1wE-JojJbPI0KdBQbyND_H_PkXS0IQVXRAMd_hMp9XmwH0TFIK4DYVAfxvAkwSwR-_9JgbBkm_uz9Ru98I5JHC-ZQuD4Mi-HX6Aq9PuHNcVppRgZDAyyb6uAWeJcwpfvjuNC_X/s1024/2024_toyota_raize_turbo_00.jpg",
+        "localUrl":  "/demo-images/cars/049-toyota-raize-turbo.jpg"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  2,
+        "objectName":  "L???c gi?? ?????ng c?? Toyota",
+        "sourceUrl":  "https://i.ebayimg.com/images/g/~F8AAOSwPe1mPQcQ/s-l1600.jpg",
+        "localUrl":  "/demo-images/accessories/002-l-c-gi-ng-c-toyota.jpg"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  6,
+        "objectName":  "Th???m l??t s??n 3D Toyota Camry",
+        "sourceUrl":  "https://i.ebayimg.com/images/g/H-YAAOSwURVlZhWP/s-l1200.jpg",
+        "localUrl":  "/demo-images/accessories/006-th-m-l-t-s-n-3d-toyota-camry.jpg"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  9,
+        "objectName":  "B??nh ???c quy GS 55Ah 12V",
+        "sourceUrl":  "https://parade.com/.image/MTkwNTgwOTc1NzQzOTM1NjEz/GRADUATION-CARD-2.jpg?profile=w1536",
+        "localUrl":  "/demo-images/accessories/009-b-nh-c-quy-gs-55ah-12v.jpg"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  11,
+        "objectName":  "Camera hanh trinh 70mai A500S",
+        "sourceUrl":  "https://www.shutterstock.com/shutterstock/photos/2246781443/display_1500/stock-vector-weights-handling-safety-ergonomic-posture-of-back-for-carry-or-push-heavy-goods-manual-correctly-2246781443.jpg",
+        "localUrl":  "/demo-images/accessories/011-camera-hanh-trinh-70mai-a500s.jpg"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  12,
+        "objectName":  "Camera hanh trinh Vietmap C61 Pro",
+        "sourceUrl":  "https://media.istockphoto.com/id/1386872887/vector/workers-of-warehouse-in-work-process-and-accidents-set-staff-in-hardhat-carrying-box.jpg?s=612x612\u0026w=0\u0026k=20\u0026c=5DlgzV7q8zTxY8GNjB8AI5M5gCkZA6npmwDGtpJziJQ=",
+        "localUrl":  "/demo-images/accessories/012-camera-hanh-trinh-vietmap-c61-pro.jpg"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  13,
+        "objectName":  "Man hinh Android Zestech ZX10",
+        "sourceUrl":  "https://carplus.vn/storage/media/Pf5BqW826sGDMDPiY3aSPEvAu3zQpx4Kft5uiVZ1.jpeg",
+        "localUrl":  "/demo-images/accessories/013-man-hinh-android-zestech-zx10.jpeg"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  15,
+        "objectName":  "Camera lui ICAR Elliview S3",
+        "sourceUrl":  "https://cdn1.vectorstock.com/i/1000x1000/15/20/delivery-man-carrying-boxes-goods-post-service-vector-30171520.jpg",
+        "localUrl":  "/demo-images/accessories/015-camera-lui-icar-elliview-s3.jpg"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  18,
+        "objectName":  "Lop Bridgestone Turanza T005A 225/50R18",
+        "sourceUrl":  "https://vinfast-cars.vn/wp-content/uploads/2024/10/vinfast-vf3-do.png",
+        "localUrl":  "/demo-images/accessories/018-lop-bridgestone-turanza-t005a-225-50r18.png"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  22,
+        "objectName":  "Tham lot san 5D sedan hang C",
+        "sourceUrl":  "https://cdn.shopify.com/s/files/1/0022/9303/9202/products/Periodic-table-science-poster-LAMINATED-chart-teaching-white-elements-classroom-decoration-premium-educators-atomic-numb-B07BDFHL38_1200x1200.jpg?v=1546025887",
+        "localUrl":  "/demo-images/accessories/022-tham-lot-san-5d-sedan-hang-c.jpg"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  26,
+        "objectName":  "Tui treo lung ghe da nang",
+        "sourceUrl":  "https://www.skateboarding.com/.image/w_1200,h_630,g_auto,c_fill/MjE0NTc2MDI4NzAwMzg3MTA4/black-label-skateboards-curb-surfer-jason-adams.png",
+        "localUrl":  "/demo-images/accessories/026-tui-treo-lung-ghe-da-nang.png"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  29,
+        "objectName":  "Bo khan microfiber 3M 3 chiec",
+        "sourceUrl":  "https://4.bp.blogspot.com/-JSICqU3em_o/W2fDX3IHQlI/AAAAAAAAE3M/GGCW-vlNEOYgfMyH4OBBIazZOcZfxSSxwCK4BGAYYCw/s320/garis%2Bhitam.jpg",
+        "localUrl":  "/demo-images/accessories/029-bo-khan-microfiber-3m-3-chiec.jpg"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  30,
+        "objectName":  "May bom lop mini Xiaomi Portable Air Pump",
+        "sourceUrl":  "https://karacarrero.com/wp-content/uploads/2020/03/stuck-at-home-play-march-april-may-family-quarantine.png",
+        "localUrl":  "/demo-images/accessories/030-may-bom-lop-mini-xiaomi-portable-air-pump.png"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  34,
+        "objectName":  "Den LED Philips Ultinon Pro6000 H11",
+        "sourceUrl":  "https://www.blauertacho4u.de/images/product_images/original_images/Philips-Ultinon-Pro6000-Boost-H11-LED--400--18W-ECE-R37-Zulassung---11362U60BX2172511711.jpg",
+        "localUrl":  "/demo-images/accessories/034-den-led-philips-ultinon-pro6000-h11.jpg"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  35,
+        "objectName":  "Nuoc hoa xe hoi kieu kep cua gio",
+        "sourceUrl":  "https://e-cdn.carpla.vn/carpla-ecom/blog/nuoc-hoa-xe-hoi-febreze-kep-cua-gio-dieu-hoa-1758851727.682.jpg",
+        "localUrl":  "/demo-images/accessories/035-nuoc-hoa-xe-hoi-kieu-kep-cua-gio.jpg"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  39,
+        "objectName":  "Tam lot cop xe chong tham SUV hang C",
+        "sourceUrl":  "https://m.media-amazon.com/images/S/aplus-media-library-service-media/0daec31e-e436-4cb6-8451-7f75aa304d0f.__CR0,0,300,300_PT0_SX300_V1___.jpg",
+        "localUrl":  "/demo-images/accessories/039-tam-lot-cop-xe-chong-tham-suv-hang-c.jpg"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  40,
+        "objectName":  "Moc treo do sau ghe hop kim 2 chiec",
+        "sourceUrl":  "https://superdesk-pro-c.s3.amazonaws.com/sd-nepalitimes/20221110161124/636d18239c7e80680e0ac7a7jpeg.jpg",
+        "localUrl":  "/demo-images/accessories/040-moc-treo-do-sau-ghe-hop-kim-2-chiec.jpg"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  50,
+        "objectName":  "Hop de do noc xe Thule Ocean 100",
+        "sourceUrl":  "https://wetrek.vn/pic/Product/hoanghien150993@gmail.com/images/Hop-dung-do-noc-xe-THULE-Touring-100-Titan-Aero-2-WETREK_VN.jpg",
+        "localUrl":  "/demo-images/accessories/050-hop-de-do-noc-xe-thule-ocean-100.jpg"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  54,
+        "objectName":  "Cap loa Pioneer 2 duong tieng",
+        "sourceUrl":  "https://cdn.shopify.com/s/files/1/1380/4501/products/toshiba-team-retro-cycling-cap_2000x.jpg?v=1595518226",
+        "localUrl":  "/demo-images/accessories/054-cap-loa-pioneer-2-duong-tieng.jpg"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  55,
+        "objectName":  "Loa sub gam ghe JBL BassPro SL2",
+        "sourceUrl":  "https://qiita-image-store.s3.amazonaws.com/0/210886/9c5c430d-3e1a-8627-758b-94ec76964e98.png",
+        "localUrl":  "/demo-images/accessories/055-loa-sub-gam-ghe-jbl-basspro-sl2.png"
+    },
+    {
+        "dbType":  "PHU_KIEN",
+        "objectId":  59,
+        "objectName":  "Bat chong loa taplo da nang",
+        "sourceUrl":  "http://zauto.vn/wp-content/uploads/2025/12/tham-taplo-nhung-va-tham-taplo-da-carbon-chong-nang-giam-nhiet-bao-ve-taplo-o-to.jpg",
+        "localUrl":  "/demo-images/accessories/059-bat-chong-loa-taplo-da-nang.jpg"
+    },
+    {
+        "dbType":  "DICH_VU",
+        "objectId":  1,
+        "objectName":  "Bao duong dinh ky 5.000 km",
+        "sourceUrl":  "http://upload.wikimedia.org/wikipedia/commons/6/61/Cars_movie\u0027s_car.jpg",
+        "localUrl":  "/demo-images/services/001-bao-duong-dinh-ky-5-000-km.jpg"
+    },
+    {
+        "dbType":  "DICH_VU",
+        "objectId":  4,
+        "objectName":  "Ve sinh noi that co ban",
+        "sourceUrl":  "https://images.pexels.com/photos/358070/pexels-photo-358070.jpeg?cs=srgb\u0026dl=pexels-pixabay-358070.jpg\u0026fm=jpg",
+        "localUrl":  "/demo-images/services/004-ve-sinh-noi-that-co-ban.jpeg"
+    },
+    {
+        "dbType":  "DICH_VU",
+        "objectId":  5,
+        "objectName":  "Ve sinh khoang may",
+        "sourceUrl":  "https://images.airtasker.com/v7/https://airtasker-seo-assets-prod.s3.amazonaws.com/en_GB/1695272894504-car-engine-washing.jpg",
+        "localUrl":  "/demo-images/services/005-ve-sinh-khoang-may.jpg"
+    },
+    {
+        "dbType":  "DICH_VU",
+        "objectId":  8,
+        "objectName":  "Can bang dong lop",
+        "sourceUrl":  "https://thumbs.dreamstime.com/b/istanbul-turkey-march-car-wheel-balancing-service-tire-mechanic-working-machine-close-up-307575288.jpg",
+        "localUrl":  "/demo-images/services/008-can-bang-dong-lop.jpg"
+    },
+    {
+        "dbType":  "DICH_VU",
+        "objectId":  9,
+        "objectName":  "Kiem tra he thong phanh",
+        "sourceUrl":  "http://upload.wikimedia.org/wikipedia/commons/0/0b/Porsche_race_car_2009_Bleekemolen.jpg",
+        "localUrl":  "/demo-images/services/009-kiem-tra-he-thong-phanh.jpg"
+    },
+    {
+        "dbType":  "DICH_VU",
+        "objectId":  10,
+        "objectName":  "Danh bong son xe 1 buoc",
+        "sourceUrl":  "https://c.pxhere.com/photos/d5/c3/automotive_concept_science_and_technology-1407865.jpg!d",
+        "localUrl":  "/demo-images/services/010-danh-bong-son-xe-1-buoc.jpg"
+    },
+    {
+        "dbType":  "DICH_VU",
+        "objectId":  12,
+        "objectName":  "Bao duong he thong dieu hoa",
+        "sourceUrl":  "https://airtasker-seo-assets-prod.s3.amazonaws.com/en_AU/1673576064636-a-mechanic-repairing-a-car-AC.jpg",
+        "localUrl":  "/demo-images/services/012-bao-duong-he-thong-dieu-hoa.jpg"
+    },
+    {
+        "dbType":  "DICH_VU",
+        "objectId":  15,
+        "objectName":  "Ve sinh kim phun va buong dot",
+        "sourceUrl":  "https://market-resized.envatousercontent.com/graphicriver.net/files/169423121/preview.jpg?auto=format\u0026q=94\u0026cf_fit=crop\u0026gravity=top\u0026h=8000\u0026w=590\u0026s=7b9340d0cce7c1f20a06d4840a03aa1300956e07fc1ff1afc938fae9eb31ef03",
+        "localUrl":  "/demo-images/services/015-ve-sinh-kim-phun-va-buong-dot.jpg"
+    },
+    {
+        "dbType":  "DICH_VU",
+        "objectId":  20,
+        "objectName":  "Phuc hoi den pha bi o",
+        "sourceUrl":  "https://shrine-carine.com/wp-content/uploads/2023/10/953d56cc6deff40f9f40f94661af23cf.jpg",
+        "localUrl":  "/demo-images/services/020-phuc-hoi-den-pha-bi-o.jpg"
+    },
+    {
+        "dbType":  "DICH_VU",
+        "objectId":  22,
+        "objectName":  "Combo thay loc gio va ve sinh hut gio",
+        "sourceUrl":  "https://images.pexels.com/photos/803975/pexels-photo-803975.jpeg?cs=srgb\u0026dl=pexels-eneida-nieves-803975.jpg\u0026fm=jpg",
+        "localUrl":  "/demo-images/services/022-combo-thay-loc-gio-va-ve-sinh-hut-gio.jpeg"
+    },
+    {
+        "dbType":  "DICH_VU",
+        "objectId":  23,
+        "objectName":  "Duong khoang may chuyen sau",
+        "sourceUrl":  "https://bigsmobile.com/wp-content/uploads/2022/10/apply-degreaser-with-detailing-brush-1.jpg",
+        "localUrl":  "/demo-images/services/023-duong-khoang-may-chuyen-sau.jpg"
+    },
+    {
+        "dbType":  "DICH_VU",
+        "objectId":  25,
+        "objectName":  "Goi cham soc xe tong the",
+        "sourceUrl":  "https://premierdetailingandwash.com/wp-content/uploads/2023/02/151732244_m.jpg",
+        "localUrl":  "/demo-images/services/025-goi-cham-soc-xe-tong-the.jpg"
+    }
+]

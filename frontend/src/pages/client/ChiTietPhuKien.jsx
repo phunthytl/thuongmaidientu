@@ -16,6 +16,7 @@ import { productService } from '../../services/productService';
 import { inventoryService } from '../../services/inventoryService';
 import { useAuthStore } from '../../stores/authStore';
 import { useCartStore } from '../../stores/cartStore';
+import { fallbackImages, getSafeImage } from '../../utils/imageFallback';
 import '../../assets/css/ChiTietSanPham.css';
 
 export default function ChiTietPhuKien() {
@@ -27,6 +28,7 @@ export default function ChiTietPhuKien() {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [addingToCart, setAddingToCart] = useState(false);
+  const [mainImage, setMainImage] = useState(fallbackImages.accessory);
   const { isAuthenticated } = useAuthStore();
   const { addToCart } = useCartStore();
 
@@ -44,6 +46,7 @@ export default function ChiTietPhuKien() {
 
       const accData = accRes?.data || accRes;
       setAccessory(accData);
+      setMainImage(getSafeImage(accData?.hinhAnhs?.[0], 'accessory'));
       
       const stocks = stockRes?.data || [];
       setWarehouses(stocks);
@@ -141,8 +144,15 @@ export default function ChiTietPhuKien() {
       <div className="product-detail-layout" style={{ maxWidth: '1280px', margin: '40px auto', padding: '0 20px' }}>
         <div className="product-gallery">
           <div className="main-image" style={{ backgroundColor: '#fff', borderRadius: '16px', padding: '40px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '400px' }}>
-            <FaTools size={100} color="#ddd" />
-            <p style={{ marginTop: '20px', color: '#6b7280' }}>Ảnh sản phẩm đang được cập nhật</p>
+            <img
+              src={mainImage}
+              alt={accessory.tenPhuKien}
+              style={{ width: '100%', maxHeight: '320px', objectFit: 'contain' }}
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = fallbackImages.accessory;
+              }}
+            />
           </div>
         </div>
 
