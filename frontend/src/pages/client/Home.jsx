@@ -19,6 +19,7 @@ import {
 } from 'react-icons/fa';
 import { productService } from '../../services/productService';
 import Navbar from '../../components/layout/Navbar';
+import { fallbackImages, getSafeImage } from '../../utils/imageFallback';
 import '../../assets/css/Home.css';
 
 export default function Home() {
@@ -33,17 +34,19 @@ export default function Home() {
         try {
             setLoading(true);
             const res = await productService.getFeaturedCars(0, 4);
+            const cars = res?.data?.content || res?.content || [];
 
             // Lấy ảnh cho từng xe
-            const carsWithImages = await Promise.all(res.data.content.map(async (car) => {
+            const carsWithImages = await Promise.all(cars.map(async (car) => {
                 try {
                     const imgRes = await productService.getCarImages(car.id);
+                    const images = imgRes?.data || imgRes || [];
                     return {
                         ...car,
-                        displayImage: imgRes.data && imgRes.data.length > 0 ? imgRes.data[0].url : ''
+                        displayImage: getSafeImage(images.length > 0 ? images[0].url : '', 'car')
                     };
                 } catch (e) {
-                    return { ...car, displayImage: '' };
+                    return { ...car, displayImage: fallbackImages.car };
                 }
             }));
 
@@ -71,8 +74,8 @@ export default function Home() {
                     <h1 className="hero-title">Khám Phá <span className="highlight">Đẳng Cấp</span> Xe Hơi Mới Nhất</h1>
                     <p className="hero-description">Những mẫu xe từ thương hiệu hàng đầu thế giới. Cam kết chất lượng và dịch vụ tận tâm.</p>
                     <div className="hero-btns">
-                        <button className="btn-primary">Xem danh sách xe <FaArrowRight /></button>
-                        <button className="btn-secondary">Đặt lịch lái thử</button>
+                        <Link to="/products" className="btn-primary">Xem danh sách xe <FaArrowRight /></Link>
+                        <Link to="/services" className="btn-secondary">Đặt lịch lái thử</Link>
                     </div>
                 </div>
                 <div className="hero-bg-overlay"></div>
@@ -128,7 +131,14 @@ export default function Home() {
                                 <div className="car-image-container">
                                     <span className="car-tag">{car.dongXe || 'Premium'}</span>
                                     {car.displayImage ? (
-                                        <img src={car.displayImage} alt={car.tenXe} />
+                                        <img
+                                            src={car.displayImage}
+                                            alt={car.tenXe}
+                                            onError={(e) => {
+                                                e.currentTarget.onerror = null;
+                                                e.currentTarget.src = fallbackImages.car;
+                                            }}
+                                        />
                                     ) : (
                                         <div className="image-placeholder">No Image Available</div>
                                     )}
@@ -154,8 +164,8 @@ export default function Home() {
                     <h2>Sẵn sàng để sở hữu chiếc xe mơ ước?</h2>
                     <p>Hãy để chúng tôi đồng hành cùng bạn trên hành trình chinh phục những cung đường mới.</p>
                     <div className="cta-btns">
-                        <button className="btn-white">Khám phá ngay</button>
-                        <button className="btn-outline-white">Liên hệ tư vấn</button>
+                        <Link to="/products" className="btn-white">Khám phá ngay</Link>
+                        <Link to="/services" className="btn-outline-white">Liên hệ tư vấn</Link>
                     </div>
                 </div>
             </section>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { FaWrench, FaClock, FaCheckCircle, FaStar, FaUserCircle, FaWarehouse, FaMapMarkerAlt, FaInfoCircle, FaHeadset } from 'react-icons/fa';
+import { FaWrench, FaClock, FaStar, FaUserCircle, FaWarehouse, FaMapMarkerAlt, FaInfoCircle, FaHeadset } from 'react-icons/fa';
 import Navbar from '../../components/layout/Navbar';
 import { api } from '../../services/api';
 import BookingModal from '../../components/client/BookingModal';
@@ -22,17 +22,21 @@ export default function ClientChiTietDichVu() {
     const fetchServiceData = async () => {
         try {
             setLoading(true);
-            const [svcRes, reviewRes, branchRes] = await Promise.all([
+            const [svcRes, reviewRes, branchRes, mediaRes] = await Promise.all([
                 api.get(`/dich-vu/${id}`),
                 api.get(`/danh-gia/dich-vu/${id}?size=10`).catch(() => ({ data: { data: { content: [] } } })),
-                api.get('/kho-hang').catch(() => ({ data: { data: [] } }))
+                api.get('/kho-hang').catch(() => ({ data: { data: [] } })), 
+                api.get(`/media/DICH_VU/${id}/images`).catch(() => ({ data: { data: [] } }))
             ]);
-            
-            setService(svcRes.data?.data);
+
+            setService({
+                ...svcRes.data?.data,
+                displayImage: mediaRes.data?.data?.[0]?.url || ''
+            });
             setReviews(reviewRes.data?.data?.content || []);
-            
+
             const list = branchRes.data?.data || [];
-            const activeBranches = list.filter(b => b.trangThai);
+            const activeBranches = list.filter(branch => branch.trangThai);
             setBranches(activeBranches);
             if (activeBranches.length > 0) {
                 setSelectedBranchId(activeBranches[0].id);
@@ -45,19 +49,19 @@ export default function ClientChiTietDichVu() {
     };
 
     const formatPrice = (price) => {
-        if (!price) return 'Liên hệ';
+        if (!price) return 'Lien he';
         return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
     };
 
     const getAverageRating = () => {
         if (!reviews.length) return 5.0;
-        const total = reviews.reduce((sum, r) => sum + r.diemDanhGia, 0);
+        const total = reviews.reduce((sum, review) => sum + review.diemDanhGia, 0);
         return (total / reviews.length).toFixed(1);
     };
 
     const handleOpenBooking = () => {
         if (!selectedBranchId) {
-            alert('Vui lòng chọn chi nhánh bạn muốn đăng ký dịch vụ!');
+            alert('Vui long chon chi nhanh ban muon dang ky dich vu.');
             return;
         }
         setIsBookingOpen(true);
@@ -74,9 +78,9 @@ export default function ClientChiTietDichVu() {
         );
     }
 
-    if (!service) return <div style={{padding: '100px', textAlign: 'center'}}>Không tìm thấy thông tin dịch vụ.</div>;
+    if (!service) return <div style={{ padding: '100px', textAlign: 'center' }}>Khong tim thay thong tin dich vu.</div>;
 
-    const selectedBranchData = branches.find(b => b.id === selectedBranchId);
+    const selectedBranchData = branches.find(branch => branch.id === selectedBranchId);
 
     return (
         <div className="home-container" style={{ backgroundColor: '#f9fafb', minHeight: '100vh', paddingBottom: '60px' }}>
@@ -90,55 +94,57 @@ export default function ClientChiTietDichVu() {
                 .wh-radio.checked { border-color: #111; background: #111; }
                 .wh-radio.checked::after { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #fff; }
             `}</style>
-            
-            <div style={{maxWidth: '1200px', margin: '40px auto', padding: '0 20px'}}>
-                <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', backgroundColor: '#fff', borderRadius: '16px', padding: '32px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)'}}>
-                    
-                    {/* Visual Area */}
-                    <div style={{backgroundColor: '#f9fafb', borderRadius: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px', border: '1px solid #e5e7eb'}}>
-                        <div style={{width: '120px', height: '120px', borderRadius: '50%', backgroundColor: '#fef2f2', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '48px', marginBottom: '24px'}}>
-                            <FaWrench />
-                        </div>
-                        <h2 style={{margin: 0, color: '#111', textAlign: 'center'}}>{service.tenDichVu}</h2>
-                        <div style={{color: '#6b7280', marginTop: '12px'}}>Dịch Vụ Ủy Quyền Chính Hãng</div>
+
+            <div style={{ maxWidth: '1200px', margin: '40px auto', padding: '0 20px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', backgroundColor: '#fff', borderRadius: '16px', padding: '32px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)' }}>
+                    <div style={{ backgroundColor: '#f9fafb', borderRadius: '12px', overflow: 'hidden', border: '1px solid #e5e7eb', minHeight: '420px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {service.displayImage ? (
+                            <img
+                                src={service.displayImage}
+                                alt={service.tenDichVu}
+                                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                            />
+                        ) : (
+                            <div style={{ color: '#ef4444', fontSize: '64px' }}>
+                                <FaWrench />
+                            </div>
+                        )}
                     </div>
 
-                    {/* Info */}
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <div style={{fontSize: '12px', textTransform: 'uppercase', letterSpacing: '2px', color: '#666', marginBottom: '8px', fontWeight: 600}}>Gói Dịch Vụ</div>
-                        <h1 style={{fontSize: '36px', fontWeight: 800, margin: '0 0 16px 0', lineHeight: 1.2, color: '#111'}}>{service.tenDichVu}</h1>
-                        
-                        <div style={{display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px'}}>
-                            <div style={{display: 'flex', color: '#fbbf24', fontSize: '18px'}}>
-                                {[...Array(5)].map((_, i) => (
-                                    <FaStar key={i} color={i < Math.round(getAverageRating()) ? '#fbbf24' : '#e5e7eb'} />
+                        <div style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '2px', color: '#666', marginBottom: '8px', fontWeight: 600 }}>Goi Dich Vu</div>
+                        <h1 style={{ fontSize: '36px', fontWeight: 800, margin: '0 0 16px 0', lineHeight: 1.2, color: '#111' }}>{service.tenDichVu}</h1>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+                            <div style={{ display: 'flex', color: '#fbbf24', fontSize: '18px' }}>
+                                {[...Array(5)].map((_, index) => (
+                                    <FaStar key={index} color={index < Math.round(getAverageRating()) ? '#fbbf24' : '#e5e7eb'} />
                                 ))}
                             </div>
-                            <span style={{fontWeight: 700, fontSize: '16px'}}>{getAverageRating()}</span>
-                            <span style={{color: '#6b7280'}}>({reviews.length} đánh giá)</span>
+                            <span style={{ fontWeight: 700, fontSize: '16px' }}>{getAverageRating()}</span>
+                            <span style={{ color: '#6b7280' }}>({reviews.length} danh gia)</span>
                         </div>
 
-                        <div style={{fontSize: '32px', fontWeight: 'bold', color: '#ef4444', marginBottom: '32px'}}>
+                        <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#ef4444', marginBottom: '32px' }}>
                             {formatPrice(service.gia)}
                         </div>
 
-                        <div style={{display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', background: '#f9fafb', borderRadius: '12px', marginBottom: '32px', border: '1px solid #e5e7eb'}}>
-                            <FaClock style={{fontSize: '24px', color: '#4b5563'}} />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', background: '#f9fafb', borderRadius: '12px', marginBottom: '32px', border: '1px solid #e5e7eb' }}>
+                            <FaClock style={{ fontSize: '24px', color: '#4b5563' }} />
                             <div>
-                                <div style={{fontSize: '12px', color: '#6b7280', textTransform: 'uppercase', fontWeight: 600}}>Thời gian dự kiến</div>
-                                <div style={{fontWeight: 700, fontSize: '16px', color: '#111'}}>{service.thoiGianUocTinh || 'Đang cập nhật'}</div>
+                                <div style={{ fontSize: '12px', color: '#6b7280', textTransform: 'uppercase', fontWeight: 600 }}>Thoi gian du kien</div>
+                                <div style={{ fontWeight: 700, fontSize: '16px', color: '#111' }}>{service.thoiGianUocTinh || 'Dang cap nhat'}</div>
                             </div>
                         </div>
 
-                        {/* ── Branch Selection ── */}
                         <div style={{ marginBottom: '32px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
                                 <FaWarehouse style={{ fontSize: '18px', color: '#4b5563' }} />
-                                <span style={{ fontSize: '16px', fontWeight: 700, color: '#111' }}>Chọn chi nhánh thực hiện</span>
+                                <span style={{ fontSize: '16px', fontWeight: 700, color: '#111' }}>Chon chi nhanh thuc hien</span>
                             </div>
                             {branches.length === 0 ? (
                                 <div style={{ padding: '16px', backgroundColor: '#f3f4f6', borderRadius: '12px', color: '#6b7280', fontStyle: 'italic' }}>
-                                    Đang tải danh sách chi nhánh...
+                                    Dang tai danh sach chi nhanh...
                                 </div>
                             ) : (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -154,7 +160,7 @@ export default function ClientChiTietDichVu() {
                                                 <div style={{ flex: 1 }}>
                                                     <div style={{ fontWeight: 700, fontSize: '15px', color: '#111', marginBottom: '2px' }}>{branch.tenKho}</div>
                                                     <div style={{ fontSize: '13px', color: '#6b7280', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                        <FaMapMarkerAlt size={11} /> {branch.tinhThanhName} — {branch.diaChiChiTiet}
+                                                        <FaMapMarkerAlt size={11} /> {branch.tinhThanhName} - {branch.diaChiChiTiet}
                                                     </div>
                                                 </div>
                                             </div>
@@ -165,42 +171,40 @@ export default function ClientChiTietDichVu() {
                         </div>
 
                         <div style={{ display: 'flex', gap: '16px', marginTop: 'auto' }}>
-                            <button 
-                                className="btn-primary" 
+                            <button
+                                className="btn-primary"
                                 style={{ flex: 1, padding: '18px', fontSize: '18px', fontWeight: 'bold', borderRadius: '12px', boxShadow: '0 4px 14px 0 rgba(239, 68, 68, 0.39)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', opacity: selectedBranchId ? 1 : 0.5, cursor: selectedBranchId ? 'pointer' : 'not-allowed' }}
                                 onClick={handleOpenBooking}
                             >
-                                <FaClock /> Đặt lịch dịch vụ
+                                <FaClock /> Dat lich dich vu
                             </button>
                             <button style={{ padding: '18px 24px', fontSize: '18px', fontWeight: 'bold', borderRadius: '12px', backgroundColor: '#fff', border: '2px solid #e5e7eb', color: '#111', cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '10px' }} onMouseOver={e => e.currentTarget.style.borderColor = '#111'} onMouseOut={e => e.currentTarget.style.borderColor = '#e5e7eb'}>
-                                <FaHeadset /> Liên hệ tư vấn
+                                <FaHeadset /> Lien he tu van
                             </button>
                         </div>
                     </div>
                 </div>
 
-                {/* Description */}
-                <div style={{marginTop: '40px', backgroundColor: '#fff', borderRadius: '16px', padding: '32px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)'}}>
-                    <h2 style={{fontSize: '24px', fontWeight: 800, borderBottom: '1px solid #e5e7eb', paddingBottom: '16px', marginBottom: '24px', color: '#111', display: 'flex', alignItems: 'center', gap: '10px'}}>
-                        <FaInfoCircle /> Mô Tả Chi Tiết
+                <div style={{ marginTop: '40px', backgroundColor: '#fff', borderRadius: '16px', padding: '32px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
+                    <h2 style={{ fontSize: '24px', fontWeight: 800, borderBottom: '1px solid #e5e7eb', paddingBottom: '16px', marginBottom: '24px', color: '#111', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <FaInfoCircle /> Mo Ta Chi Tiet
                     </h2>
-                    <div style={{lineHeight: 1.8, color: '#4b5563', backgroundColor: '#f9fafb', padding: '24px', borderRadius: '12px', fontSize: '16px'}}>
-                        {service.moTa ? service.moTa.split('\n').map((para, i) => <p key={i} style={{marginBottom: '10px'}}>{para}</p>) : 'Gói dịch vụ hiện chưa có mô tả cụ thể.'}
+                    <div style={{ lineHeight: 1.8, color: '#4b5563', backgroundColor: '#f9fafb', padding: '24px', borderRadius: '12px', fontSize: '16px' }}>
+                        {service.moTa ? service.moTa.split('\n').map((para, index) => <p key={index} style={{ marginBottom: '10px' }}>{para}</p>) : 'Goi dich vu hien chua co mo ta cu the.'}
                     </div>
                 </div>
 
-                {/* Reviews Section */}
-                <div style={{marginTop: '40px', backgroundColor: '#fff', borderRadius: '16px', padding: '32px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)'}}>
-                    <h2 style={{fontSize: '24px', fontWeight: 800, borderBottom: '1px solid #e5e7eb', paddingBottom: '16px', marginBottom: '24px', color: '#111'}}>Đánh Giá Khách Hàng ({reviews.length})</h2>
-                    
+                <div style={{ marginTop: '40px', backgroundColor: '#fff', borderRadius: '16px', padding: '32px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
+                    <h2 style={{ fontSize: '24px', fontWeight: 800, borderBottom: '1px solid #e5e7eb', paddingBottom: '16px', marginBottom: '24px', color: '#111' }}>Danh Gia Khach Hang ({reviews.length})</h2>
+
                     {reviews.length === 0 ? (
-                        <div style={{padding: '60px 20px', textAlign: 'center', background: '#f9fafb', borderRadius: '12px', color: '#6b7280'}}>
-                            Chưa có ai đánh giá dịch vụ này.
+                        <div style={{ padding: '60px 20px', textAlign: 'center', background: '#f9fafb', borderRadius: '12px', color: '#6b7280' }}>
+                            Chua co ai danh gia dich vu nay.
                         </div>
                     ) : (
-                        <div style={{display: 'flex', flexDirection: 'column', gap: '24px'}}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                             {reviews.map(review => (
-                                <div key={review.id} style={{padding: '24px', backgroundColor: '#f9fafb', borderRadius: '12px', display: 'flex', gap: '20px'}}>
+                                <div key={review.id} style={{ padding: '24px', backgroundColor: '#f9fafb', borderRadius: '12px', display: 'flex', gap: '20px' }}>
                                     <div style={{ flexShrink: 0 }}>
                                         <div style={{ width: '48px', height: '48px', backgroundColor: '#e5e7eb', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                             <FaUserCircle style={{ fontSize: '32px', color: '#9ca3af' }} />
@@ -209,17 +213,17 @@ export default function ClientChiTietDichVu() {
                                     <div style={{ flex: 1 }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                                             <div>
-                                                <div style={{ fontWeight: 700, color: '#111', fontSize: '16px' }}>{review.tenKhachHang || 'Khách Hàng'}</div>
+                                                <div style={{ fontWeight: 700, color: '#111', fontSize: '16px' }}>{review.tenKhachHang || 'Khach Hang'}</div>
                                                 <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '2px' }}>{new Date(review.ngayTao).toLocaleDateString('vi-VN')}</div>
                                             </div>
                                             <div style={{ display: 'flex', gap: '4px' }}>
-                                                {[...Array(5)].map((_, i) => (
-                                                    <FaStar key={i} color={i < review.diemDanhGia ? '#fbbf24' : '#e5e7eb'} size={16} />
+                                                {[...Array(5)].map((_, index) => (
+                                                    <FaStar key={index} color={index < review.diemDanhGia ? '#fbbf24' : '#e5e7eb'} size={16} />
                                                 ))}
                                             </div>
                                         </div>
                                         <p style={{ margin: 0, color: '#4b5563', lineHeight: 1.6, fontSize: '15px' }}>
-                                            {review.noiDung || 'Khách hàng không để lại bình luận.'}
+                                            {review.noiDung || 'Khach hang khong de lai binh luan.'}
                                         </p>
                                     </div>
                                 </div>
@@ -229,11 +233,10 @@ export default function ClientChiTietDichVu() {
                 </div>
             </div>
 
-            {/* Booking Modal */}
             {isBookingOpen && (
-                <BookingModal 
-                    isOpen={isBookingOpen} 
-                    onClose={() => setIsBookingOpen(false)} 
+                <BookingModal
+                    isOpen={isBookingOpen}
+                    onClose={() => setIsBookingOpen(false)}
                     product={service}
                     type="DICH_VU"
                     selectedBranch={{ khoHangId: selectedBranchId, tenKho: selectedBranchData?.tenKho }}
