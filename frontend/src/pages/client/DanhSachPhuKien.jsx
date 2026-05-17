@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  FaCar, 
-  FaShoppingCart, 
-  FaUser, 
-  FaSearch, 
-  FaFilter, 
+import {
+  FaCar,
+  FaShoppingCart,
+  FaUser,
+  FaSearch,
+  FaFilter,
   FaTools,
   FaArrowRight,
   FaFacebookF,
@@ -18,7 +18,7 @@ import { productService } from '../../services/productService';
 import Navbar from '../../components/layout/Navbar';
 import { fallbackImages, getSafeImage } from '../../utils/imageFallback';
 import '../../assets/css/Home.css';
-import '../../assets/css/DanhSachOto.css'; // Reusing layout styles
+import '../../assets/css/DanhSachOto.css';
 
 export default function DanhSachPhuKien() {
   const [accessories, setAccessories] = useState([]);
@@ -38,11 +38,11 @@ export default function DanhSachPhuKien() {
   const fetchAccessories = async () => {
     try {
       setLoading(true);
-      const res = await productService.getAccessories({ 
-        page: params.page, 
-        size: params.size, 
+      const res = await productService.getAccessories({
+        page: params.page,
+        size: params.size,
         keyword: params.keyword,
-        sort: 'ngayTao,desc' 
+        sort: 'ngayTao,desc'
       });
 
       const data = res?.data?.content || res?.content || [];
@@ -68,27 +68,25 @@ export default function DanhSachPhuKien() {
       <Navbar />
 
       <div className="products-page-layout">
-        {/* Sidebar Filters */}
         <aside className="filters-sidebar">
           <div className="filter-group">
             <h3><FaFilter /> Bộ lọc</h3>
             <div className="filter-item">
               <label>Loại phụ kiện</label>
-              <select 
-                value={params.loai} 
-                onChange={(e) => setParams({...params, loai: e.target.value, page: 0})}
+              <select
+                value={params.loai}
+                onChange={(e) => setParams({ ...params, loai: e.target.value, page: 0 })}
               >
                 <option value="">Tất cả</option>
                 <option value="NoiThat">Nội thất</option>
                 <option value="NgoaiThat">Ngoại thất</option>
                 <option value="DienTu">Điện tử</option>
-                <option value="LopXe">Lốp & Mâm</option>
+                <option value="LopXe">Lốp và mâm</option>
               </select>
             </div>
           </div>
         </aside>
 
-        {/* Main Content */}
         <main className="products-content">
           <div className="content-header">
             <h1>Danh sách phụ kiện</h1>
@@ -97,15 +95,15 @@ export default function DanhSachPhuKien() {
 
           {loading ? (
             <div className="loading-grid">
-              {[1,2,3,4,5,6].map(i => <div key={i} className="skeleton-card"></div>)}
+              {[1, 2, 3, 4, 5, 6].map((i) => <div key={i} className="skeleton-card"></div>)}
             </div>
           ) : (
             <>
               <div className="cars-grid">
-                {accessories.map(item => (
+                {accessories.map((item) => (
                   <div key={item.id} className="car-card">
                     <div className="car-image-container">
-                      <span className="car-tag">{item.loaiPhuKien || 'Accessory'}</span>
+                      <span className="car-tag">{item.loaiPhuKien || 'Phụ kiện'}</span>
                       <img
                         src={item.displayImage || fallbackImages.accessory}
                         alt={item.tenPhuKien}
@@ -129,14 +127,13 @@ export default function DanhSachPhuKien() {
                 ))}
               </div>
 
-              {/* Pagination */}
               {totalPages > 1 && (
                 <div className="pagination">
                   {[...Array(totalPages)].map((_, i) => (
-                    <button 
-                      key={i} 
+                    <button
+                      key={i}
                       className={`page-btn ${params.page === i ? 'active' : ''}`}
-                      onClick={() => setParams({...params, page: i})}
+                      onClick={() => setParams({ ...params, page: i })}
                     >
                       {i + 1}
                     </button>
@@ -157,9 +154,9 @@ export default function DanhSachPhuKien() {
             </div>
             <p>Hệ thống phân phối và cung cấp dịch vụ xe hơi cao cấp hàng đầu Việt Nam.</p>
             <div className="social-icons">
-              <span><FaFacebookF /></span> 
-              <span><FaTwitter /></span> 
-              <span><FaInstagram /></span> 
+              <span><FaFacebookF /></span>
+              <span><FaTwitter /></span>
+              <span><FaInstagram /></span>
               <span><FaYoutube /></span>
             </div>
           </div>

@@ -18,7 +18,7 @@ import {
 import { productService } from '../../services/productService';
 import Navbar from '../../components/layout/Navbar';
 import { fallbackImages, getSafeImage } from '../../utils/imageFallback';
-import '../../assets/css/Home.css'; // Reusing some base styles
+import '../../assets/css/Home.css';
 import '../../assets/css/DanhSachOto.css';
 
 export default function DanhSachOto() {
@@ -36,7 +36,7 @@ export default function DanhSachOto() {
 
     useEffect(() => {
         fetchCars();
-    }, [params.page, params.hangXe]); // Refresh when page or brand changes
+    }, [params.page, params.hangXe]);
 
     const fetchCars = async () => {
         try {
@@ -50,8 +50,8 @@ export default function DanhSachOto() {
                 res = await productService.getCars({ page: params.page, size: params.size, sort: 'ngayTao,desc' });
             }
 
-            const cars = res?.data?.content || res?.content || [];
-            const carsWithImages = await Promise.all(cars.map(async (car) => {
+            const carsData = res?.data?.content || res?.content || [];
+            const carsWithImages = await Promise.all(carsData.map(async (car) => {
                 try {
                     const imgRes = await productService.getCarImages(car.id);
                     const images = imgRes?.data || imgRes || [];
@@ -59,7 +59,7 @@ export default function DanhSachOto() {
                         ...car,
                         displayImage: getSafeImage(images.length > 0 ? images[0].url : '', 'car')
                     };
-                } catch (e) {
+                } catch (error) {
                     return { ...car, displayImage: fallbackImages.car };
                 }
             }));
@@ -83,7 +83,6 @@ export default function DanhSachOto() {
             <Navbar />
 
             <div className="products-page-layout">
-                {/* Sidebar Filters */}
                 <aside className="filters-sidebar">
                     <div className="filter-group">
                         <h3><FaFilter /> Bộ lọc</h3>
@@ -113,7 +112,6 @@ export default function DanhSachOto() {
                     </div>
                 </aside>
 
-                {/* Main Content */}
                 <main className="products-content">
                     <div className="content-header">
                         <h1>Danh sách xe hơi</h1>
@@ -122,15 +120,15 @@ export default function DanhSachOto() {
 
                     {loading ? (
                         <div className="loading-grid">
-                            {[1, 2, 3, 4, 5, 6].map(i => <div key={i} className="skeleton-card"></div>)}
+                            {[1, 2, 3, 4, 5, 6].map((i) => <div key={i} className="skeleton-card"></div>)}
                         </div>
                     ) : (
                         <>
                             <div className="cars-grid">
-                                {cars.map(car => (
+                                {cars.map((car) => (
                                     <div key={car.id} className="car-card">
                                         <div className="car-image-container">
-                                            <span className="car-tag">{car.dongXe || 'New'}</span>
+                                            <span className="car-tag">{car.dongXe || 'Mới'}</span>
                                             {car.displayImage ? (
                                                 <img
                                                     src={car.displayImage}
@@ -157,7 +155,6 @@ export default function DanhSachOto() {
                                 ))}
                             </div>
 
-                            {/* Pagination */}
                             {totalPages > 1 && (
                                 <div className="pagination">
                                     {[...Array(totalPages)].map((_, i) => (
@@ -176,7 +173,6 @@ export default function DanhSachOto() {
                 </main>
             </div>
 
-            {/* Footer (Reusing Footer from Home would be better as a component, but I'll add it here for now) */}
             <footer className="footer">
                 <div className="footer-top">
                     <div className="footer-brand">
