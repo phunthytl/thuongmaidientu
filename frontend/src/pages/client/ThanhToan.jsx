@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaMoneyBillWave, FaArrowLeft, FaTruck, FaMapMarkerAlt, FaCheckCircle } from 'react-icons/fa';
+import { FaMoneyBillWave, FaArrowLeft, FaTruck, FaMapMarkerAlt } from 'react-icons/fa';
 import Navbar from '../../components/layout/Navbar';
 import { useAuthStore } from '../../stores/authStore';
 import { useCartStore } from '../../stores/cartStore';
@@ -41,6 +41,7 @@ export default function ThanhToan() {
         }
         fetchProvinces();
         fetchUserAddresses();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [items, navigate]);
 
     const fetchUserAddresses = async () => {
@@ -72,6 +73,7 @@ export default function ThanhToan() {
             setSelectedWard('');
             setShippingFee(0);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedProvince]);
 
     useEffect(() => {
@@ -80,12 +82,14 @@ export default function ThanhToan() {
             setSelectedWard('');
             setShippingFee(0);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedDistrict]);
 
     useEffect(() => {
         if (selectedDistrict && selectedWard && isAddingNew) {
             calculateShippingFee(selectedDistrict, selectedWard);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedDistrict, selectedWard, isAddingNew]);
 
     const fetchProvinces = async () => {

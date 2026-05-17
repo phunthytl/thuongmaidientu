@@ -33,6 +33,7 @@ export default function KhieuNaiCuaToi() {
         if (khachHangId) {
             fetchData();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [khachHangId]);
 
     useEffect(() => {
@@ -40,6 +41,7 @@ export default function KhieuNaiCuaToi() {
             setForm(prev => ({ ...prev, donHangId: presetDonHangId }));
             setFormOpen(true);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [presetDonHangId]);
 
     const fetchData = async () => {

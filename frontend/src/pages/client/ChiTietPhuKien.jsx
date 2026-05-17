@@ -4,8 +4,6 @@ import {
   FaShoppingCart,
   FaShieldAlt,
   FaTruck,
-  FaTools,
-  FaCheckCircle,
   FaWarehouse,
   FaMapMarkerAlt,
   FaStar,
@@ -34,6 +32,7 @@ export default function ChiTietPhuKien() {
 
   useEffect(() => {
     fetchDetail();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const fetchDetail = async () => {
