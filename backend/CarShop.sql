@@ -328,7 +328,7 @@ CREATE TABLE `media` (
   `dinh_dang` varchar(20) DEFAULT NULL,
   `doi_tuong_id` bigint NOT NULL,
   `dung_luong` bigint DEFAULT NULL,
-  `loai_doi_tuong` enum('DICH_VU','OTO','PHU_KIEN') NOT NULL,
+  `loai_doi_tuong` enum('DICH_VU','OTO','PHU_KIEN','KHIEU_NAI') NOT NULL,
   `loai_media` enum('IMAGE','VIDEO') NOT NULL,
   `mo_ta` varchar(255) DEFAULT NULL,
   `public_id` varchar(300) NOT NULL,

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '../../services/api';
 import { inventoryService } from '../../services/inventoryService';
-import { FaWarehouse, FaCogs, FaSave, FaSearch, FaHistory } from 'react-icons/fa';
+import { FaWarehouse, FaCogs, FaSave, FaSearch } from 'react-icons/fa';
 
 export default function TonKhoPhuKien() {
     const [accessories, setAccessories] = useState([]);

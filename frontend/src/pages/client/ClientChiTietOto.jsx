@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { FaGasPump, FaCogs, FaStar, FaUserCircle, FaCalendarAlt, FaCar, FaInfoCircle, FaComments, FaWarehouse, FaCheckCircle, FaMapMarkerAlt, FaHeadset } from 'react-icons/fa';
+import { FaGasPump, FaCogs, FaStar, FaUserCircle, FaCalendarAlt, FaCar, FaInfoCircle, FaComments, FaWarehouse, FaMapMarkerAlt, FaHeadset } from 'react-icons/fa';
 import Navbar from '../../components/layout/Navbar';
 import { productService } from '../../services/productService';
-import { inventoryService } from '../../services/inventoryService';
 import { api } from '../../services/api';
 import BookingModal from '../../components/client/BookingModal';
 import { fallbackImages, getSafeImage } from '../../utils/imageFallback';
@@ -23,7 +22,7 @@ export default function ClientChiTietOto() {
 
     useEffect(() => {
         fetchCarData();
-    }, [id]);
+    }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const fetchCarData = async () => {
         try {

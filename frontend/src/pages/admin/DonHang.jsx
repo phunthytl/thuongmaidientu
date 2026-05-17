@@ -43,11 +43,6 @@ export default function DonHang() {
         return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
     };
 
-    const statusFormat = (stt) => {
-        const raw = stt || 'UNKNOWN';
-        return raw.replace(/_/g, ' ');
-    };
-
     const formatDate = (dateString) => {
         if (!dateString) return '---';
         const date = new Date(dateString);

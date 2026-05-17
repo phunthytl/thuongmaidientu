@@ -113,6 +113,7 @@ export default function DangNhap() {
                         </form>
 
                         <div className="login-footer">
+                            {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
                             <p>Bạn gặp sự cố? <a href="#">Liên hệ IT Support</a></p>
                         </div>
                     </div>
