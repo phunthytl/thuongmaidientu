@@ -112,7 +112,7 @@ public class DonHangService {
 
         boolean isPhuKienOrder = items.stream().anyMatch(i -> i.getLoaiSanPham() == LoaiSanPham.PHU_KIEN);
         if (isPhuKienOrder && diaChi != null) {
-            int totalWeight = donHang.getChiTietDonHangs().stream()
+            int totalWeight = chiTietList.stream()
                     .filter(ct -> ct.getLoaiSanPham() == LoaiSanPham.PHU_KIEN && ct.getPhuKien() != null)
                     .mapToInt(ct -> ct.getSoLuong()
                             * (ct.getPhuKien().getTrongLuong() != null ? ct.getPhuKien().getTrongLuong() : 500))
