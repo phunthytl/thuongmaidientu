@@ -5,11 +5,26 @@ import com.sale_oto.carshop.dto.request.DonHangRequest;
 import com.sale_oto.carshop.dto.response.ChiTietDonHangResponse;
 import com.sale_oto.carshop.dto.response.DiaChiResponse;
 import com.sale_oto.carshop.dto.response.DonHangResponse;
-import com.sale_oto.carshop.entity.*;
+import com.sale_oto.carshop.entity.ChiTietDonHang;
+import com.sale_oto.carshop.entity.DiaChiKhachHang;
+import com.sale_oto.carshop.entity.DichVu;
+import com.sale_oto.carshop.entity.DonHang;
+import com.sale_oto.carshop.entity.KhachHang;
+import com.sale_oto.carshop.entity.KhoHang;
+import com.sale_oto.carshop.entity.NhanVien;
+import com.sale_oto.carshop.entity.PhuKien;
 import com.sale_oto.carshop.enums.LoaiSanPham;
 import com.sale_oto.carshop.enums.TrangThaiDonHang;
+import com.sale_oto.carshop.exception.BadRequestException;
 import com.sale_oto.carshop.exception.ResourceNotFoundException;
-import com.sale_oto.carshop.repository.*;
+import com.sale_oto.carshop.repository.DanhGiaRepository;
+import com.sale_oto.carshop.repository.DiaChiKhachHangRepository;
+import com.sale_oto.carshop.repository.DichVuRepository;
+import com.sale_oto.carshop.repository.DonHangRepository;
+import com.sale_oto.carshop.repository.KhachHangRepository;
+import com.sale_oto.carshop.repository.KhoHangRepository;
+import com.sale_oto.carshop.repository.NhanVienRepository;
+import com.sale_oto.carshop.repository.PhuKienRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,7 +44,6 @@ public class DonHangService {
     private final DonHangRepository donHangRepository;
     private final KhachHangRepository khachHangRepository;
     private final NhanVienRepository nhanVienRepository;
-    private final OToRepository oToRepository;
     private final PhuKienRepository phuKienRepository;
     private final DichVuRepository dichVuRepository;
     private final DiaChiKhachHangRepository diaChiKhachHangRepository;
@@ -40,40 +54,32 @@ public class DonHangService {
     @Transactional
     public List<DonHangResponse> create(DonHangRequest request) {
         KhachHang khachHang = khachHangRepository.findById(request.getKhachHangId())
-                .orElseThrow(() -> new ResourceNotFoundException("Khách hàng", request.getKhachHangId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Khach hang", request.getKhachHangId()));
 
         DiaChiKhachHang diaChi = null;
         if (request.getDiaChiGiaoHangId() != null) {
             diaChi = diaChiKhachHangRepository.findById(request.getDiaChiGiaoHangId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Địa chỉ", request.getDiaChiGiaoHangId()));
+                    .orElseThrow(() -> new ResourceNotFoundException("Dia chi", request.getDiaChiGiaoHangId()));
         }
 
-        List<DonHangResponse> responses = new ArrayList<>();
-        List<ChiTietDonHangRequest> phuKienDichVuList = new ArrayList<>();
+        for (ChiTietDonHangRequest ct : request.getChiTietDonHangs()) {
+            if (ct.getLoaiSanPham() == LoaiSanPham.OTO) {
+                throw new BadRequestException(
+                        "O to hien tai chi ho tro dat lich lai thu, khong the tao don hang.");
+            }
+        }
 
         KhoHang khoHangChung = null;
         if (request.getKhoHangId() != null) {
             khoHangChung = khoHangRepository.findById(request.getKhoHangId()).orElse(null);
         }
 
-        for (ChiTietDonHangRequest ct : request.getChiTietDonHangs()) {
-            if (ct.getLoaiSanPham() == LoaiSanPham.OTO) {
-                // Mỗi xe ô tô tách riêng thành 1 đơn hàng độc lập
-                KhoHang khoXe = khoHangChung;
-                if (ct.getKhoHangId() != null) {
-                    khoXe = khoHangRepository.findById(ct.getKhoHangId()).orElse(khoHangChung);
-                }
-                DonHang dhOto = createSingleOrder(khachHang, diaChi, khoXe, List.of(ct), request.getGhiChu());
-                responses.add(toResponse(dhOto));
-            } else {
-                // Phụ kiện và dịch vụ gom chung
-                phuKienDichVuList.add(ct);
-            }
-        }
+        List<ChiTietDonHangRequest> items = new ArrayList<>(request.getChiTietDonHangs());
+        List<DonHangResponse> responses = new ArrayList<>();
 
-        if (!phuKienDichVuList.isEmpty()) {
-            DonHang dhGop = createSingleOrder(khachHang, diaChi, khoHangChung, phuKienDichVuList, request.getGhiChu());
-            responses.add(toResponse(dhGop));
+        if (!items.isEmpty()) {
+            DonHang donHang = createSingleOrder(khachHang, diaChi, khoHangChung, items, request.getGhiChu());
+            responses.add(toResponse(donHang));
         }
 
         return responses;
@@ -117,8 +123,9 @@ public class DonHangService {
                     .mapToInt(ct -> ct.getSoLuong()
                             * (ct.getPhuKien().getTrongLuong() != null ? ct.getPhuKien().getTrongLuong() : 500))
                     .sum();
-            if (totalWeight <= 0)
-                totalWeight = 500; // Tránh lỗi cân nặng = 0
+            if (totalWeight <= 0) {
+                totalWeight = 500;
+            }
 
             BigDecimal phiVanChuyen = ghnService.calculateFee(
                     null, null, totalWeight, 10, 10, 10);
@@ -129,13 +136,10 @@ public class DonHangService {
         donHang.setChiTietDonHangs(chiTietList);
         DonHang saved = donHangRepository.save(donHang);
 
-        // Trừ tồn kho cho xe ô tô và phụ kiện
         for (ChiTietDonHang ct : chiTietList) {
             Long targetKho = ct.getKhoHangId() != null ? ct.getKhoHangId() : (khoHang != null ? khoHang.getId() : null);
-            if (targetKho != null) {
-                if (ct.getLoaiSanPham() == LoaiSanPham.PHU_KIEN && ct.getPhuKien() != null) {
-                    tonKhoService.decreaseStock(ct.getPhuKien().getId(), targetKho, ct.getSoLuong());
-                }
+            if (targetKho != null && ct.getLoaiSanPham() == LoaiSanPham.PHU_KIEN && ct.getPhuKien() != null) {
+                tonKhoService.decreaseStock(ct.getPhuKien().getId(), targetKho, ct.getSoLuong());
             }
         }
 
@@ -145,14 +149,14 @@ public class DonHangService {
     @Transactional(readOnly = true)
     public DonHangResponse getById(Long id) {
         DonHang donHang = donHangRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Đơn hàng", id));
+                .orElseThrow(() -> new ResourceNotFoundException("Don hang", id));
         return toResponse(donHang);
     }
 
     @Transactional(readOnly = true)
     public DonHangResponse getByMaDonHang(String maDonHang) {
         DonHang donHang = donHangRepository.findByMaDonHang(maDonHang)
-                .orElseThrow(() -> new ResourceNotFoundException("Đơn hàng không tìm thấy: " + maDonHang));
+                .orElseThrow(() -> new ResourceNotFoundException("Don hang khong tim thay: " + maDonHang));
         return toResponse(donHang);
     }
 
@@ -179,7 +183,7 @@ public class DonHangService {
     @Transactional
     public DonHangResponse capNhatTrangThai(Long id, TrangThaiDonHang trangThai) {
         DonHang donHang = donHangRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Đơn hàng", id));
+                .orElseThrow(() -> new ResourceNotFoundException("Don hang", id));
 
         if (trangThai == TrangThaiDonHang.DA_XAC_NHAN && donHang.getMaDonHangGhn() == null) {
             boolean hasPhuKien = donHang.getChiTietDonHangs().stream()
@@ -194,15 +198,12 @@ public class DonHangService {
             ghnService.cancelOrder(donHang.getMaDonHangGhn());
         }
 
-        // Hoàn kho khi hủy đơn
         if (trangThai == TrangThaiDonHang.DA_HUY) {
             for (ChiTietDonHang ct : donHang.getChiTietDonHangs()) {
                 Long targetKho = ct.getKhoHangId() != null ? ct.getKhoHangId()
                         : (donHang.getKhoXuatHang() != null ? donHang.getKhoXuatHang().getId() : null);
-                if (targetKho != null) {
-                    if (ct.getLoaiSanPham() == LoaiSanPham.PHU_KIEN && ct.getPhuKien() != null) {
-                        tonKhoService.increaseStock(ct.getPhuKien().getId(), targetKho, ct.getSoLuong());
-                    }
+                if (targetKho != null && ct.getLoaiSanPham() == LoaiSanPham.PHU_KIEN && ct.getPhuKien() != null) {
+                    tonKhoService.increaseStock(ct.getPhuKien().getId(), targetKho, ct.getSoLuong());
                 }
             }
         }
@@ -215,9 +216,9 @@ public class DonHangService {
     @Transactional
     public DonHangResponse ganNhanVien(Long donHangId, Long nhanVienId) {
         DonHang donHang = donHangRepository.findById(donHangId)
-                .orElseThrow(() -> new ResourceNotFoundException("Đơn hàng", donHangId));
+                .orElseThrow(() -> new ResourceNotFoundException("Don hang", donHangId));
         NhanVien nhanVien = nhanVienRepository.findById(nhanVienId)
-                .orElseThrow(() -> new ResourceNotFoundException("Nhân viên", nhanVienId));
+                .orElseThrow(() -> new ResourceNotFoundException("Nhan vien", nhanVienId));
         donHang.setNhanVienXuLy(nhanVien);
         donHang = donHangRepository.save(donHang);
         return toResponse(donHang);
@@ -225,21 +226,17 @@ public class DonHangService {
 
     private BigDecimal resolveProductAndPrice(ChiTietDonHang chiTiet, ChiTietDonHangRequest request) {
         return switch (request.getLoaiSanPham()) {
-            case OTO -> {
-                OTo oto = oToRepository.findById(request.getOtoId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Ô tô", request.getOtoId()));
-                chiTiet.setOto(oto);
-                yield oto.getGia();
-            }
+            case OTO -> throw new BadRequestException(
+                    "O to hien tai chi ho tro dat lich lai thu, khong the tao don hang.");
             case PHU_KIEN -> {
                 PhuKien pk = phuKienRepository.findById(request.getPhuKienId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Phụ kiện", request.getPhuKienId()));
+                        .orElseThrow(() -> new ResourceNotFoundException("Phu kien", request.getPhuKienId()));
                 chiTiet.setPhuKien(pk);
                 yield pk.getGia();
             }
             case DICH_VU -> {
                 DichVu dv = dichVuRepository.findById(request.getDichVuId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Dịch vụ", request.getDichVuId()));
+                        .orElseThrow(() -> new ResourceNotFoundException("Dich vu", request.getDichVuId()));
                 chiTiet.setDichVu(dv);
                 yield dv.getGia();
             }
