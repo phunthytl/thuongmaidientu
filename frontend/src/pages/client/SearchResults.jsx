@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { FaSearch, FaCar, FaTools, FaCogs, FaArrowRight } from 'react-icons/fa';
 import Navbar from '../../components/layout/Navbar';
+import Footer from '../../components/layout/Footer';
 import { api } from '../../services/api';
 import { fallbackImages } from '../../utils/imageFallback';
 import '../../assets/css/Home.css';
@@ -191,11 +192,7 @@ export default function SearchResults() {
         </main>
       </div>
 
-      <footer className="footer" style={{ marginTop: 'auto' }}>
-        <div className="footer-bottom">
-          <p>© 2024 CarSales. Bảo lưu mọi quyền.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

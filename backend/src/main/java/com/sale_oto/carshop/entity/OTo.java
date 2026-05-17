@@ -50,6 +50,8 @@ public class OTo extends BaseEntity {
     @Column(name = "gia", nullable = false, precision = 15, scale = 2)
     private BigDecimal gia;
 
+    @Column(name = "so_luong")
+    private Integer soLuong;
 
     @Column(name = "mo_ta", columnDefinition = "TEXT")
     private String moTa;

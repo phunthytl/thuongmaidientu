@@ -37,6 +37,7 @@ import ClientChiTietDichVu from './pages/client/ClientChiTietDichVu';
 import ThanhToan from './pages/client/ThanhToan';
 import Profile from './pages/client/Profile';
 import SearchResults from './pages/client/SearchResults';
+import HoTro from './pages/client/HoTro';
 import ProtectedRoute from './components/routes/ProtectedRoute';
 
 function App() {
@@ -59,6 +60,7 @@ function App() {
                 <Route path="/products/accessory/:id" element={<ClientChiTietPhuKien />} />
                 <Route path="/services" element={<DanhSachDichVu />} />
                 <Route path="/services/:id" element={<ClientChiTietDichVu />} />
+                <Route path="/support" element={<HoTro />} />
                 <Route path="/cart" element={<GioHang />} />
                 <Route path="/checkout" element={
                     <ProtectedRoute allowedRoles={['KHACH_HANG', 'ADMIN', 'NHAN_VIEN']}>

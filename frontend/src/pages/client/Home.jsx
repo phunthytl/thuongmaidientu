@@ -19,6 +19,7 @@ import {
 } from 'react-icons/fa';
 import { productService } from '../../services/productService';
 import Navbar from '../../components/layout/Navbar';
+import Footer from '../../components/layout/Footer';
 import { fallbackImages, getSafeImage } from '../../utils/imageFallback';
 import '../../assets/css/Home.css';
 
@@ -81,7 +82,7 @@ export default function Home() {
                     <p className="hero-description">Những mẫu xe từ thương hiệu hàng đầu thế giới. Cam kết chất lượng và dịch vụ tận tâm.</p>
                     <div className="hero-btns">
                         <Link to="/products" className="btn-primary">Xem danh sách xe <FaArrowRight /></Link>
-                        <Link to="/services" className="btn-secondary">Đặt lịch lái thử</Link>
+                        <Link to="/products" className="btn-secondary">Đặt lịch lái thử</Link>
                     </div>
                 </div>
             </section>
@@ -175,55 +176,7 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* Footer */}
-            <footer className="footer">
-                <div className="footer-top">
-                    <div className="footer-brand">
-                        <div className="nav-logo">
-                            <FaCar className="logo-icon" />
-                            <span className="logo-text">CarSales</span>
-                        </div>
-                        <p>Hệ thống phân phối và cung cấp dịch vụ xe hơi cao cấp hàng đầu Việt Nam. Mang lại trải nghiệm lái xe đẳng cấp cho khách hàng.</p>
-                        <div className="social-icons">
-                            <span><FaFacebookF /></span>
-                            <span><FaTwitter /></span>
-                            <span><FaInstagram /></span>
-                            <span><FaYoutube /></span>
-                        </div>
-                    </div>
-                    <div className="footer-links">
-                        <h4>CÔNG TY</h4>
-                        <ul>
-                            <li>Về chúng tôi</li>
-                            <li>Tuyển dụng</li>
-                            <li>Tin tức</li>
-                        </ul>
-                    </div>
-                    <div className="footer-links">
-                        <h4>SẢN PHẨM</h4>
-                        <ul>
-                            <li>Xe mới</li>
-                            <li>Xe cũ</li>
-                            <li>Phụ kiện</li>
-                        </ul>
-                    </div>
-                    <div className="footer-links">
-                        <h4>DỊCH VỤ</h4>
-                        <ul>
-                            <li>Bảo hành</li>
-                            <li>Sửa chữa</li>
-                            <li>Cứu hộ 24/7</li>
-                        </ul>
-                    </div>
-                </div>
-                <div className="footer-bottom">
-                    <p>© 2024 CarSales. Bảo lưu mọi quyền.</p>
-                    <div className="bottom-links">
-                        <span>Chính sách bảo mật</span>
-                        <span>Điều khoản sử dụng</span>
-                    </div>
-                </div>
-            </footer>
+            <Footer />
         </div>
     );
 }

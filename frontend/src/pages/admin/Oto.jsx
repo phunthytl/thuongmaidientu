@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { api } from '../../services/api';
 import { useNavigate } from 'react-router-dom';
 import '../../assets/css/DanhSach.css';
@@ -7,11 +7,28 @@ export default function Oto() {
     const navigate = useNavigate();
     const [inventory, setInventory] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [selectedHangXe, setSelectedHangXe] = useState('');
+
+    const hangXeList = useMemo(() => {
+        const set = new Set(
+            inventory
+                .map(item => (item.hangXe || '').trim())
+                .filter(Boolean)
+        );
+        return Array.from(set).sort((a, b) => a.localeCompare(b, 'vi'));
+    }, [inventory]);
+
+    const filteredInventory = useMemo(() => {
+        if (!selectedHangXe) return inventory;
+        return inventory.filter(
+            item => (item.hangXe || '').trim().toLowerCase() === selectedHangXe.toLowerCase()
+        );
+    }, [inventory, selectedHangXe]);
 
     useEffect(() => {
         const fetchInventory = async () => {
             try {
-                const res = await api.get('/oto?size=10'); // Limit size for page
+                const res = await api.get('/oto?size=1000');
                 if (res.data?.data?.content) {
                     setInventory(res.data.data.content);
                 }
@@ -58,6 +75,25 @@ export default function Oto() {
                 </div>
             </header>
 
+            <div className="filter-bar">
+                <label className="filter-label">Lọc theo hãng xe:</label>
+                <select
+                    className="filter-select"
+                    value={selectedHangXe}
+                    onChange={(e) => setSelectedHangXe(e.target.value)}
+                >
+                    <option value="">Tất cả hãng</option>
+                    {hangXeList.map(hang => (
+                        <option key={hang} value={hang}>{hang}</option>
+                    ))}
+                </select>
+                {selectedHangXe && (
+                    <span className="filter-count">
+                        Đang hiển thị {filteredInventory.length} / {inventory.length} xe
+                    </span>
+                )}
+            </div>
+
             <div className="products-table-wrapper">
                 <div className="table-header">
                     <div className="col-id">Mã Xe</div>
@@ -70,10 +106,14 @@ export default function Oto() {
                 <div className="table-body">
                     {loading ? (
                         <div className="table-loading">Đang kết nối kho dữ liệu...</div>
-                    ) : inventory.length === 0 ? (
-                        <div className="table-empty">Kho xe hiện đang trống.</div>
+                    ) : filteredInventory.length === 0 ? (
+                        <div className="table-empty">
+                            {inventory.length === 0
+                                ? 'Kho xe hiện đang trống.'
+                                : `Không có xe nào thuộc hãng "${selectedHangXe}".`}
+                        </div>
                     ) : (
-                        inventory.map((item) => (
+                        filteredInventory.map((item) => (
                             <div key={item.id} className="table-row">
                                 <div className="col-id">OTO-{item.id || 'N/A'}</div>
                                 <div className="col-name">

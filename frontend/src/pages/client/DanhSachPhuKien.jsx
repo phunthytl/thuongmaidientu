@@ -16,6 +16,7 @@ import {
 } from 'react-icons/fa';
 import { productService } from '../../services/productService';
 import Navbar from '../../components/layout/Navbar';
+import Footer from '../../components/layout/Footer';
 import { fallbackImages, getSafeImage } from '../../utils/imageFallback';
 import '../../assets/css/Home.css';
 import '../../assets/css/DanhSachOto.css'; 
@@ -223,26 +224,7 @@ export default function DanhSachPhuKien() {
         </main>
       </div>
 
-      <footer className="footer">
-        <div className="footer-top">
-          <div className="footer-brand">
-            <div className="nav-logo">
-              <FaCar className="logo-icon" />
-              <span className="logo-text">CarSales</span>
-            </div>
-            <p>Hệ thống phân phối và cung cấp dịch vụ xe hơi cao cấp hàng đầu Việt Nam.</p>
-            <div className="social-icons">
-              <span><FaFacebookF /></span> 
-              <span><FaTwitter /></span> 
-              <span><FaInstagram /></span> 
-              <span><FaYoutube /></span>
-            </div>
-          </div>
-        </div>
-        <div className="footer-bottom">
-          <p>© 2024 CarSales. Bảo lưu mọi quyền.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
