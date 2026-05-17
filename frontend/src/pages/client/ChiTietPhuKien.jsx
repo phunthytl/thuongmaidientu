@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import {
   FaShoppingCart,
   FaShieldAlt,
@@ -16,14 +16,12 @@ import Navbar from '../../components/layout/Navbar';
 import { productService } from '../../services/productService';
 import { inventoryService } from '../../services/inventoryService';
 import { api } from '../../services/api';
-import { useAuthStore } from '../../stores/authStore';
 import { useCartStore } from '../../stores/cartStore';
 import { fallbackImages, getSafeImage } from '../../utils/imageFallback';
 import '../../assets/css/ChiTietSanPham.css';
 
 export default function ChiTietPhuKien() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const [accessory, setAccessory] = useState(null);
   const [warehouses, setWarehouses] = useState([]);
   const [selectedKho, setSelectedKho] = useState(null);
@@ -32,7 +30,6 @@ export default function ChiTietPhuKien() {
   const [quantity, setQuantity] = useState(1);
   const [addingToCart, setAddingToCart] = useState(false);
   const [mainImage, setMainImage] = useState(fallbackImages.accessory);
-  const { isAuthenticated } = useAuthStore();
   const { addToCart } = useCartStore();
 
   useEffect(() => {
@@ -70,12 +67,6 @@ export default function ChiTietPhuKien() {
   };
 
   const handleAddToCart = async () => {
-    if (!isAuthenticated) {
-      alert('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng!');
-      navigate('/login');
-      return;
-    }
-
     if (!selectedKho || addingToCart) {
       return;
     }
