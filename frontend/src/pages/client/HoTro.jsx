@@ -5,6 +5,7 @@ import {
     FaClipboardList,
     FaCreditCard,
     FaEnvelope,
+    FaExclamationCircle,
     FaMapMarkerAlt,
     FaPhoneAlt,
     FaTools,
@@ -35,6 +36,13 @@ export default function HoTro() {
             text: 'Đặt lịch bảo dưỡng, sửa chữa và các dịch vụ chăm sóc xe.',
             link: '/services',
             action: 'Xem dịch vụ'
+        },
+        {
+            icon: <FaExclamationCircle />,
+            title: 'Gửi khiếu nại',
+            text: 'Phản ánh về đơn hàng, chất lượng sản phẩm hoặc dịch vụ. Đính kèm ảnh nếu cần.',
+            link: '/my-disputes',
+            action: 'Gửi khiếu nại'
         }
     ];
 

@@ -19,8 +19,6 @@ public class PhuKienRequest {
     @NotNull(message = "Giá không được để trống")
     private BigDecimal gia;
 
-    private Integer soLuong;
-
     private Integer trongLuong;
 
     private String moTa;

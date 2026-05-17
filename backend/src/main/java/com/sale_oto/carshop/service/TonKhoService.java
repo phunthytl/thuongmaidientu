@@ -41,6 +41,7 @@ public class TonKhoService {
 
         return activeKhos.stream().map(kho -> {
             TonKho tk = tonKhoMap.get(kho.getId());
+            Integer soLuong = tk != null ? tk.getSoLuong() : null;
             return TonKhoResponse.builder()
                     .id(tk != null ? tk.getId() : null)
                     .khoHangId(kho.getId())
@@ -49,7 +50,7 @@ public class TonKhoService {
                     .tinhThanhTen(kho.getTinhThanhTen())
                     .khoTrangThai(kho.getTrangThai())
                     .phuKienId(phuKienId)
-                    .soLuong(tk != null ? tk.getSoLuong() : 0)
+                    .soLuong(soLuong != null ? soLuong : 0)
                     .build();
         }).toList();
     }
@@ -81,11 +82,13 @@ public class TonKhoService {
         TonKho tonKho = tonKhoRepository.findByPhuKienIdAndKhoHangId(phuKienId, khoHangId)
                 .orElseThrow(() -> new ResourceNotFoundException("Tồn kho phụ kiện", phuKienId));
 
-        if (tonKho.getSoLuong() < quantity) {
+        Integer soLuongTonKho = tonKho.getSoLuong();
+        int currentStock = soLuongTonKho != null ? soLuongTonKho : 0;
+        if (currentStock < quantity) {
             throw new RuntimeException("Kho '" + tonKho.getKhoHang().getTenKho() + "' không đủ hàng.");
         }
 
-        tonKho.setSoLuong(tonKho.getSoLuong() - quantity);
+        tonKho.setSoLuong(currentStock - quantity);
         tonKhoRepository.save(tonKho);
         syncPhuKienTotalStock(phuKienId);
     }
@@ -103,7 +106,9 @@ public class TonKhoService {
         TonKho tonKho = tonKhoRepository.findByPhuKienIdAndKhoHangId(phuKienId, khoHangId)
                 .orElseGet(() -> TonKho.builder().phuKien(phuKienRepository.findById(phuKienId).orElse(null)).khoHang(kho).soLuong(0).build());
 
-        tonKho.setSoLuong(tonKho.getSoLuong() + quantity);
+        Integer soLuongTonKho = tonKho.getSoLuong();
+        int currentStock = soLuongTonKho != null ? soLuongTonKho : 0;
+        tonKho.setSoLuong(currentStock + quantity);
         tonKhoRepository.save(tonKho);
         syncPhuKienTotalStock(phuKienId);
     }

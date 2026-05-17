@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { FaBoxOpen, FaStar, FaTimes, FaCar, FaTools, FaCalendarAlt, FaClipboardList, FaMapMarkerAlt, FaClock } from 'react-icons/fa';
+import { Link, useNavigate } from 'react-router-dom';
+import { FaBoxOpen, FaStar, FaTimes, FaCar, FaTools, FaCalendarAlt, FaClipboardList, FaMapMarkerAlt, FaClock, FaExclamationCircle } from 'react-icons/fa';
 import Navbar from '../../components/layout/Navbar';
 import { useAuthStore } from '../../stores/authStore';
 import { api } from '../../services/api';
@@ -8,6 +8,7 @@ import { bookingService } from '../../services/bookingService';
 import '../../assets/css/Home.css';
 
 export default function LichSuDonHang() {
+    const navigate = useNavigate();
     const { user } = useAuthStore();
     const [activeTab, setActiveTab] = useState('PHU_KIEN'); // OTO, PHU_KIEN, DICH_VU
     const [statusFilter, setStatusFilter] = useState('ALL');
@@ -198,9 +199,16 @@ export default function LichSuDonHang() {
                                                 </div>
                                             ))}
                                         </div>
-                                        <div style={{ textAlign: 'right', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #f3f4f6' }}>
-                                            <span style={{ color: '#6b7280', marginRight: '12px' }}>Tổng thanh toán:</span>
-                                            <span style={{ fontSize: '20px', fontWeight: 800, color: '#ef4444' }}>{formatPrice(order.tongTien)}</span>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #f3f4f6' }}>
+                                            <button
+                                                onClick={() => navigate(`/my-disputes?donHangId=${order.id}`)}
+                                                style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', background: '#fff', border: '1px solid #f59e0b', color: '#b45309', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: 600 }}>
+                                                <FaExclamationCircle /> Khiếu nại đơn này
+                                            </button>
+                                            <div>
+                                                <span style={{ color: '#6b7280', marginRight: '12px' }}>Tổng thanh toán:</span>
+                                                <span style={{ fontSize: '20px', fontWeight: 800, color: '#ef4444' }}>{formatPrice(order.tongTien)}</span>
+                                            </div>
                                         </div>
                                     </div>
                                 ))

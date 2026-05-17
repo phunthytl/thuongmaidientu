@@ -65,7 +65,14 @@ export default function PhuKien() {
                     <h2 className="products-subtitle">Phân Hệ Kho</h2>
                     <h1 className="products-title">Sản Phẩm: Phụ Kiện</h1>
                 </div>
-                <div className="action-group">
+                <div className="action-group" style={{ display: 'flex', gap: '10px' }}>
+                    <button
+                        className="btn-add-product"
+                        style={{ background: '#fff', color: '#111', border: '2px solid #111' }}
+                        onClick={() => navigate('/admin/inventory/accessories')}
+                    >
+                        Quản lý Tồn kho
+                    </button>
                     <button className="btn-add-product" onClick={() => navigate('/admin/products/accessories/new')}>Thêm Phụ Kiện Mới</button>
                 </div>
             </header>
@@ -117,10 +124,22 @@ export default function PhuKien() {
                                     {item.loaiPhuKien && <span className="brand-badge">{item.loaiPhuKien}</span>}
                                 </div>
                                 <div className="col-brand">{item.hangSanXuat || '---'}</div>
-                                <div className="col-amount">{item.soLuong || 0} hộp</div>
+                                <div className="col-amount">
+                                    <span style={{
+                                        padding: '4px 10px',
+                                        borderRadius: '20px',
+                                        fontSize: '12px',
+                                        fontWeight: 700,
+                                        background: (item.soLuong || 0) > 0 ? '#dcfce7' : '#fee2e2',
+                                        color: (item.soLuong || 0) > 0 ? '#166534' : '#991b1b'
+                                    }}>
+                                        {(item.soLuong || 0) > 0 ? `Còn ${item.soLuong}` : 'Hết hàng'}
+                                    </span>
+                                </div>
                                 <div className="col-price">{formatPrice(item.gia)}</div>
                                 <div className="col-actions">
                                     <button className="btn-action view" onClick={() => navigate(`/admin/products/accessories/${item.id}`)}>Hồ Sơ</button>
+                                    <button className="btn-action view" onClick={() => navigate('/admin/inventory/accessories')}>Tồn kho</button>
                                     <button className="btn-action delete" onClick={() => handleDelete(item.id, item.tenPhuKien)}>Xóa</button>
                                 </div>
                             </div>

@@ -38,6 +38,7 @@ import ThanhToan from './pages/client/ThanhToan';
 import Profile from './pages/client/Profile';
 import SearchResults from './pages/client/SearchResults';
 import HoTro from './pages/client/HoTro';
+import KhieuNaiCuaToi from './pages/client/KhieuNaiCuaToi';
 import ProtectedRoute from './components/routes/ProtectedRoute';
 
 function App() {
@@ -76,6 +77,11 @@ function App() {
                 <Route path="/profile" element={
                     <ProtectedRoute allowedRoles={['KHACH_HANG', 'ADMIN', 'NHAN_VIEN']}>
                         <Profile />
+                    </ProtectedRoute>
+                } />
+                <Route path="/my-disputes" element={
+                    <ProtectedRoute allowedRoles={['KHACH_HANG', 'ADMIN', 'NHAN_VIEN']}>
+                        <KhieuNaiCuaToi />
                     </ProtectedRoute>
                 } />
 

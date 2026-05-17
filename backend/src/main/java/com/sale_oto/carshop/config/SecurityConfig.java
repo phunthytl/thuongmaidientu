@@ -91,8 +91,8 @@ public class SecurityConfig {
                     // GET /api/user/reviews: yêu cầu đăng nhập (bất kỳ role nào)
                     .requestMatchers("/api/webhook/ghn/**").permitAll()
 
-                    // Media - Upload/Delete (Admin + NV)
-                    .requestMatchers(HttpMethod.POST, "/api/media/**").hasAnyRole("ADMIN", "NHAN_VIEN")
+                    // Media - Upload (Admin + NV + KH cho khiếu nại), Delete (Admin + NV)
+                    .requestMatchers(HttpMethod.POST, "/api/media/**").hasAnyRole("ADMIN", "NHAN_VIEN", "KHACH_HANG")
                     .requestMatchers(HttpMethod.DELETE, "/api/media/**").hasAnyRole("ADMIN", "NHAN_VIEN")
 
                     // Tồn kho - GET public, POST Admin/NV

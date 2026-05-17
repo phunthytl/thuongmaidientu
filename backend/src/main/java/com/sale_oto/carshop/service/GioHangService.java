@@ -7,17 +7,14 @@ import com.sale_oto.carshop.entity.ChiTietGioHang;
 import com.sale_oto.carshop.entity.DichVu;
 import com.sale_oto.carshop.entity.GioHang;
 import com.sale_oto.carshop.entity.KhachHang;
-import com.sale_oto.carshop.entity.OTo;
 import com.sale_oto.carshop.entity.PhuKien;
 import com.sale_oto.carshop.enums.LoaiSanPham;
-import com.sale_oto.carshop.enums.TrangThaiOTo;
 import com.sale_oto.carshop.exception.BadRequestException;
 import com.sale_oto.carshop.exception.ResourceNotFoundException;
 import com.sale_oto.carshop.repository.ChiTietGioHangRepository;
 import com.sale_oto.carshop.repository.DichVuRepository;
 import com.sale_oto.carshop.repository.GioHangRepository;
 import com.sale_oto.carshop.repository.KhachHangRepository;
-import com.sale_oto.carshop.repository.OToRepository;
 import com.sale_oto.carshop.repository.PhuKienRepository;
 import com.sale_oto.carshop.repository.MediaRepository;
 import com.sale_oto.carshop.enums.LoaiDoiTuong;
@@ -38,7 +35,6 @@ public class GioHangService {
     private final GioHangRepository gioHangRepository;
     private final ChiTietGioHangRepository chiTietGioHangRepository;
     private final KhachHangRepository khachHangRepository;
-    private final OToRepository oToRepository;
     private final PhuKienRepository phuKienRepository;
     private final DichVuRepository dichVuRepository;
     private final MediaRepository mediaRepository;
@@ -66,7 +62,8 @@ public class GioHangService {
 
         BigDecimal donGia = resolveProductAndPrice(chiTiet, request);
 
-        int soLuongMoi = (chiTiet.getId() == null ? 0 : chiTiet.getSoLuong()) + request.getSoLuong();
+        Integer soLuongHienTai = chiTiet.getId() == null ? null : chiTiet.getSoLuong();
+        int soLuongMoi = (soLuongHienTai != null ? soLuongHienTai : 0) + request.getSoLuong();
         validateAvailability(chiTiet, soLuongMoi);
 
         chiTiet.setSoLuong(soLuongMoi);

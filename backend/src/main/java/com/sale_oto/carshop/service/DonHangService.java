@@ -115,14 +115,22 @@ public class DonHangService {
         if (isPhuKienOrder && diaChi != null) {
             int totalWeight = chiTietList.stream()
                     .filter(ct -> ct.getLoaiSanPham() == LoaiSanPham.PHU_KIEN && ct.getPhuKien() != null)
-                    .mapToInt(ct -> ct.getSoLuong()
-                            * (ct.getPhuKien().getTrongLuong() != null ? ct.getPhuKien().getTrongLuong() : 500))
+                    .mapToInt(ct -> {
+                        Integer soLuong = ct.getSoLuong();
+                        Integer trongLuong = ct.getPhuKien().getTrongLuong();
+                        return (soLuong != null ? soLuong : 0) * (trongLuong != null ? trongLuong : 500);
+                    })
                     .sum();
             if (totalWeight <= 0)
                 totalWeight = 500; // Tránh lỗi cân nặng = 0
 
-            BigDecimal phiVanChuyen = ghnService.calculateFee(
-                    null, null, totalWeight, 10, 10, 10);
+            BigDecimal phiVanChuyen = BigDecimal.ZERO;
+            if (diaChi.getGhnDistrictId() != null && diaChi.getGhnWardCode() != null) {
+                phiVanChuyen = ghnService.calculateFee(
+                        diaChi.getGhnDistrictId(),
+                        diaChi.getGhnWardCode(),
+                        totalWeight, 10, 10, 10);
+            }
             donHang.setPhiVanChuyen(phiVanChuyen);
             donHang.setTongTien(donHang.getTongTien().add(phiVanChuyen));
         }

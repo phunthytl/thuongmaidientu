@@ -178,14 +178,30 @@ export default function DanhSachPhuKien() {
           ) : (
             <>
               <div className="cars-grid">
-                {accessories.map(item => (
+                {accessories.map(item => {
+                  const inStock = (item.soLuong || 0) > 0;
+                  return (
                   <div key={item.id} className="car-card">
-                    <div className="car-image-container">
+                    <div className="car-image-container" style={{ position: 'relative' }}>
                       <span className="car-tag">{item.loaiPhuKien || 'Accessory'}</span>
+                      <span style={{
+                        position: 'absolute',
+                        top: '12px',
+                        right: '12px',
+                        padding: '4px 10px',
+                        borderRadius: '20px',
+                        fontSize: '12px',
+                        fontWeight: 700,
+                        background: inStock ? '#dcfce7' : '#fee2e2',
+                        color: inStock ? '#166534' : '#991b1b',
+                        zIndex: 2
+                      }}>
+                        {inStock ? `Còn ${item.soLuong}` : 'Hết hàng'}
+                      </span>
                       <img
                         src={item.displayImage || fallbackImages.accessory}
                         alt={item.tenPhuKien}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: inStock ? 1 : 0.6 }}
                         onError={(e) => {
                           e.currentTarget.onerror = null;
                           e.currentTarget.src = fallbackImages.accessory;
@@ -202,7 +218,8 @@ export default function DanhSachPhuKien() {
                       <Link to={`/products/accessory/${item.id}`} className="view-detail">Xem chi tiết <FaArrowRight /></Link>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* Pagination */}

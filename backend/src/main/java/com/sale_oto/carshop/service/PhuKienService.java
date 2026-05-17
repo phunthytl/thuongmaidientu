@@ -30,6 +30,7 @@ public class PhuKienService {
     public PhuKienResponse create(PhuKienRequest request) {
         PhuKien pk = new PhuKien();
         mapRequestToEntity(request, pk);
+        pk.setSoLuong(0);
         pk.setTrangThai(true);
         pk = phuKienRepository.save(pk);
         return toResponse(pk);
@@ -86,8 +87,8 @@ public class PhuKienService {
         pk.setLoaiPhuKien(request.getLoaiPhuKien());
         pk.setHangSanXuat(request.getHangSanXuat());
         pk.setGia(request.getGia());
-        pk.setSoLuong(request.getSoLuong() != null ? request.getSoLuong() : 0);
-        pk.setTrongLuong(request.getTrongLuong() != null ? request.getTrongLuong() : 500);
+        Integer trongLuong = request.getTrongLuong();
+        pk.setTrongLuong(trongLuong != null ? trongLuong : 500);
         pk.setMoTa(request.getMoTa());
     }
 
