@@ -1,10 +1,19 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
+    FaCar,
+    FaShoppingCart,
+    FaUser,
+    FaSearch,
     FaFilter,
     FaGasPump,
     FaCogs,
-    FaArrowRight
+    FaArrowRight,
+    FaFacebookF,
+    FaTwitter,
+    FaInstagram,
+    FaYoutube,
+    FaChevronDown
 } from 'react-icons/fa';
 import { productService } from '../../services/productService';
 import Navbar from '../../components/layout/Navbar';
@@ -59,7 +68,6 @@ export default function DanhSachOto() {
 
     useEffect(() => {
         fetchCars();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [params.page, params.hangXe, params.keyword, params.giaMin, params.giaMax, params.sort]);
 
     const fetchCars = async () => {
@@ -75,7 +83,7 @@ export default function DanhSachOto() {
                 sort: params.sort
             });
 
-            const cars = res?.data?.content || res?.content || [];
+            const cars = res?.data?.content || [];
             const carsWithImages = await Promise.all(cars.map(async (car) => {
                 try {
                     const imgRes = await productService.getCarImages(car.id);
@@ -84,7 +92,7 @@ export default function DanhSachOto() {
                         ...car,
                         displayImage: getSafeImage(images.length > 0 ? images[0].url : '', 'car')
                     };
-                } catch (error) {
+                } catch (e) {
                     return { ...car, displayImage: fallbackImages.car };
                 }
             }));
@@ -117,6 +125,7 @@ export default function DanhSachOto() {
             <Navbar />
 
             <div className="products-page-layout">
+                {/* Sidebar Filters */}
                 <aside className="filters-sidebar">
                     <div className="filter-group">
                         <h3><FaFilter /> Bộ lọc</h3>
@@ -154,6 +163,7 @@ export default function DanhSachOto() {
                     </div>
                 </aside>
 
+                {/* Main Content */}
                 <main className="products-content">
                     <div className="content-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
                         <div>
@@ -178,15 +188,15 @@ export default function DanhSachOto() {
 
                     {loading ? (
                         <div className="loading-grid">
-                            {[1, 2, 3, 4, 5, 6].map((i) => <div key={i} className="skeleton-card"></div>)}
+                            {[1, 2, 3, 4, 5, 6].map(i => <div key={i} className="skeleton-card"></div>)}
                         </div>
                     ) : (
                         <>
                             <div className="cars-grid">
-                                {cars.map((car) => (
+                                {cars.map(car => (
                                     <div key={car.id} className="car-card">
                                         <div className="car-image-container">
-                                            <span className="car-tag">{car.dongXe || 'Mới'}</span>
+                                            <span className="car-tag">{car.dongXe || 'New'}</span>
                                             {car.displayImage ? (
                                                 <img
                                                     src={car.displayImage}
@@ -213,6 +223,7 @@ export default function DanhSachOto() {
                                 ))}
                             </div>
 
+                            {/* Pagination */}
                             {totalPages > 1 && (
                                 <div className="pagination">
                                     {[...Array(totalPages)].map((_, i) => (

@@ -33,7 +33,6 @@ export default function KhieuNaiCuaToi() {
         if (khachHangId) {
             fetchData();
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [khachHangId]);
 
     useEffect(() => {
@@ -41,7 +40,6 @@ export default function KhieuNaiCuaToi() {
             setForm(prev => ({ ...prev, donHangId: presetDonHangId }));
             setFormOpen(true);
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [presetDonHangId]);
 
     const fetchData = async () => {
@@ -49,11 +47,10 @@ export default function KhieuNaiCuaToi() {
         try {
             const [disputesRes, ordersRes] = await Promise.all([
                 api.get(`/khieu-nai/khach-hang/${khachHangId}?size=50&sort=ngayTao,desc`),
-                api.get(`/don-hang/khach-hang/${khachHangId}?size=50&sort=ngayTao,desc`)
+                api.get(`/don-hang/khach-hang/${khachHangId}?size=50`)
             ]);
             setDisputes(disputesRes.data?.data?.content || []);
-            const sortedOrders = (ordersRes.data?.data?.content || []).sort((a, b) => new Date(b.ngayTao) - new Date(a.ngayTao));
-            setOrders(sortedOrders);
+            setOrders(ordersRes.data?.data?.content || []);
         } catch (err) {
             console.error('Lỗi tải khiếu nại:', err);
         } finally {

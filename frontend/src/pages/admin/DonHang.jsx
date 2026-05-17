@@ -12,10 +12,9 @@ export default function DonHang() {
     useEffect(() => {
         const fetchOrders = async () => {
             try {
-                const res = await api.get('/don-hang?size=100&sort=ngayTao,desc');
+                const res = await api.get('/don-hang?size=15');
                 if (res.data?.data?.content) {
-                    const sorted = (res.data.data.content).sort((a, b) => new Date(b.ngayTao) - new Date(a.ngayTao));
-                    setOrders(sorted);
+                    setOrders(res.data.data.content);
                 }
             } catch (err) {
                 console.error('Failed to fetch orders', err);
@@ -44,20 +43,16 @@ export default function DonHang() {
         return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
     };
 
+    const statusFormat = (stt) => {
+        const raw = stt || 'UNKNOWN';
+        return raw.replace(/_/g, ' ');
+    };
+
     const formatDate = (dateString) => {
         if (!dateString) return '---';
         const date = new Date(dateString);
         return date.toLocaleDateString('vi-VN') + ' ' + date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
     }
-
-    const getPaymentStatus = (order) => {
-        const isPaid = order.thanhToan?.trangThai === 'DA_THANH_TOAN';
-        return {
-            label: isPaid ? 'Đã thanh toán' : 'Chưa thanh toán',
-            className: isPaid ? 'payment-paid' : 'payment-unpaid',
-            method: order.thanhToan?.phuongThuc === 'VNPAY' ? 'VNPay' : 'COD'
-        };
-    };
 
     return (
         <div className="orders-container">
@@ -68,48 +63,42 @@ export default function DonHang() {
                 </div>
                 <div className="action-group">
                     <button className="btn-export-orders">Xuất Báo Cáo</button>
-                    <button className="btn-export-orders btn-export-history">Lịch sử Xuất Báo cáo</button>
+                    <button className="btn-export-orders" style={{marginLeft: '8px'}}>Lịch sử Xuất Báo cáo</button>
                 </div>
             </header>
 
-            {/* Premium Navigation Tabs */}
-            <div className="orders-tabs">
-                <button 
-                    className={`tab-item ${activeTab === 'ALL' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('ALL')}
-                >
+            {/* Tabs Filter theo phong cách GHN */}
+            <div className="orders-tabs" style={{display: 'flex', gap: '24px', borderBottom: '1px solid #e5e7eb', marginBottom: '20px', paddingBottom: '10px', fontSize: '14px', fontWeight: 500, color: '#4b5563'}}>
+                <div 
+                    onClick={() => setActiveTab('ALL')} 
+                    style={{cursor: 'pointer', color: activeTab === 'ALL' ? '#ef4444' : 'inherit', borderBottom: activeTab === 'ALL' ? '2px solid #ef4444' : 'none', paddingBottom: '8px'}}>
                     Tất cả
-                </button>
-                <button 
-                    className={`tab-item ${activeTab === 'CHO_XAC_NHAN' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('CHO_XAC_NHAN')}
-                >
+                </div>
+                <div 
+                    onClick={() => setActiveTab('CHO_XAC_NHAN')} 
+                    style={{cursor: 'pointer', color: activeTab === 'CHO_XAC_NHAN' ? '#ef4444' : 'inherit', borderBottom: activeTab === 'CHO_XAC_NHAN' ? '2px solid #ef4444' : 'none', paddingBottom: '8px'}}>
                     Chờ xác nhận
-                </button>
-                <button 
-                    className={`tab-item ${activeTab === 'DA_XAC_NHAN' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('DA_XAC_NHAN')}
-                >
+                </div>
+                <div 
+                    onClick={() => setActiveTab('DA_XAC_NHAN')} 
+                    style={{cursor: 'pointer', color: activeTab === 'DA_XAC_NHAN' ? '#ef4444' : 'inherit', borderBottom: activeTab === 'DA_XAC_NHAN' ? '2px solid #ef4444' : 'none', paddingBottom: '8px'}}>
                     Chờ lấy hàng
-                </button>
-                <button 
-                    className={`tab-item ${activeTab === 'DANG_GIAO' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('DANG_GIAO')}
-                >
+                </div>
+                <div 
+                    onClick={() => setActiveTab('DANG_GIAO')} 
+                    style={{cursor: 'pointer', color: activeTab === 'DANG_GIAO' ? '#ef4444' : 'inherit', borderBottom: activeTab === 'DANG_GIAO' ? '2px solid #ef4444' : 'none', paddingBottom: '8px'}}>
                     Đang giao
-                </button>
-                <button 
-                    className={`tab-item ${activeTab === 'HOAN_THANH' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('HOAN_THANH')}
-                >
+                </div>
+                <div 
+                    onClick={() => setActiveTab('HOAN_THANH')} 
+                    style={{cursor: 'pointer', color: activeTab === 'HOAN_THANH' ? '#ef4444' : 'inherit', borderBottom: activeTab === 'HOAN_THANH' ? '2px solid #ef4444' : 'none', paddingBottom: '8px'}}>
                     Đã giao
-                </button>
-                <button 
-                    className={`tab-item ${activeTab === 'DA_HUY' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('DA_HUY')}
-                >
+                </div>
+                <div 
+                    onClick={() => setActiveTab('DA_HUY')} 
+                    style={{cursor: 'pointer', color: activeTab === 'DA_HUY' ? '#ef4444' : 'inherit', borderBottom: activeTab === 'DA_HUY' ? '2px solid #ef4444' : 'none', paddingBottom: '8px'}}>
                     Trả hàng/Hoàn tiền/Hủy
-                </button>
+                </div>
             </div>
 
             <div className="orders-table-wrapper">
@@ -119,8 +108,7 @@ export default function DonHang() {
                     <div className="col-date">Thời Gian Cập Nhật</div>
                     <div className="col-total">Tổng Giá Trị</div>
                     <div className="col-status">Trạng Thái</div>
-                    <div className="col-payment">Thanh Toán</div>
-                    <div className="col-actions">Thao Tác</div>
+                    <div className="col-actions" style={{ flex: '0 0 100px', textAlign: 'right' }}>Thao Tác</div>
                 </div>
 
                 <div className="table-body">
@@ -129,9 +117,7 @@ export default function DonHang() {
                     ) : orders.filter(o => activeTab === 'ALL' || o.trangThai === activeTab).length === 0 ? (
                         <div className="table-empty">Hệ thống chưa ghi nhận đơn hàng nào ở trạng thái này.</div>
                     ) : (
-                        orders.filter(o => activeTab === 'ALL' || o.trangThai === activeTab).map((item) => {
-                            const paymentStatus = getPaymentStatus(item);
-                            return (
+                        orders.filter(o => activeTab === 'ALL' || o.trangThai === activeTab).map((item) => (
                             <div key={item.id} className="table-row">
                                 <div className="col-order-id">{item.maDonHang || `ORD-${item.id}`}</div>
                                 <div className="col-customer">
@@ -155,23 +141,16 @@ export default function DonHang() {
                                         <option value="DA_HUY">Đã hủy</option>
                                     </select>
                                 </div>
-                                <div className="col-payment">
-                                    <span className={`payment-badge ${paymentStatus.className}`}>
-                                        {paymentStatus.label}
-                                    </span>
-                                    <span className="payment-method">{paymentStatus.method}</span>
-                                </div>
-                                <div className="col-actions">
+                                <div className="col-actions" style={{ flex: '0 0 100px', textAlign: 'right' }}>
                                     <button 
-                                        className="btn-view-order"
                                         onClick={() => navigate(`/admin/orders/${item.id}`)}
+                                        style={{ background: 'transparent', border: '1px solid #d1d5db', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '13px' }}
                                     >
                                         Hồ Sơ
                                     </button>
                                 </div>
                             </div>
-                            );
-                        })
+                        ))
                     )}
                 </div>
             </div>

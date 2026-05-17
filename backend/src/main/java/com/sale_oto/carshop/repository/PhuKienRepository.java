@@ -15,6 +15,8 @@ public interface PhuKienRepository extends JpaRepository<PhuKien, Long> {
 
     Page<PhuKien> findByTrangThai(Boolean trangThai, Pageable pageable);
 
+    List<PhuKien> findByTrangThai(Boolean trangThai);
+
     Page<PhuKien> findByLoaiPhuKien(String loaiPhuKien, Pageable pageable);
 
     @Query("SELECT pk FROM PhuKien pk WHERE pk.tenPhuKien LIKE %:keyword% OR pk.loaiPhuKien LIKE %:keyword% OR pk.hangSanXuat LIKE %:keyword%")

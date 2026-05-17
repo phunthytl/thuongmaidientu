@@ -32,6 +32,13 @@ public class PhuKienController {
         return ResponseEntity.ok(ApiResponse.success(phuKienService.getById(id)));
     }
 
+    @GetMapping("/{id}/tuong-tu")
+    public ResponseEntity<ApiResponse<List<PhuKienResponse>>> getSimilarProducts(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "4") int limit) {
+        return ResponseEntity.ok(ApiResponse.success(phuKienService.getSimilarProducts(id, limit)));
+    }
+
     @GetMapping
     public ResponseEntity<ApiResponse<Page<PhuKienResponse>>> getAll(Pageable pageable) {
         return ResponseEntity.ok(ApiResponse.success(phuKienService.getAll(pageable)));

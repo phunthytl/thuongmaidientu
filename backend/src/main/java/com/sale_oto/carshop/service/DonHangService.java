@@ -5,7 +5,6 @@ import com.sale_oto.carshop.dto.request.DonHangRequest;
 import com.sale_oto.carshop.dto.response.ChiTietDonHangResponse;
 import com.sale_oto.carshop.dto.response.DiaChiResponse;
 import com.sale_oto.carshop.dto.response.DonHangResponse;
-import com.sale_oto.carshop.dto.response.ThanhToanResponse;
 import com.sale_oto.carshop.entity.*;
 import com.sale_oto.carshop.enums.LoaiSanPham;
 import com.sale_oto.carshop.enums.TrangThaiDonHang;
@@ -280,20 +279,6 @@ public class DonHangService {
                     .build();
         }
 
-        ThanhToanResponse thanhToanRes = dh.getThanhToans() != null
-                ? dh.getThanhToans().stream()
-                        .max((a, b) -> {
-                            if (a.getNgayTao() == null && b.getNgayTao() == null) {
-                                return Long.compare(a.getId() != null ? a.getId() : 0L, b.getId() != null ? b.getId() : 0L);
-                            }
-                            if (a.getNgayTao() == null) return -1;
-                            if (b.getNgayTao() == null) return 1;
-                            return a.getNgayTao().compareTo(b.getNgayTao());
-                        })
-                        .map(this::toThanhToanResponse)
-                        .orElse(null)
-                : null;
-
         return DonHangResponse.builder()
                 .id(dh.getId())
                 .maDonHang(dh.getMaDonHang())
@@ -308,22 +293,10 @@ public class DonHangService {
                 .ghiChu(dh.getGhiChu())
                 .phiVanChuyen(dh.getPhiVanChuyen())
                 .maDonHangGhn(dh.getMaDonHangGhn())
-                .thanhToan(thanhToanRes)
                 .diaChiGiaoHang(diaChiRes)
                 .chiTietDonHangs(chiTietResponses)
                 .ngayTao(dh.getNgayTao())
                 .ngayCapNhat(dh.getNgayCapNhat())
-                .build();
-    }
-
-    private ThanhToanResponse toThanhToanResponse(ThanhToan thanhToan) {
-        return ThanhToanResponse.builder()
-                .id(thanhToan.getId())
-                .soTien(thanhToan.getSoTien())
-                .phuongThuc(thanhToan.getPhuongThuc())
-                .maGiaoDich(thanhToan.getMaGiaoDich())
-                .trangThai(thanhToan.getTrangThai())
-                .ngayThanhToan(thanhToan.getNgayThanhToan())
                 .build();
     }
 

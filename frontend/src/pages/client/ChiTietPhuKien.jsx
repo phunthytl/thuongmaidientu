@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import {
   FaShoppingCart,
   FaShieldAlt,
   FaTruck,
+  FaTools,
+  FaCheckCircle,
   FaWarehouse,
   FaMapMarkerAlt,
   FaStar,
@@ -24,6 +26,7 @@ export default function ChiTietPhuKien() {
   const [warehouses, setWarehouses] = useState([]);
   const [selectedKho, setSelectedKho] = useState(null);
   const [reviews, setReviews] = useState([]);
+  const [similarAccessories, setSimilarAccessories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [addingToCart, setAddingToCart] = useState(false);
@@ -32,16 +35,16 @@ export default function ChiTietPhuKien() {
 
   useEffect(() => {
     fetchDetail();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const fetchDetail = async () => {
     try {
       setLoading(true);
-      const [accRes, stockRes, reviewRes] = await Promise.all([
+      const [accRes, stockRes, reviewRes, similarRes] = await Promise.all([
         productService.getAccessoryDetail(id),
         inventoryService.getStockByPhuKien(id).catch(() => ({ data: [] })),
-        api.get(`/danh-gia/phu-kien/${id}?size=10`).catch(() => ({ data: { data: { content: [] } } }))
+        api.get(`/danh-gia/phu-kien/${id}?size=10`).catch(() => ({ data: { data: { content: [] } } })),
+        productService.getSimilarAccessories(id, 4).catch(() => ({ data: [] }))
       ]);
 
       const accData = accRes?.data || accRes;
@@ -49,6 +52,7 @@ export default function ChiTietPhuKien() {
       setMainImage(getSafeImage(accData?.hinhAnhs?.[0], 'accessory'));
 
       setReviews(reviewRes?.data?.data?.content || []);
+      setSimilarAccessories(similarRes?.data || similarRes?.data?.data || []);
 
       const stocks = stockRes?.data || [];
       setWarehouses(stocks);
@@ -135,6 +139,12 @@ export default function ChiTietPhuKien() {
         .stock-badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
         .stock-badge.in-stock { background: #dcfce7; color: #166534; }
         .stock-badge.out-of-stock { background: #fee2e2; color: #991b1b; }
+        .similar-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
+        .similar-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; text-decoration: none; color: inherit; transition: all 0.2s ease; }
+        .similar-card:hover { transform: translateY(-3px); box-shadow: 0 12px 24px rgba(0,0,0,0.08); border-color: #111; }
+        .similar-image { width: 100%; aspect-ratio: 4/3; object-fit: contain; background: #f9fafb; display: block; padding: 14px; box-sizing: border-box; }
+        @media (max-width: 992px) { .similar-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (max-width: 640px) { .similar-grid { grid-template-columns: 1fr; } }
       `}</style>
       
       <div className="product-detail-layout" style={{ maxWidth: '1280px', margin: '40px auto', padding: '0 20px' }}>
@@ -278,6 +288,45 @@ export default function ChiTietPhuKien() {
           )}
         </div>
       </div>
+
+      {similarAccessories.length > 0 && (
+        <div style={{ maxWidth: '1280px', margin: '40px auto 0', padding: '0 20px' }}>
+          <div style={{ backgroundColor: '#fff', borderRadius: '16px', padding: '32px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
+            <h2 style={{ fontSize: '24px', fontWeight: 800, margin: '0 0 24px 0', color: '#111' }}>
+              Sản phẩm tương tự
+            </h2>
+            <div className="similar-grid">
+              {similarAccessories.map(item => (
+                <Link key={item.id} to={`/products/accessory/${item.id}`} className="similar-card">
+                  <img
+                    src={getSafeImage(item.hinhAnhs?.[0], 'accessory')}
+                    alt={item.tenPhuKien}
+                    className="similar-image"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = fallbackImages.accessory;
+                    }}
+                  />
+                  <div style={{ padding: '16px' }}>
+                    <div style={{ fontSize: '13px', color: '#6b7280', fontWeight: 700, textTransform: 'uppercase', marginBottom: '8px' }}>
+                      {item.loaiPhuKien}
+                    </div>
+                    <h3 style={{ fontSize: '16px', lineHeight: 1.4, minHeight: '44px', margin: '0 0 12px 0', color: '#111' }}>
+                      {item.tenPhuKien}
+                    </h3>
+                    <div style={{ color: '#6b7280', fontSize: '14px', marginBottom: '10px' }}>
+                      {item.hangSanXuat}
+                    </div>
+                    <div style={{ fontWeight: 800, color: '#ef4444', fontSize: '17px' }}>
+                      {formatPrice(item.gia)}
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -38,9 +38,4 @@ public class GhnController {
         
         return ResponseEntity.ok(ghnService.calculateFeeRaw(toDistrictId, toWardCode, weight, length, width, height));
     }
-
-    @GetMapping("/order/{orderCode}/detail")
-    public ResponseEntity<String> getOrderDetail(@PathVariable String orderCode) {
-        return ResponseEntity.ok(ghnService.getOrderDetail(orderCode));
-    }
 }
