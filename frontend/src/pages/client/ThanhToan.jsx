@@ -8,13 +8,79 @@ import { api } from '../../services/api';
 import '../../assets/css/Home.css';
 import '../../assets/css/GioHang.css';
 
+const FALLBACK_PROVINCES = [
+    { ProvinceID: 201, ProvinceName: 'Ha Noi' },
+    { ProvinceID: 202, ProvinceName: 'TP Ho Chi Minh' },
+    { ProvinceID: 203, ProvinceName: 'Da Nang' },
+];
+
+const FALLBACK_DISTRICTS = {
+    201: [
+        { DistrictID: 20101, DistrictName: 'Quan Hoan Kiem' },
+        { DistrictID: 20102, DistrictName: 'Quan Cau Giay' },
+        { DistrictID: 20103, DistrictName: 'Quan Hoang Mai' },
+    ],
+    202: [
+        { DistrictID: 20201, DistrictName: 'Quan 1' },
+        { DistrictID: 20202, DistrictName: 'Quan 3' },
+        { DistrictID: 20203, DistrictName: 'Quan 12' },
+    ],
+    203: [
+        { DistrictID: 20301, DistrictName: 'Quan Hai Chau' },
+        { DistrictID: 20302, DistrictName: 'Quan Son Tra' },
+        { DistrictID: 20303, DistrictName: 'Quan Thanh Khe' },
+    ],
+};
+
+const FALLBACK_WARDS = {
+    20101: [
+        { WardCode: '2010101', WardName: 'Phuong Hang Trong' },
+        { WardCode: '2010102', WardName: 'Phuong Trang Tien' },
+    ],
+    20102: [
+        { WardCode: '2010201', WardName: 'Phuong Dich Vong' },
+        { WardCode: '2010202', WardName: 'Phuong Nghia Tan' },
+    ],
+    20103: [
+        { WardCode: '2010301', WardName: 'Phuong Yen So' },
+        { WardCode: '2010302', WardName: 'Phuong Hoang Liet' },
+    ],
+    20201: [
+        { WardCode: '2020101', WardName: 'Phuong Ben Nghe' },
+        { WardCode: '2020102', WardName: 'Phuong Ben Thanh' },
+    ],
+    20202: [
+        { WardCode: '2020201', WardName: 'Phuong Vo Thi Sau' },
+        { WardCode: '2020202', WardName: 'Phuong Ban Co' },
+    ],
+    20203: [
+        { WardCode: '2020301', WardName: 'Phuong Trung My Tay' },
+        { WardCode: '2020302', WardName: 'Phuong Tan Chanh Hiep' },
+    ],
+    20301: [
+        { WardCode: '2030101', WardName: 'Phuong Hai Chau 1' },
+        { WardCode: '2030102', WardName: 'Phuong Thach Thang' },
+    ],
+    20302: [
+        { WardCode: '2030201', WardName: 'Phuong An Hai Bac' },
+        { WardCode: '2030202', WardName: 'Phuong Tho Quang' },
+    ],
+    20303: [
+        { WardCode: '2030301', WardName: 'Phuong Tam Thuan' },
+        { WardCode: '2030302', WardName: 'Phuong Xuan Ha' },
+    ],
+};
+
+const FALLBACK_SHIPPING_FEE = 45000;
+
 export default function ThanhToan() {
     const { user } = useAuthStore();
     const { items, getTotalPrice, clearCart } = useCartStore();
     const navigate = useNavigate();
+    const khachHangId = user?.khachHangId ?? user?.id;
 
     // Address & GHN state
-    const [provinces, setProvinces] = useState([]);
+    const [provinces, setProvinces] = useState(FALLBACK_PROVINCES);
     const [districts, setDistricts] = useState([]);
     const [wards, setWards] = useState([]);
     
@@ -45,9 +111,9 @@ export default function ThanhToan() {
     }, [items, navigate]);
 
     const fetchUserAddresses = async () => {
-        if (!user) return;
+        if (!khachHangId) return;
         try {
-            const res = await api.get(`/khach-hang/${user.id}/dia-chi`);
+            const res = await api.get(`/khach-hang/${khachHangId}/dia-chi`);
             const addrList = res.data || [];
             setAddresses(addrList);
             
@@ -68,6 +134,7 @@ export default function ThanhToan() {
 
     useEffect(() => {
         if (selectedProvince) {
+            setDistricts(FALLBACK_DISTRICTS[selectedProvince] || []);
             fetchDistricts(selectedProvince);
             setSelectedDistrict('');
             setSelectedWard('');
@@ -78,6 +145,7 @@ export default function ThanhToan() {
 
     useEffect(() => {
         if (selectedDistrict) {
+            setWards(FALLBACK_WARDS[selectedDistrict] || []);
             fetchWards(selectedDistrict);
             setSelectedWard('');
             setShippingFee(0);
@@ -98,7 +166,7 @@ export default function ThanhToan() {
             const data = typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
             let list = data.data || [];
             list = list.filter(p => p.ProvinceName && !p.ProvinceName.toLowerCase().includes('test') && !p.ProvinceName.includes('02'));
-            setProvinces(list);
+            setProvinces(list.length > 0 ? list : FALLBACK_PROVINCES);
         } catch (error) {
             console.error('Lỗi tải danh sách tỉnh thành:', error);
         }
@@ -110,7 +178,7 @@ export default function ThanhToan() {
             const data = typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
             let list = data.data || [];
             list = list.filter(d => d.DistrictName && !d.DistrictName.toLowerCase().includes('test') && !d.DistrictName.includes('02'));
-            setDistricts(list);
+            setDistricts(list.length > 0 ? list : (FALLBACK_DISTRICTS[provinceId] || []));
         } catch (error) {
             console.error('Lỗi tải danh sách quận huyện:', error);
         }
@@ -122,7 +190,7 @@ export default function ThanhToan() {
             const data = typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
             let list = data.data || [];
             list = list.filter(w => w.WardName && !w.WardName.toLowerCase().includes('test') && !w.WardName.includes('02'));
-            setWards(list);
+            setWards(list.length > 0 ? list : (FALLBACK_WARDS[districtId] || []));
         } catch (error) {
             console.error('Lỗi tải danh sách phường xã:', error);
         }
@@ -138,10 +206,12 @@ export default function ThanhToan() {
             const data = typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
             if (data && data.data && data.data.total) {
                 setShippingFee(data.data.total);
+            } else {
+                setShippingFee(FALLBACK_SHIPPING_FEE);
             }
         } catch (error) {
             console.error('Lỗi tính phí ship:', error);
-            setShippingFee(45000); // Fallback
+            setShippingFee(FALLBACK_SHIPPING_FEE);
         } finally {
             setIsCalculatingFee(false);
         }
@@ -169,7 +239,7 @@ export default function ThanhToan() {
                 const districtName = districts.find(d => d.DistrictID.toString() === selectedDistrict)?.DistrictName || '';
                 const wardName = wards.find(w => w.WardCode === selectedWard)?.WardName || '';
 
-                const newAddrRes = await api.post(`/khach-hang/${user.id}/dia-chi`, {
+                const newAddrRes = await api.post(`/khach-hang/${khachHangId}/dia-chi`, {
                     tenNguoiNhan: user.hoTen,
                     soDienThoai: user.soDienThoai,
                     tinhThanhId: parseInt(selectedProvince),
@@ -207,7 +277,7 @@ export default function ThanhToan() {
         }));
 
         const payload = {
-            khachHangId: user.id,
+            khachHangId,
             chiTietDonHangs: chiTietDonHangs,
             ghiChu: ghiChu,
             diaChiGiaoHangId: finalAddressId

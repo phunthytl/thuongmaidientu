@@ -72,9 +72,18 @@ public class GhnService {
         String url = ghnConfig.getApiUrl() + "/shipping-order/create";
 
         Map<String, Object> request = new HashMap<>();
-        request.put("payment_type_id", 1); // 1 = Seller pays phí cho GHN (shop trả). COD KH thanh toán cả gốc + phí
-        request.put("cod_amount", donHang.getTongTien().intValue()); // Thu hộ tổng tiền = Tiền phụ kiện + Phí vận
-                                                                     // chuyển
+        request.put("payment_type_id", 1); // 1 = Seller pays phí cho GHN (shop trả).
+        
+        // Kiểm tra xem đơn hàng đã được thanh toán thành công (qua VNPay hoặc MoMo...) chưa
+        boolean isPaid = false;
+        if (donHang.getThanhToans() != null) {
+            isPaid = donHang.getThanhToans().stream()
+                    .anyMatch(t -> t.getTrangThai() == com.sale_oto.carshop.enums.TrangThaiThanhToan.DA_THANH_TOAN);
+        }
+        
+        // Nếu đã thanh toán trực tuyến, COD thu hộ = 0. Ngược lại thu hộ tổng tiền.
+        request.put("cod_amount", isPaid ? 0 : donHang.getTongTien().intValue()); 
+        
         request.put("note", donHang.getGhiChu());
         request.put("required_note", "CHOXEMHANGKHONGTHU");
         request.put("client_order_code", donHang.getMaDonHang());
@@ -234,6 +243,20 @@ public class GhnService {
         } catch (RestClientException e) {
             log.error("Error calculating fee raw", e);
             throw new RuntimeException("Error calculating fee");
+        }
+    }
+
+    public String getOrderDetail(String orderCode) {
+        String url = ghnConfig.getApiUrl() + "/shipping-order/detail";
+        Map<String, Object> request = new HashMap<>();
+        request.put("order_code", orderCode);
+
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, createHeaders());
+        try {
+            return restTemplate.postForEntity(url, entity, String.class).getBody();
+        } catch (RestClientException e) {
+            log.error("Error fetching order detail from GHN for code: " + orderCode, e);
+            throw new RuntimeException("Error fetching order detail from GHN: " + e.getMessage());
         }
     }
 }

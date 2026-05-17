@@ -12,9 +12,10 @@ export default function DonHang() {
     useEffect(() => {
         const fetchOrders = async () => {
             try {
-                const res = await api.get('/don-hang?size=15');
+                const res = await api.get('/don-hang?size=100&sort=ngayTao,desc');
                 if (res.data?.data?.content) {
-                    setOrders(res.data.data.content);
+                    const sorted = (res.data.data.content).sort((a, b) => new Date(b.ngayTao) - new Date(a.ngayTao));
+                    setOrders(sorted);
                 }
             } catch (err) {
                 console.error('Failed to fetch orders', err);

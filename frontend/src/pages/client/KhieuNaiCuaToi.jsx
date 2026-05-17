@@ -49,10 +49,11 @@ export default function KhieuNaiCuaToi() {
         try {
             const [disputesRes, ordersRes] = await Promise.all([
                 api.get(`/khieu-nai/khach-hang/${khachHangId}?size=50&sort=ngayTao,desc`),
-                api.get(`/don-hang/khach-hang/${khachHangId}?size=50`)
+                api.get(`/don-hang/khach-hang/${khachHangId}?size=50&sort=ngayTao,desc`)
             ]);
             setDisputes(disputesRes.data?.data?.content || []);
-            setOrders(ordersRes.data?.data?.content || []);
+            const sortedOrders = (ordersRes.data?.data?.content || []).sort((a, b) => new Date(b.ngayTao) - new Date(a.ngayTao));
+            setOrders(sortedOrders);
         } catch (err) {
             console.error('Lỗi tải khiếu nại:', err);
         } finally {
