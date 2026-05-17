@@ -13,6 +13,8 @@ public class LichHenResponse {
     private Long id;
     private String loaiLich;
     private String tenDoiTuong; // Tên xe hoặc tên dịch vụ
+    private Long otoId;
+    private Long dichVuId;
     private String tenChiNhanh;
     private String hoTen;
     private String soDienThoai;
@@ -22,4 +24,5 @@ public class LichHenResponse {
     private String ghiChu;
     private String trangThai;
     private LocalDateTime ngayTao;
+    private Boolean daDanhGia;
 }

@@ -1,19 +1,21 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  FaShoppingCart, 
-  FaShieldAlt, 
-  FaTruck, 
+import {
+  FaShoppingCart,
+  FaShieldAlt,
+  FaTruck,
   FaTools,
   FaCheckCircle,
   FaWarehouse,
   FaMapMarkerAlt,
   FaStar,
-  FaInfoCircle
+  FaInfoCircle,
+  FaUserCircle
 } from 'react-icons/fa';
 import Navbar from '../../components/layout/Navbar';
 import { productService } from '../../services/productService';
 import { inventoryService } from '../../services/inventoryService';
+import { api } from '../../services/api';
 import { useAuthStore } from '../../stores/authStore';
 import { useCartStore } from '../../stores/cartStore';
 import { fallbackImages, getSafeImage } from '../../utils/imageFallback';
@@ -25,6 +27,7 @@ export default function ChiTietPhuKien() {
   const [accessory, setAccessory] = useState(null);
   const [warehouses, setWarehouses] = useState([]);
   const [selectedKho, setSelectedKho] = useState(null);
+  const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [addingToCart, setAddingToCart] = useState(false);
@@ -39,15 +42,18 @@ export default function ChiTietPhuKien() {
   const fetchDetail = async () => {
     try {
       setLoading(true);
-      const [accRes, stockRes] = await Promise.all([
+      const [accRes, stockRes, reviewRes] = await Promise.all([
         productService.getAccessoryDetail(id),
-        inventoryService.getStockByPhuKien(id).catch(() => ({ data: [] }))
+        inventoryService.getStockByPhuKien(id).catch(() => ({ data: [] })),
+        api.get(`/danh-gia/phu-kien/${id}?size=10`).catch(() => ({ data: { data: { content: [] } } }))
       ]);
 
       const accData = accRes?.data || accRes;
       setAccessory(accData);
       setMainImage(getSafeImage(accData?.hinhAnhs?.[0], 'accessory'));
-      
+
+      setReviews(reviewRes?.data?.data?.content || []);
+
       const stocks = stockRes?.data || [];
       setWarehouses(stocks);
       
@@ -239,6 +245,47 @@ export default function ChiTietPhuKien() {
               <span>Giao hàng toàn quốc</span>
             </div>
           </div>
+        </div>
+      </div>
+
+      <div style={{ maxWidth: '1280px', margin: '40px auto 0', padding: '0 20px' }}>
+        <div style={{ backgroundColor: '#fff', borderRadius: '16px', padding: '32px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
+          <h2 style={{ fontSize: '24px', fontWeight: 800, borderBottom: '1px solid #e5e7eb', paddingBottom: '16px', marginBottom: '24px', color: '#111' }}>
+            Đánh giá khách hàng ({reviews.length})
+          </h2>
+          {reviews.length === 0 ? (
+            <div style={{ padding: '60px 20px', textAlign: 'center', background: '#f9fafb', borderRadius: '12px', color: '#6b7280' }}>
+              Chưa có ai đánh giá phụ kiện này.
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              {reviews.map(review => (
+                <div key={review.id} style={{ padding: '24px', backgroundColor: '#f9fafb', borderRadius: '12px', display: 'flex', gap: '20px' }}>
+                  <div style={{ flexShrink: 0 }}>
+                    <div style={{ width: '48px', height: '48px', backgroundColor: '#e5e7eb', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <FaUserCircle style={{ fontSize: '32px', color: '#9ca3af' }} />
+                    </div>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <div>
+                        <div style={{ fontWeight: 700, color: '#111', fontSize: '16px' }}>{review.tenKhachHang || 'Khách hàng'}</div>
+                        <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '2px' }}>{review.ngayTao ? new Date(review.ngayTao).toLocaleDateString('vi-VN') : ''}</div>
+                      </div>
+                      <div style={{ display: 'flex', gap: '4px' }}>
+                        {[...Array(5)].map((_, index) => (
+                          <FaStar key={index} color={index < review.diemDanhGia ? '#fbbf24' : '#e5e7eb'} size={16} />
+                        ))}
+                      </div>
+                    </div>
+                    <p style={{ margin: 0, color: '#4b5563', lineHeight: 1.6, fontSize: '15px' }}>
+                      {review.noiDung || 'Khách hàng không để lại bình luận.'}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

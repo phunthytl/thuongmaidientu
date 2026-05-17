@@ -36,6 +36,7 @@ public class DonHangService {
     private final KhoHangRepository khoHangRepository;
     private final TonKhoService tonKhoService;
     private final GhnService ghnService;
+    private final DanhGiaRepository danhGiaRepository;
 
     @Transactional
     public List<DonHangResponse> create(DonHangRequest request) {
@@ -313,6 +314,7 @@ public class DonHangService {
                 .donGia(ct.getDonGia())
                 .thanhTien(ct.getThanhTien())
                 .khoHangId(ct.getKhoHangId())
+                .daDanhGia(danhGiaRepository.existsByChiTietDonHangId(ct.getId()))
                 .build();
     }
 }

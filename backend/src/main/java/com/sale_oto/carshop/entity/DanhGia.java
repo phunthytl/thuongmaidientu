@@ -44,4 +44,11 @@ public class DanhGia extends BaseEntity {
 
     @Column(name = "trang_thai", nullable = false)
     private Boolean trangThai = true;
+
+    // Nguồn đánh giá — mỗi (lichHenId | chiTietDonHangId) chỉ được đánh giá 1 lần
+    @Column(name = "lich_hen_id", unique = true)
+    private Long lichHenId;
+
+    @Column(name = "chi_tiet_don_hang_id", unique = true)
+    private Long chiTietDonHangId;
 }
