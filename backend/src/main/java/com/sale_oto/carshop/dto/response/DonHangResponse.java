@@ -26,6 +26,7 @@ public class DonHangResponse {
     private DiaChiResponse diaChiGiaoHang;
     private BigDecimal phiVanChuyen;
     private String maDonHangGhn;
+    private ThanhToanResponse thanhToan;
     private List<ChiTietDonHangResponse> chiTietDonHangs;
     private LocalDateTime ngayTao;
     private LocalDateTime ngayCapNhat;

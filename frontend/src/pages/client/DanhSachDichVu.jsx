@@ -18,7 +18,7 @@ export default function DanhSachDichVu() {
             setLoading(true);
             const res = await api.get('/dich-vu?size=20&sort=ngayTao,desc');
             const data = res.data?.data?.content || [];
-            const activeServices = data.filter(service => service.trangThai === true);
+            const activeServices = data.filter((service) => service.trangThai === true);
 
             const servicesWithImages = await Promise.all(
                 activeServices.map(async (service) => {
@@ -46,7 +46,7 @@ export default function DanhSachDichVu() {
     };
 
     const formatPrice = (price) => {
-        if (!price) return 'Lien he';
+        if (!price) return 'Liên hệ';
         return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
     };
 
@@ -55,20 +55,20 @@ export default function DanhSachDichVu() {
             <Navbar />
 
             <div style={{ backgroundColor: '#111', color: '#fff', padding: '60px 20px', textAlign: 'center' }}>
-                <h1 style={{ fontSize: '36px', fontFamily: 'Lora, serif', marginBottom: '16px' }}>Dich Vu Hau Mai Dang Cap</h1>
+                <h1 style={{ fontSize: '36px', fontFamily: 'Lora, serif', marginBottom: '16px' }}>Dịch Vụ Hậu Mãi Đẳng Cấp</h1>
                 <p style={{ color: '#9ca3af', maxWidth: '600px', margin: '0 auto', lineHeight: 1.6 }}>
-                    Bao duong, sua chua va cham soc xe chuyen nghiep voi he thong trang thiet bi hien dai.
+                    Bảo dưỡng, sửa chữa và chăm sóc xe chuyên nghiệp với hệ thống trang thiết bị hiện đại.
                 </p>
             </div>
 
             <div style={{ maxWidth: '1200px', margin: '60px auto', padding: '0 20px' }}>
                 {loading ? (
                     <div className="loading-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '30px' }}>
-                        {[1, 2, 3, 4, 5, 6].map(i => <div key={i} className="skeleton-card" style={{ height: '250px', background: '#e5e7eb', borderRadius: '8px' }}></div>)}
+                        {[1, 2, 3, 4, 5, 6].map((i) => <div key={i} className="skeleton-card" style={{ height: '250px', background: '#e5e7eb', borderRadius: '8px' }}></div>)}
                     </div>
                 ) : (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '30px' }}>
-                        {services.map(service => (
+                        {services.map((service) => (
                             <div key={service.id} style={{ border: '1px solid #e5e7eb', borderRadius: '8px', padding: '24px', display: 'flex', flexDirection: 'column', transition: 'all 0.3s ease', backgroundColor: '#fff' }} className="service-card">
                                 <div style={{ width: '100%', height: '220px', borderRadius: '10px', overflow: 'hidden', backgroundColor: '#f3f4f6', marginBottom: '20px' }}>
                                     {service.displayImage ? (
@@ -87,22 +87,22 @@ export default function DanhSachDichVu() {
                                 <h3 style={{ fontSize: '20px', margin: '0 0 12px 0', color: '#111' }}>{service.tenDichVu}</h3>
 
                                 <p style={{ color: '#6b7280', fontSize: '14px', lineHeight: 1.6, marginBottom: '24px', flex: 1, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                                    {service.moTa || 'Dich vu cham soc xe chuyen nghiep, giup xe van hanh on dinh va sach dep hon.'}
+                                    {service.moTa || 'Dịch vụ chăm sóc xe chuyên nghiệp, giúp xe vận hành ổn định và sạch đẹp hơn.'}
                                 </p>
 
                                 <div style={{ padding: '16px', backgroundColor: '#f9fafb', borderRadius: '8px', marginBottom: '20px' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '14px' }}>
-                                        <span style={{ color: '#6b7280' }}><FaClock style={{ marginRight: '6px' }} /> Thoi gian</span>
-                                        <span style={{ fontWeight: 600 }}>{service.thoiGianUocTinh || 'Lien he'}</span>
+                                        <span style={{ color: '#6b7280' }}><FaClock style={{ marginRight: '6px' }} /> Thời gian</span>
+                                        <span style={{ fontWeight: 600 }}>{service.thoiGianUocTinh || 'Liên hệ'}</span>
                                     </div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', alignItems: 'center' }}>
-                                        <span style={{ color: '#6b7280' }}>Gia du kien</span>
+                                        <span style={{ color: '#6b7280' }}>Giá dự kiến</span>
                                         <span style={{ fontWeight: 'bold', fontSize: '16px', color: '#ef4444' }}>{formatPrice(service.gia)}</span>
                                     </div>
                                 </div>
 
                                 <Link to={`/services/${service.id}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px', border: '1px solid #111', color: '#111', textDecoration: 'none', borderRadius: '4px', fontWeight: 600, transition: 'all 0.2s' }}>
-                                    Xem Chi Tiet <FaArrowRight />
+                                    Xem Chi Tiết <FaArrowRight />
                                 </Link>
                             </div>
                         ))}

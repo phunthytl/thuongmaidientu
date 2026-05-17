@@ -38,7 +38,7 @@ public class GhnService {
 
     public BigDecimal calculateFee(Integer toDistrictId, String toWardCode, int weight, int length, int width,
             int height) {
-        String url = ghnConfig.getApiUrl() + "/v2/shipping-order/fee";
+        String url = ghnConfig.getApiUrl() + "/shipping-order/fee";
 
         Map<String, Object> request = new HashMap<>();
         request.put("service_type_id", 2); // 2 = Gói chuẩn (Standard)
@@ -69,7 +69,7 @@ public class GhnService {
     }
 
     public String createOrder(DonHang donHang) {
-        String url = ghnConfig.getApiUrl() + "/v2/shipping-order/create";
+        String url = ghnConfig.getApiUrl() + "/shipping-order/create";
 
         Map<String, Object> request = new HashMap<>();
         request.put("payment_type_id", 1); // 1 = Seller pays phí cho GHN (shop trả). COD KH thanh toán cả gốc + phí
@@ -164,7 +164,7 @@ public class GhnService {
     }
 
     public void cancelOrder(String orderCode) {
-        String url = ghnConfig.getApiUrl() + "/v2/switch-status/cancel";
+        String url = ghnConfig.getApiUrl() + "/switch-status/cancel";
         Map<String, Object> request = new HashMap<>();
         request.put("order_codes", List.of(orderCode));
 
@@ -217,7 +217,7 @@ public class GhnService {
 
     public String calculateFeeRaw(Integer toDistrictId, String toWardCode, int weight, int length, int width,
             int height) {
-        String url = ghnConfig.getApiUrl() + "/v2/shipping-order/fee";
+        String url = ghnConfig.getApiUrl() + "/shipping-order/fee";
         Map<String, Object> request = new HashMap<>();
         request.put("service_type_id", 2); // 2 = Giao chuẩn
         request.put("insurance_value", 0);

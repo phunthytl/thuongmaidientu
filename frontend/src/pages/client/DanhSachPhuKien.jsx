@@ -101,15 +101,14 @@ export default function DanhSachPhuKien() {
       <Navbar />
 
       <div className="products-page-layout">
-        {/* Sidebar Filters */}
         <aside className="filters-sidebar">
           <div className="filter-group">
             <h3><FaFilter /> Bộ lọc</h3>
             <div className="filter-item">
               <label>Loại phụ kiện</label>
-              <select 
-                value={params.loai} 
-                onChange={(e) => setParams({...params, loai: e.target.value, page: 0})}
+              <select
+                value={params.loai}
+                onChange={(e) => setParams({ ...params, loai: e.target.value, page: 0 })}
               >
                 <option value="">Tất cả</option>
                 {types.map(type => (
@@ -139,7 +138,6 @@ export default function DanhSachPhuKien() {
           </div>
         </aside>
 
-        {/* Main Content */}
         <main className="products-content">
           <div className="content-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
@@ -164,7 +162,7 @@ export default function DanhSachPhuKien() {
 
           {loading ? (
             <div className="loading-grid">
-              {[1,2,3,4,5,6].map(i => <div key={i} className="skeleton-card"></div>)}
+              {[1, 2, 3, 4, 5, 6].map((i) => <div key={i} className="skeleton-card"></div>)}
             </div>
           ) : (
             <>
@@ -213,14 +211,13 @@ export default function DanhSachPhuKien() {
                 })}
               </div>
 
-              {/* Pagination */}
               {totalPages > 1 && (
                 <div className="pagination">
                   {[...Array(totalPages)].map((_, i) => (
-                    <button 
-                      key={i} 
+                    <button
+                      key={i}
                       className={`page-btn ${params.page === i ? 'active' : ''}`}
-                      onClick={() => setParams({...params, page: i})}
+                      onClick={() => setParams({ ...params, page: i })}
                     >
                       {i + 1}
                     </button>

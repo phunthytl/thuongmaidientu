@@ -29,19 +29,20 @@ export default function Home() {
             const res = await productService.getFeaturedCars(0, 4);
             const cars = res?.data?.content || res?.content || [];
 
-            // Lấy ảnh cho từng xe
-            const carsWithImages = await Promise.all(cars.map(async (car) => {
-                try {
-                    const imgRes = await productService.getCarImages(car.id);
-                    const images = imgRes?.data || imgRes || [];
-                    return {
-                        ...car,
-                        displayImage: getSafeImage(images.length > 0 ? images[0].url : '', 'car')
-                    };
-                } catch (e) {
-                    return { ...car, displayImage: fallbackImages.car };
-                }
-            }));
+            const carsWithImages = await Promise.all(
+                cars.map(async (car) => {
+                    try {
+                        const imgRes = await productService.getCarImages(car.id);
+                        const images = imgRes?.data || imgRes || [];
+                        return {
+                            ...car,
+                            displayImage: getSafeImage(images.length > 0 ? images[0].url : '', 'car')
+                        };
+                    } catch (error) {
+                        return { ...car, displayImage: fallbackImages.car };
+                    }
+                })
+            );
 
             setFeaturedCars(carsWithImages);
         } catch (error) {
@@ -60,7 +61,6 @@ export default function Home() {
         <div className="home-container">
             <Navbar />
 
-            {/* Hero Section */}
             <section className="hero-section">
                 <div className="hero-slideshow">
                     <div className="hero-slide hero-slide-1"></div>
@@ -79,7 +79,6 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* Features Grid */}
             <section className="features-grid">
                 <div className="feature-card">
                     <div className="feature-icon-wrapper red">
@@ -111,7 +110,6 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* Featured Cars */}
             <section className="featured-cars">
                 <div className="section-header">
                     <h2>Xe Nổi Bật</h2>
@@ -120,11 +118,11 @@ export default function Home() {
 
                 {loading ? (
                     <div className="loading-grid">
-                        {[1, 2, 3, 4].map(i => <div key={i} className="skeleton-card"></div>)}
+                        {[1, 2, 3, 4].map((i) => <div key={i} className="skeleton-card"></div>)}
                     </div>
                 ) : (
                     <div className="cars-grid">
-                        {featuredCars.map(car => (
+                        {featuredCars.map((car) => (
                             <div key={car.id} className="car-card">
                                 <div className="car-image-container">
                                     <span className="car-tag">{car.dongXe || 'Premium'}</span>
@@ -156,7 +154,6 @@ export default function Home() {
                 )}
             </section>
 
-            {/* CTA Banner */}
             <section className="cta-banner">
                 <div className="cta-content">
                     <h2>Sẵn sàng để sở hữu chiếc xe mơ ước?</h2>
