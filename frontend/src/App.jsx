@@ -39,6 +39,7 @@ import Profile from './pages/client/Profile';
 import SearchResults from './pages/client/SearchResults';
 import HoTro from './pages/client/HoTro';
 import KhieuNaiCuaToi from './pages/client/KhieuNaiCuaToi';
+import VnpayResult from './pages/client/VnpayResult';
 import ProtectedRoute from './components/routes/ProtectedRoute';
 
 function App() {
@@ -68,6 +69,7 @@ function App() {
                         <ThanhToan />
                     </ProtectedRoute>
                 } />
+                <Route path="/thanh-toan/ket-qua" element={<VnpayResult />} />
                 <Route path="/register" element={<DangKy />} />
                 <Route path="/my-orders" element={
                     <ProtectedRoute allowedRoles={['KHACH_HANG', 'ADMIN', 'NHAN_VIEN']}>

@@ -92,7 +92,9 @@ export default function ThanhToan() {
         try {
             const res = await api.get('/ghn/provinces');
             const data = typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
-            setProvinces(data.data || []);
+            let list = data.data || [];
+            list = list.filter(p => p.ProvinceName && !p.ProvinceName.toLowerCase().includes('test') && !p.ProvinceName.includes('02'));
+            setProvinces(list);
         } catch (error) {
             console.error('Lỗi tải danh sách tỉnh thành:', error);
         }
@@ -102,7 +104,9 @@ export default function ThanhToan() {
         try {
             const res = await api.get(`/ghn/districts?provinceId=${provinceId}`);
             const data = typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
-            setDistricts(data.data || []);
+            let list = data.data || [];
+            list = list.filter(d => d.DistrictName && !d.DistrictName.toLowerCase().includes('test') && !d.DistrictName.includes('02'));
+            setDistricts(list);
         } catch (error) {
             console.error('Lỗi tải danh sách quận huyện:', error);
         }
@@ -112,7 +116,9 @@ export default function ThanhToan() {
         try {
             const res = await api.get(`/ghn/wards?districtId=${districtId}`);
             const data = typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
-            setWards(data.data || []);
+            let list = data.data || [];
+            list = list.filter(w => w.WardName && !w.WardName.toLowerCase().includes('test') && !w.WardName.includes('02'));
+            setWards(list);
         } catch (error) {
             console.error('Lỗi tải danh sách phường xã:', error);
         }

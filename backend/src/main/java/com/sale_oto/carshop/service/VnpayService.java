@@ -42,6 +42,7 @@ public class VnpayService {
     private final VnpayConfig vnpayConfig;
     private final DonHangRepository donHangRepository;
     private final ThanhToanRepository thanhToanRepository;
+    private final TonKhoService tonKhoService;
 
     public boolean isConfigured() {
         return hasText(vnpayConfig.getPaymentUrl()) && hasText(vnpayConfig.getTmnCode())
@@ -146,18 +147,37 @@ public class VnpayService {
         boolean paid = "00".equals(responseCode) && "00".equals(transactionStatus);
         thanhToan.setTrangThai(paid ? TrangThaiThanhToan.DA_THANH_TOAN : TrangThaiThanhToan.THAT_BAI);
         thanhToan.setDuLieuPhanHoi(toJson(params));
+
+        DonHang donHang = thanhToan.getDonHang();
+        Long donHangId = donHang != null ? donHang.getId() : null;
+        String maDonHang = donHang != null ? donHang.getMaDonHang() : null;
+
         if (paid) {
             thanhToan.setNgayThanhToan(parsePayDate(params.get("vnp_PayDate")));
+            thanhToanRepository.save(thanhToan);
+        } else {
+            if (donHang != null) {
+                if (donHang.getChiTietDonHangs() != null) {
+                    for (com.sale_oto.carshop.entity.ChiTietDonHang ct : donHang.getChiTietDonHangs()) {
+                        if (ct.getLoaiSanPham() == com.sale_oto.carshop.enums.LoaiSanPham.PHU_KIEN && ct.getPhuKien() != null) {
+                            Long targetKho = ct.getKhoHangId() != null ? ct.getKhoHangId() : (donHang.getKhoXuatHang() != null ? donHang.getKhoXuatHang().getId() : null);
+                            tonKhoService.increaseStock(ct.getPhuKien().getId(), targetKho, ct.getSoLuong());
+                        }
+                    }
+                }
+                donHangRepository.delete(donHang);
+            }
         }
-        thanhToanRepository.save(thanhToan);
 
-        return buildResult(
-                paid,
-                paid ? "Thanh toan VNPay thanh cong" : "Thanh toan VNPay khong thanh cong",
-                thanhToan,
-                txnRef,
-                responseCode,
-                transactionStatus);
+        return VnpayReturnResponse.builder()
+                .success(paid)
+                .message(paid ? "Thanh toan VNPay thanh cong" : "Thanh toan VNPay khong thanh cong")
+                .donHangId(donHangId)
+                .maDonHang(maDonHang)
+                .maGiaoDich(txnRef)
+                .responseCode(responseCode)
+                .transactionStatus(transactionStatus)
+                .build();
     }
 
     private void ensureConfigured() {

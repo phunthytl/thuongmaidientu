@@ -177,7 +177,7 @@ public class GhnService {
     }
 
     public String getProvinces() {
-        String url = ghnConfig.getApiUrl() + "/master-data/province";
+        String url = ghnConfig.getApiUrl().replace("/v2", "") + "/master-data/province";
         HttpEntity<String> entity = new HttpEntity<>(createHeaders());
         try {
             return restTemplate.exchange(url, HttpMethod.GET, entity, String.class).getBody();
@@ -188,12 +188,13 @@ public class GhnService {
     }
 
     public String getDistricts(Integer provinceId) {
-        String url = ghnConfig.getApiUrl() + "/master-data/district?province_id=" + provinceId;
+        String baseUrl = ghnConfig.getApiUrl().replace("/v2", "");
+        String url = baseUrl + "/master-data/district?province_id=" + provinceId;
         HttpEntity<String> entity = new HttpEntity<>(createHeaders());
         try {
             if (provinceId == null) {
                 return restTemplate
-                        .exchange(ghnConfig.getApiUrl() + "/master-data/district", HttpMethod.GET, entity, String.class)
+                        .exchange(baseUrl + "/master-data/district", HttpMethod.GET, entity, String.class)
                         .getBody();
             }
             return restTemplate.exchange(url, HttpMethod.GET, entity, String.class).getBody();
@@ -204,7 +205,7 @@ public class GhnService {
     }
 
     public String getWards(Integer districtId) {
-        String url = ghnConfig.getApiUrl() + "/master-data/ward?district_id=" + districtId;
+        String url = ghnConfig.getApiUrl().replace("/v2", "") + "/master-data/ward?district_id=" + districtId;
         HttpEntity<String> entity = new HttpEntity<>(createHeaders());
         try {
             return restTemplate.exchange(url, HttpMethod.GET, entity, String.class).getBody();

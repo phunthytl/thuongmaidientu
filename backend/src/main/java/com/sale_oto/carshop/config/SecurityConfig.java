@@ -84,6 +84,7 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.GET, "/api/danh-gia/**").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/media/**").permitAll()
                     .requestMatchers("/api/ghn/**").permitAll()
+                    .requestMatchers("/api/thanh-toan/vnpay/return").permitAll()
 
                     // Đánh giá ô tô - user-facing
                     // GET reviews + rating-summary: public (đã cover bởi rule GET /api/oto/** phía trên)
