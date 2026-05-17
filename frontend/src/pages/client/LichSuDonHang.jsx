@@ -63,11 +63,14 @@ export default function LichSuDonHang() {
                 phuKienId: selectedItem.loaiSanPham === 'PHU_KIEN' ? selectedItem.sanPhamId : null,
                 dichVuId: selectedItem.loaiSanPham === 'DICH_VU' ? selectedItem.sanPhamId : null,
                 diemDanhGia: reviewForm.diemDanhGia,
-                noiDung: reviewForm.noiDung
+                noiDung: reviewForm.noiDung,
+                lichHenId: selectedItem.lichHenId || null,
+                chiTietDonHangId: selectedItem.chiTietDonHangId || null
             };
             await api.post('/danh-gia', payload);
             alert('Cảm ơn bạn đã đánh giá sản phẩm!');
             setReviewModalOpen(false);
+            fetchData();
         } catch (error) {
             console.error('Error posting review:', error);
             alert(error.response?.data?.message || 'Có lỗi xảy ra khi gửi đánh giá');
@@ -178,12 +181,18 @@ export default function LichSuDonHang() {
                                                     <div style={{ textAlign: 'right' }}>
                                                         <div style={{ fontWeight: 700, marginBottom: '8px' }}>{formatPrice(item.donGia)}</div>
                                                         {order.trangThai === 'HOAN_THANH' && (
-                                                            <button 
-                                                                onClick={() => handleOpenReview(item)}
-                                                                style={{ padding: '4px 12px', background: '#fff', border: '1px solid #10b981', color: '#10b981', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', fontWeight: 600 }}
-                                                            >
-                                                                Đánh giá
-                                                            </button>
+                                                            item.daDanhGia ? (
+                                                                <span style={{ padding: '4px 12px', background: '#f3f4f6', color: '#6b7280', borderRadius: '4px', fontSize: '12px', fontWeight: 600 }}>
+                                                                    Đã đánh giá
+                                                                </span>
+                                                            ) : (
+                                                                <button
+                                                                    onClick={() => handleOpenReview({ ...item, chiTietDonHangId: item.id })}
+                                                                    style={{ padding: '4px 12px', background: '#fff', border: '1px solid #10b981', color: '#10b981', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', fontWeight: 600 }}
+                                                                >
+                                                                    Đánh giá
+                                                                </button>
+                                                            )
                                                         )}
                                                     </div>
                                                 </div>
@@ -236,7 +245,7 @@ export default function LichSuDonHang() {
                                         )}
                                         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px', gap: '12px' }}>
                                             {book.trangThai === 'CHO_XAC_NHAN' && (
-                                                <button 
+                                                <button
                                                     onClick={async () => {
                                                         if (window.confirm('Bạn có chắc chắn muốn hủy lịch hẹn này?')) {
                                                             try {
@@ -251,6 +260,37 @@ export default function LichSuDonHang() {
                                                 >
                                                     Hủy lịch
                                                 </button>
+                                            )}
+                                            {book.trangThai === 'DA_HOAN_THANH' && (
+                                                book.daDanhGia ? (
+                                                    <span style={{ padding: '8px 16px', borderRadius: '8px', background: '#f3f4f6', color: '#6b7280', fontWeight: 600 }}>
+                                                        Đã đánh giá
+                                                    </span>
+                                                ) : activeTab === 'DICH_VU' && book.dichVuId ? (
+                                                    <button
+                                                        onClick={() => handleOpenReview({
+                                                            loaiSanPham: 'DICH_VU',
+                                                            sanPhamId: book.dichVuId,
+                                                            tenSanPham: book.tenDoiTuong,
+                                                            lichHenId: book.id
+                                                        })}
+                                                        style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #10b981', background: '#fff', color: '#10b981', fontWeight: 600, cursor: 'pointer' }}
+                                                    >
+                                                        <FaStar style={{ marginRight: 6 }} /> Đánh giá
+                                                    </button>
+                                                ) : activeTab === 'OTO' && book.otoId ? (
+                                                    <button
+                                                        onClick={() => handleOpenReview({
+                                                            loaiSanPham: 'OTO',
+                                                            sanPhamId: book.otoId,
+                                                            tenSanPham: book.tenDoiTuong,
+                                                            lichHenId: book.id
+                                                        })}
+                                                        style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #10b981', background: '#fff', color: '#10b981', fontWeight: 600, cursor: 'pointer' }}
+                                                    >
+                                                        <FaStar style={{ marginRight: 6 }} /> Đánh giá
+                                                    </button>
+                                                ) : null
                                             )}
                                         </div>
                                     </div>

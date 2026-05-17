@@ -18,4 +18,5 @@ public class ChiTietDonHangResponse {
     private BigDecimal donGia;
     private BigDecimal thanhTien;
     private Long khoHangId;
+    private Boolean daDanhGia;
 }

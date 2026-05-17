@@ -3,6 +3,7 @@ package com.sale_oto.carshop.service;
 import com.sale_oto.carshop.dto.request.DanhGiaRequest;
 import com.sale_oto.carshop.dto.response.DanhGiaResponse;
 import com.sale_oto.carshop.entity.*;
+import com.sale_oto.carshop.exception.DuplicateResourceException;
 import com.sale_oto.carshop.exception.ResourceNotFoundException;
 import com.sale_oto.carshop.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -26,12 +27,23 @@ public class DanhGiaService {
         KhachHang khachHang = khachHangRepository.findById(request.getKhachHangId())
                 .orElseThrow(() -> new ResourceNotFoundException("Khách hàng", request.getKhachHangId()));
 
+        // Chặn đánh giá trùng: mỗi lịch hẹn / chi tiết đơn hàng chỉ 1 đánh giá
+        if (request.getLichHenId() != null && danhGiaRepository.existsByLichHenId(request.getLichHenId())) {
+            throw new DuplicateResourceException("Bạn đã đánh giá lịch hẹn này rồi.");
+        }
+        if (request.getChiTietDonHangId() != null
+                && danhGiaRepository.existsByChiTietDonHangId(request.getChiTietDonHangId())) {
+            throw new DuplicateResourceException("Bạn đã đánh giá sản phẩm này trong đơn hàng rồi.");
+        }
+
         DanhGia danhGia = new DanhGia();
         danhGia.setKhachHang(khachHang);
         danhGia.setLoaiSanPham(request.getLoaiSanPham());
         danhGia.setDiemDanhGia(request.getDiemDanhGia());
         danhGia.setNoiDung(request.getNoiDung());
         danhGia.setTrangThai(true);
+        danhGia.setLichHenId(request.getLichHenId());
+        danhGia.setChiTietDonHangId(request.getChiTietDonHangId());
 
         switch (request.getLoaiSanPham()) {
             case OTO -> {
@@ -55,22 +67,27 @@ public class DanhGiaService {
         return toResponse(danhGia);
     }
 
+    @Transactional(readOnly = true)
     public Page<DanhGiaResponse> getAll(Pageable pageable) {
         return danhGiaRepository.findAll(pageable).map(this::toResponse);
     }
 
+    @Transactional(readOnly = true)
     public Page<DanhGiaResponse> getByOto(Long otoId, Pageable pageable) {
         return danhGiaRepository.findByOtoId(otoId, pageable).map(this::toResponse);
     }
 
+    @Transactional(readOnly = true)
     public Page<DanhGiaResponse> getByPhuKien(Long phuKienId, Pageable pageable) {
         return danhGiaRepository.findByPhuKienId(phuKienId, pageable).map(this::toResponse);
     }
 
+    @Transactional(readOnly = true)
     public Page<DanhGiaResponse> getByDichVu(Long dichVuId, Pageable pageable) {
         return danhGiaRepository.findByDichVuId(dichVuId, pageable).map(this::toResponse);
     }
 
+    @Transactional(readOnly = true)
     public Page<DanhGiaResponse> getByKhachHang(Long khachHangId, Pageable pageable) {
         return danhGiaRepository.findByKhachHangId(khachHangId, pageable).map(this::toResponse);
     }
@@ -92,14 +109,16 @@ public class DanhGiaService {
 
         return DanhGiaResponse.builder()
                 .id(dg.getId())
-                .tenKhachHang(dg.getKhachHang().getHoTen())
-                .khachHangId(dg.getKhachHang().getId())
+                .tenKhachHang(dg.getKhachHang() != null ? dg.getKhachHang().getHoTen() : "Khách vãng lai")
+                .khachHangId(dg.getKhachHang() != null ? dg.getKhachHang().getId() : null)
                 .loaiSanPham(dg.getLoaiSanPham())
                 .tenSanPham(tenSanPham)
                 .diemDanhGia(dg.getDiemDanhGia())
                 .noiDung(dg.getNoiDung())
                 .trangThai(dg.getTrangThai())
                 .ngayTao(dg.getNgayTao())
+                .lichHenId(dg.getLichHenId())
+                .chiTietDonHangId(dg.getChiTietDonHangId())
                 .build();
     }
 }

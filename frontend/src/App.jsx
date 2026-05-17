@@ -1,4 +1,6 @@
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { useAuthStore } from './stores/authStore';
 import MinimalistAdminLayout from './components/layout/MinimalistAdminLayout';
 import AdminLogin from './pages/admin/DangNhap';
 import Dashboard from './pages/admin/TongQuan';
@@ -38,6 +40,14 @@ import SearchResults from './pages/client/SearchResults';
 import ProtectedRoute from './components/routes/ProtectedRoute';
 
 function App() {
+    const checkAuth = useAuthStore((s) => s.checkAuth);
+
+    useEffect(() => {
+        if (localStorage.getItem('access_token')) {
+            checkAuth();
+        }
+    }, [checkAuth]);
+
     return (
         <BrowserRouter>
             <Routes>

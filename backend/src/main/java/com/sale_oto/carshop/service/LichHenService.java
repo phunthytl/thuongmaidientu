@@ -22,6 +22,7 @@ public class LichHenService {
     private final DichVuRepository dichVuRepository;
     private final KhoHangRepository khoHangRepository;
     private final NguoiDungRepository nguoiDungRepository;
+    private final DanhGiaRepository danhGiaRepository;
 
     @Transactional
     public LichHenResponse create(LichHenRequest request) {
@@ -99,6 +100,8 @@ public class LichHenService {
                 .id(entity.getId())
                 .loaiLich(entity.getLoaiLich().name())
                 .tenDoiTuong(tenDoiTuong)
+                .otoId(entity.getOto() != null ? entity.getOto().getId() : null)
+                .dichVuId(entity.getDichVu() != null ? entity.getDichVu().getId() : null)
                 .tenChiNhanh(entity.getChiNhanh().getTenKho())
                 .hoTen(entity.getHoTen())
                 .soDienThoai(entity.getSoDienThoai())
@@ -108,6 +111,7 @@ public class LichHenService {
                 .ghiChu(entity.getGhiChu())
                 .trangThai(entity.getTrangThai().name())
                 .ngayTao(entity.getNgayTao())
+                .daDanhGia(danhGiaRepository.existsByLichHenId(entity.getId()))
                 .build();
     }
 }

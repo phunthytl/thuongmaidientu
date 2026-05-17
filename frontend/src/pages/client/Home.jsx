@@ -69,6 +69,12 @@ export default function Home() {
 
             {/* Hero Section */}
             <section className="hero-section">
+                <div className="hero-slideshow">
+                    <div className="hero-slide hero-slide-1"></div>
+                    <div className="hero-slide hero-slide-2"></div>
+                    <div className="hero-slide hero-slide-3"></div>
+                </div>
+                <div className="hero-bg-overlay"></div>
                 <div className="hero-content">
                     <p className="hero-subtitle">SỰ LỰA CHỌN HÀNG ĐẦU CHO XE SANG</p>
                     <h1 className="hero-title">Khám Phá <span className="highlight">Đẳng Cấp</span> Xe Hơi Mới Nhất</h1>
@@ -78,7 +84,6 @@ export default function Home() {
                         <Link to="/services" className="btn-secondary">Đặt lịch lái thử</Link>
                     </div>
                 </div>
-                <div className="hero-bg-overlay"></div>
             </section>
 
             {/* Features Grid */}

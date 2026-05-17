@@ -25,7 +25,7 @@ export default function ClientChiTietDichVu() {
             const [svcRes, reviewRes, branchRes, mediaRes] = await Promise.all([
                 api.get(`/dich-vu/${id}`),
                 api.get(`/danh-gia/dich-vu/${id}?size=10`).catch(() => ({ data: { data: { content: [] } } })),
-                api.get('/kho-hang').catch(() => ({ data: { data: [] } })), 
+                api.get('/kho-hang/active').catch(() => ({ data: { data: [] } })),
                 api.get(`/media/DICH_VU/${id}/images`).catch(() => ({ data: { data: [] } }))
             ]);
 
@@ -35,8 +35,7 @@ export default function ClientChiTietDichVu() {
             });
             setReviews(reviewRes.data?.data?.content || []);
 
-            const list = branchRes.data?.data || [];
-            const activeBranches = list.filter(branch => branch.trangThai);
+            const activeBranches = branchRes.data?.data || [];
             setBranches(activeBranches);
             if (activeBranches.length > 0) {
                 setSelectedBranchId(activeBranches[0].id);

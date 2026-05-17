@@ -19,4 +19,6 @@ public class DanhGiaResponse {
     private String noiDung;
     private Boolean trangThai;
     private LocalDateTime ngayTao;
+    private Long lichHenId;
+    private Long chiTietDonHangId;
 }
