@@ -50,6 +50,7 @@ public class DonHangService {
     private final KhoHangRepository khoHangRepository;
     private final TonKhoService tonKhoService;
     private final GhnService ghnService;
+    private final DanhGiaRepository danhGiaRepository;
 
     @Transactional
     public List<DonHangResponse> create(DonHangRequest request) {
@@ -118,17 +119,25 @@ public class DonHangService {
 
         boolean isPhuKienOrder = items.stream().anyMatch(i -> i.getLoaiSanPham() == LoaiSanPham.PHU_KIEN);
         if (isPhuKienOrder && diaChi != null) {
-            int totalWeight = donHang.getChiTietDonHangs().stream()
+            int totalWeight = chiTietList.stream()
                     .filter(ct -> ct.getLoaiSanPham() == LoaiSanPham.PHU_KIEN && ct.getPhuKien() != null)
-                    .mapToInt(ct -> ct.getSoLuong()
-                            * (ct.getPhuKien().getTrongLuong() != null ? ct.getPhuKien().getTrongLuong() : 500))
+                    .mapToInt(ct -> {
+                        Integer soLuong = ct.getSoLuong();
+                        Integer trongLuong = ct.getPhuKien().getTrongLuong();
+                        return (soLuong != null ? soLuong : 0) * (trongLuong != null ? trongLuong : 500);
+                    })
                     .sum();
             if (totalWeight <= 0) {
                 totalWeight = 500;
             }
 
-            BigDecimal phiVanChuyen = ghnService.calculateFee(
-                    null, null, totalWeight, 10, 10, 10);
+            BigDecimal phiVanChuyen = BigDecimal.ZERO;
+            if (diaChi.getGhnDistrictId() != null && diaChi.getGhnWardCode() != null) {
+                phiVanChuyen = ghnService.calculateFee(
+                        diaChi.getGhnDistrictId(),
+                        diaChi.getGhnWardCode(),
+                        totalWeight, 10, 10, 10);
+            }
             donHang.setPhiVanChuyen(phiVanChuyen);
             donHang.setTongTien(donHang.getTongTien().add(phiVanChuyen));
         }
@@ -310,6 +319,7 @@ public class DonHangService {
                 .donGia(ct.getDonGia())
                 .thanhTien(ct.getThanhTien())
                 .khoHangId(ct.getKhoHangId())
+                .daDanhGia(danhGiaRepository.existsByChiTietDonHangId(ct.getId()))
                 .build();
     }
 }

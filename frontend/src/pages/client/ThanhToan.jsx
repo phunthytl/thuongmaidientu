@@ -33,6 +33,8 @@ export default function ThanhToan() {
     const [selectedAddressId, setSelectedAddressId] = useState('');
     const [isAddingNew, setIsAddingNew] = useState(false);
 
+    const [paymentMethod, setPaymentMethod] = useState('COD'); // 'COD' or 'VNPAY'
+
     useEffect(() => {
         if (items.length === 0) {
             navigate('/cart');
@@ -90,7 +92,9 @@ export default function ThanhToan() {
         try {
             const res = await api.get('/ghn/provinces');
             const data = typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
-            setProvinces(data.data || []);
+            let list = data.data || [];
+            list = list.filter(p => p.ProvinceName && !p.ProvinceName.toLowerCase().includes('test') && !p.ProvinceName.includes('02'));
+            setProvinces(list);
         } catch (error) {
             console.error('Lỗi tải danh sách tỉnh thành:', error);
         }
@@ -100,7 +104,9 @@ export default function ThanhToan() {
         try {
             const res = await api.get(`/ghn/districts?provinceId=${provinceId}`);
             const data = typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
-            setDistricts(data.data || []);
+            let list = data.data || [];
+            list = list.filter(d => d.DistrictName && !d.DistrictName.toLowerCase().includes('test') && !d.DistrictName.includes('02'));
+            setDistricts(list);
         } catch (error) {
             console.error('Lỗi tải danh sách quận huyện:', error);
         }
@@ -110,7 +116,9 @@ export default function ThanhToan() {
         try {
             const res = await api.get(`/ghn/wards?districtId=${districtId}`);
             const data = typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
-            setWards(data.data || []);
+            let list = data.data || [];
+            list = list.filter(w => w.WardName && !w.WardName.toLowerCase().includes('test') && !w.WardName.includes('02'));
+            setWards(list);
         } catch (error) {
             console.error('Lỗi tải danh sách phường xã:', error);
         }
@@ -203,7 +211,29 @@ export default function ThanhToan() {
 
         try {
             setIsSubmitting(true);
-            await api.post('/don-hang', payload);
+            const donHangRes = await api.post('/don-hang', payload);
+            
+            // Xử lý VNPay nếu được chọn
+            if (paymentMethod === 'VNPAY') {
+                const createdOrders = donHangRes.data?.data || [];
+                if (createdOrders.length > 0) {
+                    // VNPay backend hiện tại yêu cầu đơn hàng phụ kiện
+                    const accessoryOrder = createdOrders.find(o => o.chiTietDonHangs.some(ct => ct.loaiSanPham === 'PHU_KIEN'));
+                    const orderToPay = accessoryOrder || createdOrders[0];
+                    
+                    try {
+                        const vnpayRes = await api.post(`/thanh-toan/vnpay/create/${orderToPay.id}`);
+                        if (vnpayRes.data && vnpayRes.data.data && vnpayRes.data.data.paymentUrl) {
+                            clearCart();
+                            window.location.href = vnpayRes.data.data.paymentUrl;
+                            return;
+                        }
+                    } catch (vnpayError) {
+                        console.error('Lỗi tạo URL VNPay:', vnpayError);
+                        alert(vnpayError.response?.data?.message || 'Có lỗi khi kết nối VNPay. Đơn hàng đã được ghi nhận.');
+                    }
+                }
+            }
             
             clearCart();
             alert('Đặt hàng thành công! Cảm ơn bạn đã tin tưởng CarSales.');
@@ -222,6 +252,8 @@ export default function ThanhToan() {
 
     const cartTotal = getTotalPrice();
     const finalTotal = cartTotal + shippingFee;
+
+    const isCheckoutDisabled = isSubmitting || (isAddingNew ? (!selectedProvince || !selectedDistrict || !selectedWard || !detailAddress.trim()) : !selectedAddressId);
 
     return (
         <div className="home-container">
@@ -428,19 +460,57 @@ export default function ThanhToan() {
                             <span className="total-price" style={{fontSize: '24px', color: '#ef4444'}}>{formatPrice(finalTotal)}</span>
                         </div>
                         
-                        <div style={{marginTop: '24px', padding: '16px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', display: 'flex', gap: '12px', alignItems: 'flex-start'}}>
-                            <FaMoneyBillWave color="#16a34a" size={24} style={{flexShrink: 0}} />
-                            <div>
-                                <h4 style={{margin: '0 0 4px 0', color: '#166534', fontSize: '14px'}}>Thanh toán khi nhận hàng (COD)</h4>
-                                <p style={{margin: 0, fontSize: '12px', color: '#15803d', lineHeight: 1.5}}>Bạn chỉ thanh toán khi đã nhận và kiểm tra đầy đủ sản phẩm.</p>
+                        <h3 style={{marginBottom: '16px', marginTop: '24px'}}>Phương thức thanh toán</h3>
+                        
+                        <div style={{display: 'flex', flexDirection: 'column', gap: '12px'}}>
+                            <div 
+                                onClick={() => setPaymentMethod('COD')}
+                                style={{
+                                    padding: '16px', 
+                                    background: paymentMethod === 'COD' ? '#f0fdf4' : '#fff', 
+                                    border: `2px solid ${paymentMethod === 'COD' ? '#16a34a' : '#e5e7eb'}`, 
+                                    borderRadius: '8px', 
+                                    display: 'flex', 
+                                    gap: '12px', 
+                                    alignItems: 'center',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s'
+                                }}
+                            >
+                                <input type="radio" checked={paymentMethod === 'COD'} readOnly style={{cursor: 'pointer'}} />
+                                <FaMoneyBillWave color="#16a34a" size={24} style={{flexShrink: 0}} />
+                                <div>
+                                    <h4 style={{margin: '0 0 4px 0', color: paymentMethod === 'COD' ? '#166534' : '#374151', fontSize: '14px'}}>Thanh toán khi nhận hàng (COD)</h4>
+                                </div>
+                            </div>
+
+                            <div 
+                                onClick={() => setPaymentMethod('VNPAY')}
+                                style={{
+                                    padding: '16px', 
+                                    background: paymentMethod === 'VNPAY' ? '#eff6ff' : '#fff', 
+                                    border: `2px solid ${paymentMethod === 'VNPAY' ? '#3b82f6' : '#e5e7eb'}`, 
+                                    borderRadius: '8px', 
+                                    display: 'flex', 
+                                    gap: '12px', 
+                                    alignItems: 'center',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s'
+                                }}
+                            >
+                                <input type="radio" checked={paymentMethod === 'VNPAY'} readOnly style={{cursor: 'pointer'}} />
+                                <img src="https://vnpay.vn/s1/statics.vnpay.vn/2023/6/0oxhzjmxbksr1686814746087.png" alt="VNPay" style={{width: '24px', height: 'auto', objectFit: 'contain', flexShrink: 0}} />
+                                <div>
+                                    <h4 style={{margin: '0 0 4px 0', color: paymentMethod === 'VNPAY' ? '#1e40af' : '#374151', fontSize: '14px'}}>Thanh toán qua VNPAY</h4>
+                                </div>
                             </div>
                         </div>
 
                         <button 
                             className="btn-checkout" 
                             onClick={handlePlaceOrder}
-                            disabled={isSubmitting || !selectedWard}
-                            style={{marginTop: '24px', opacity: (isSubmitting || !selectedWard) ? 0.7 : 1}}
+                            disabled={isCheckoutDisabled}
+                            style={{marginTop: '24px', opacity: isCheckoutDisabled ? 0.7 : 1}}
                         >
                             {isSubmitting ? 'Đang xử lý...' : 'ĐẶT HÀNG NGAY'}
                         </button>

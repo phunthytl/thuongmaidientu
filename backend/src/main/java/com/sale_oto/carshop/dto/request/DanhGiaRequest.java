@@ -27,4 +27,8 @@ public class DanhGiaRequest {
     private Integer diemDanhGia;
 
     private String noiDung;
+
+    // Nguồn đánh giá (1 trong 2 phải có)
+    private Long lichHenId;            // cho OTO (lái thử) & DICH_VU
+    private Long chiTietDonHangId;     // cho PHU_KIEN
 }

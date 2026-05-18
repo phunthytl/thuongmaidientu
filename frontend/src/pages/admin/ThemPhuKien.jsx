@@ -7,7 +7,7 @@ export default function ThemPhuKien() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     tenPhuKien: '', loaiPhuKien: '', hangSanXuat: '',
-    gia: '', soLuong: '', trongLuong: '500', moTa: ''
+    gia: '', trongLuong: '500', moTa: ''
   });
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -32,7 +32,6 @@ export default function ThemPhuKien() {
       const payload = {
         ...formData,
         gia: parseInt(formData.gia) || 0,
-        soLuong: parseInt(formData.soLuong) || 0,
         trongLuong: parseInt(formData.trongLuong) || 500
       };
       
@@ -53,7 +52,8 @@ export default function ThemPhuKien() {
           });
       }
 
-      navigate('/admin/products/accessories');
+      alert('Tạo phụ kiện thành công! Vui lòng phân bổ số lượng tồn kho cho từng chi nhánh.');
+      navigate('/admin/inventory/accessories');
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.message || 'Có lỗi xảy ra khi tạo phụ kiện');
@@ -101,23 +101,23 @@ export default function ThemPhuKien() {
               </div>
            </div>
 
-           {/* Dinh gia va Ton kho */}
+           {/* Dinh gia */}
            <div className="form-section">
-              <h3 className="section-heading">Định Giá & Số Lượng</h3>
-              
+              <h3 className="section-heading">Định Giá & Quy Cách</h3>
+
               <div className="form-group row-group">
                  <div className="col">
                    <label>Định Giá Bán Ra (VNĐ) *</label>
                    <input required type="number" name="gia" value={formData.gia} onChange={handleChange} placeholder="Ví dụ: 1200000" />
                  </div>
                  <div className="col">
-                   <label>Số Lượng Tồn Kho Ban Đầu *</label>
-                   <input required type="number" name="soLuong" value={formData.soLuong} onChange={handleChange} placeholder="50" />
-                 </div>
-                 <div className="col">
                    <label>Cân nặng (gram) *</label>
                    <input required type="number" name="trongLuong" value={formData.trongLuong} onChange={handleChange} placeholder="500" />
                  </div>
+              </div>
+
+              <div className="form-group" style={{ marginTop: '12px', padding: '12px 14px', background: '#fef3c7', border: '1px solid #fde68a', borderRadius: '10px', color: '#92400e', fontSize: '13px' }}>
+                 Số lượng tồn kho được quản lý theo từng chi nhánh tại mục <strong>Tồn kho Phụ kiện</strong>. Sau khi tạo phụ kiện, hệ thống sẽ tự chuyển bạn sang trang đó để phân bổ tồn.
               </div>
            </div>
 

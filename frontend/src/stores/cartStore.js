@@ -14,6 +14,10 @@ const loadGuestCart = () => {
 };
 
 const saveGuestCart = (items) => {
+  if (!items.length) {
+    localStorage.removeItem(GUEST_KEY);
+    return;
+  }
   localStorage.setItem(GUEST_KEY, JSON.stringify(items));
 };
 
@@ -32,7 +36,7 @@ const mapApiItem = (ct) => ({
 
 // ─── Store ────────────────────────────────────────────────────────────────────
 export const useCartStore = create((set, get) => ({
-  items:           [],
+  items:           loadGuestCart(),
   currentUserId:   null,
   khachHangId:     null,   // id bảng khach_hang (khác với user.id)
   isLoadingCart:   false,
@@ -100,7 +104,7 @@ export const useCartStore = create((set, get) => ({
 
   // ── Cập nhật số lượng ────────────────────────────────────────────────────
   updateQuantity: async (id, type, quantity) => {
-    const { currentUserId, items, khachHangId } = get();
+    const { currentUserId, items } = get();
 
     if (!currentUserId) {
       const newItems = items.map((i) =>
@@ -171,7 +175,7 @@ export const useCartStore = create((set, get) => ({
     }
 
     // Xóa guest cart sau khi merge
-    localStorage.removeItem(GUEST_KEY);
+    saveGuestCart([]);
   },
 
   // ── Cập nhật kho cho item ────────────────────────────────────────────────

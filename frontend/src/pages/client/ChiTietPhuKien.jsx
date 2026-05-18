@@ -1,35 +1,36 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  FaShoppingCart, 
-  FaShieldAlt, 
-  FaTruck, 
+import { Link, useParams } from 'react-router-dom';
+import {
+  FaShoppingCart,
+  FaShieldAlt,
+  FaTruck,
   FaTools,
   FaCheckCircle,
   FaWarehouse,
   FaMapMarkerAlt,
   FaStar,
-  FaInfoCircle
+  FaInfoCircle,
+  FaUserCircle
 } from 'react-icons/fa';
 import Navbar from '../../components/layout/Navbar';
 import { productService } from '../../services/productService';
 import { inventoryService } from '../../services/inventoryService';
-import { useAuthStore } from '../../stores/authStore';
+import { api } from '../../services/api';
 import { useCartStore } from '../../stores/cartStore';
 import { fallbackImages, getSafeImage } from '../../utils/imageFallback';
 import '../../assets/css/ChiTietSanPham.css';
 
 export default function ChiTietPhuKien() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const [accessory, setAccessory] = useState(null);
   const [warehouses, setWarehouses] = useState([]);
   const [selectedKho, setSelectedKho] = useState(null);
+  const [reviews, setReviews] = useState([]);
+  const [similarAccessories, setSimilarAccessories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [addingToCart, setAddingToCart] = useState(false);
   const [mainImage, setMainImage] = useState(fallbackImages.accessory);
-  const { isAuthenticated } = useAuthStore();
   const { addToCart } = useCartStore();
 
   useEffect(() => {
@@ -39,15 +40,20 @@ export default function ChiTietPhuKien() {
   const fetchDetail = async () => {
     try {
       setLoading(true);
-      const [accRes, stockRes] = await Promise.all([
+      const [accRes, stockRes, reviewRes, similarRes] = await Promise.all([
         productService.getAccessoryDetail(id),
-        inventoryService.getStockByPhuKien(id).catch(() => ({ data: [] }))
+        inventoryService.getStockByPhuKien(id).catch(() => ({ data: [] })),
+        api.get(`/danh-gia/phu-kien/${id}?size=10`).catch(() => ({ data: { data: { content: [] } } })),
+        productService.getSimilarAccessories(id, 4).catch(() => ({ data: [] }))
       ]);
 
       const accData = accRes?.data || accRes;
       setAccessory(accData);
       setMainImage(getSafeImage(accData?.hinhAnhs?.[0], 'accessory'));
-      
+
+      setReviews(reviewRes?.data?.data?.content || []);
+      setSimilarAccessories(similarRes?.data || similarRes?.data?.data || []);
+
       const stocks = stockRes?.data || [];
       setWarehouses(stocks);
       
@@ -64,12 +70,6 @@ export default function ChiTietPhuKien() {
   };
 
   const handleAddToCart = async () => {
-    if (!isAuthenticated) {
-      alert('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng!');
-      navigate('/login');
-      return;
-    }
-
     if (!selectedKho || addingToCart) {
       return;
     }
@@ -139,6 +139,12 @@ export default function ChiTietPhuKien() {
         .stock-badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
         .stock-badge.in-stock { background: #dcfce7; color: #166534; }
         .stock-badge.out-of-stock { background: #fee2e2; color: #991b1b; }
+        .similar-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
+        .similar-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; text-decoration: none; color: inherit; transition: all 0.2s ease; }
+        .similar-card:hover { transform: translateY(-3px); box-shadow: 0 12px 24px rgba(0,0,0,0.08); border-color: #111; }
+        .similar-image { width: 100%; aspect-ratio: 4/3; object-fit: contain; background: #f9fafb; display: block; padding: 14px; box-sizing: border-box; }
+        @media (max-width: 992px) { .similar-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (max-width: 640px) { .similar-grid { grid-template-columns: 1fr; } }
       `}</style>
       
       <div className="product-detail-layout" style={{ maxWidth: '1280px', margin: '40px auto', padding: '0 20px' }}>
@@ -241,6 +247,86 @@ export default function ChiTietPhuKien() {
           </div>
         </div>
       </div>
+
+      <div style={{ maxWidth: '1280px', margin: '40px auto 0', padding: '0 20px' }}>
+        <div style={{ backgroundColor: '#fff', borderRadius: '16px', padding: '32px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
+          <h2 style={{ fontSize: '24px', fontWeight: 800, borderBottom: '1px solid #e5e7eb', paddingBottom: '16px', marginBottom: '24px', color: '#111' }}>
+            Đánh giá khách hàng ({reviews.length})
+          </h2>
+          {reviews.length === 0 ? (
+            <div style={{ padding: '60px 20px', textAlign: 'center', background: '#f9fafb', borderRadius: '12px', color: '#6b7280' }}>
+              Chưa có ai đánh giá phụ kiện này.
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              {reviews.map(review => (
+                <div key={review.id} style={{ padding: '24px', backgroundColor: '#f9fafb', borderRadius: '12px', display: 'flex', gap: '20px' }}>
+                  <div style={{ flexShrink: 0 }}>
+                    <div style={{ width: '48px', height: '48px', backgroundColor: '#e5e7eb', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <FaUserCircle style={{ fontSize: '32px', color: '#9ca3af' }} />
+                    </div>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <div>
+                        <div style={{ fontWeight: 700, color: '#111', fontSize: '16px' }}>{review.tenKhachHang || 'Khách hàng'}</div>
+                        <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '2px' }}>{review.ngayTao ? new Date(review.ngayTao).toLocaleDateString('vi-VN') : ''}</div>
+                      </div>
+                      <div style={{ display: 'flex', gap: '4px' }}>
+                        {[...Array(5)].map((_, index) => (
+                          <FaStar key={index} color={index < review.diemDanhGia ? '#fbbf24' : '#e5e7eb'} size={16} />
+                        ))}
+                      </div>
+                    </div>
+                    <p style={{ margin: 0, color: '#4b5563', lineHeight: 1.6, fontSize: '15px' }}>
+                      {review.noiDung || 'Khách hàng không để lại bình luận.'}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {similarAccessories.length > 0 && (
+        <div style={{ maxWidth: '1280px', margin: '40px auto 0', padding: '0 20px' }}>
+          <div style={{ backgroundColor: '#fff', borderRadius: '16px', padding: '32px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
+            <h2 style={{ fontSize: '24px', fontWeight: 800, margin: '0 0 24px 0', color: '#111' }}>
+              Sản phẩm tương tự
+            </h2>
+            <div className="similar-grid">
+              {similarAccessories.map(item => (
+                <Link key={item.id} to={`/products/accessory/${item.id}`} className="similar-card">
+                  <img
+                    src={getSafeImage(item.hinhAnhs?.[0], 'accessory')}
+                    alt={item.tenPhuKien}
+                    className="similar-image"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = fallbackImages.accessory;
+                    }}
+                  />
+                  <div style={{ padding: '16px' }}>
+                    <div style={{ fontSize: '13px', color: '#6b7280', fontWeight: 700, textTransform: 'uppercase', marginBottom: '8px' }}>
+                      {item.loaiPhuKien}
+                    </div>
+                    <h3 style={{ fontSize: '16px', lineHeight: 1.4, minHeight: '44px', margin: '0 0 12px 0', color: '#111' }}>
+                      {item.tenPhuKien}
+                    </h3>
+                    <div style={{ color: '#6b7280', fontSize: '14px', marginBottom: '10px' }}>
+                      {item.hangSanXuat}
+                    </div>
+                    <div style={{ fontWeight: 800, color: '#ef4444', fontSize: '17px' }}>
+                      {formatPrice(item.gia)}
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

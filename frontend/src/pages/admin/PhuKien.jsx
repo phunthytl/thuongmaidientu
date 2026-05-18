@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../services/api';
 import '../../assets/css/DanhSach.css';
@@ -7,11 +7,12 @@ export default function PhuKien() {
     const navigate = useNavigate();
     const [inventory, setInventory] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [selectedHang, setSelectedHang] = useState('');
 
     useEffect(() => {
         const fetchInventory = async () => {
             try {
-                const res = await api.get('/phu-kien?size=15'); // Fetch phu kien
+                const res = await api.get('/phu-kien?size=1000');
                 if (res.data?.data?.content) {
                     setInventory(res.data.data.content);
                 }
@@ -23,6 +24,22 @@ export default function PhuKien() {
         };
         fetchInventory();
     }, []);
+
+    const hangList = useMemo(() => {
+        const set = new Set(
+            inventory
+                .map(item => (item.hangSanXuat || '').trim())
+                .filter(Boolean)
+        );
+        return Array.from(set).sort((a, b) => a.localeCompare(b, 'vi'));
+    }, [inventory]);
+
+    const filteredInventory = useMemo(() => {
+        if (!selectedHang) return inventory;
+        return inventory.filter(
+            item => (item.hangSanXuat || '').trim().toLowerCase() === selectedHang.toLowerCase()
+        );
+    }, [inventory, selectedHang]);
 
     const handleDelete = async (id, name) => {
         if (window.confirm(`Xác nhận xóa phụ kiện: ${name} (Mã số: PK-${id})? Hành động này không thể hoàn tác.`)) {
@@ -48,10 +65,36 @@ export default function PhuKien() {
                     <h2 className="products-subtitle">Phân Hệ Kho</h2>
                     <h1 className="products-title">Sản Phẩm: Phụ Kiện</h1>
                 </div>
-                <div className="action-group">
+                <div className="action-group" style={{ display: 'flex', gap: '10px' }}>
+                    <button
+                        className="btn-add-product"
+                        style={{ background: '#fff', color: '#111', border: '2px solid #111' }}
+                        onClick={() => navigate('/admin/inventory/accessories')}
+                    >
+                        Quản lý Tồn kho
+                    </button>
                     <button className="btn-add-product" onClick={() => navigate('/admin/products/accessories/new')}>Thêm Phụ Kiện Mới</button>
                 </div>
             </header>
+
+            <div className="filter-bar">
+                <label className="filter-label">Lọc theo hãng sản xuất:</label>
+                <select
+                    className="filter-select"
+                    value={selectedHang}
+                    onChange={(e) => setSelectedHang(e.target.value)}
+                >
+                    <option value="">Tất cả hãng</option>
+                    {hangList.map(hang => (
+                        <option key={hang} value={hang}>{hang}</option>
+                    ))}
+                </select>
+                {selectedHang && (
+                    <span className="filter-count">
+                        Đang hiển thị {filteredInventory.length} / {inventory.length} phụ kiện
+                    </span>
+                )}
+            </div>
 
             <div className="products-table-wrapper">
                 <div className="table-header">
@@ -66,10 +109,14 @@ export default function PhuKien() {
                 <div className="table-body">
                     {loading ? (
                         <div className="table-loading">Đang kết nối kho dữ liệu...</div>
-                    ) : inventory.length === 0 ? (
-                        <div className="table-empty">Kho phụ kiện hiện đang trống.</div>
+                    ) : filteredInventory.length === 0 ? (
+                        <div className="table-empty">
+                            {inventory.length === 0
+                                ? 'Kho phụ kiện hiện đang trống.'
+                                : `Không có phụ kiện nào thuộc hãng "${selectedHang}".`}
+                        </div>
                     ) : (
-                        inventory.map((item) => (
+                        filteredInventory.map((item) => (
                             <div key={item.id} className="table-row">
                                 <div className="col-id">PK-{item.id || 'N/A'}</div>
                                 <div className="col-name">
@@ -77,10 +124,22 @@ export default function PhuKien() {
                                     {item.loaiPhuKien && <span className="brand-badge">{item.loaiPhuKien}</span>}
                                 </div>
                                 <div className="col-brand">{item.hangSanXuat || '---'}</div>
-                                <div className="col-amount">{item.soLuong || 0} hộp</div>
+                                <div className="col-amount">
+                                    <span style={{
+                                        padding: '4px 10px',
+                                        borderRadius: '20px',
+                                        fontSize: '12px',
+                                        fontWeight: 700,
+                                        background: (item.soLuong || 0) > 0 ? '#dcfce7' : '#fee2e2',
+                                        color: (item.soLuong || 0) > 0 ? '#166534' : '#991b1b'
+                                    }}>
+                                        {(item.soLuong || 0) > 0 ? `Còn ${item.soLuong}` : 'Hết hàng'}
+                                    </span>
+                                </div>
                                 <div className="col-price">{formatPrice(item.gia)}</div>
                                 <div className="col-actions">
                                     <button className="btn-action view" onClick={() => navigate(`/admin/products/accessories/${item.id}`)}>Hồ Sơ</button>
+                                    <button className="btn-action view" onClick={() => navigate('/admin/inventory/accessories')}>Tồn kho</button>
                                     <button className="btn-action delete" onClick={() => handleDelete(item.id, item.tenPhuKien)}>Xóa</button>
                                 </div>
                             </div>

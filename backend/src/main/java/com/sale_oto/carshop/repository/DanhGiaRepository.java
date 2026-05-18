@@ -27,4 +27,8 @@ public interface DanhGiaRepository extends JpaRepository<DanhGia, Long> {
 
     @Query("SELECT AVG(dg.diemDanhGia) FROM DanhGia dg WHERE dg.dichVu.id = :dichVuId AND dg.trangThai = true")
     Double getAverageRatingByDichVuId(@Param("dichVuId") Long dichVuId);
+
+    boolean existsByLichHenId(Long lichHenId);
+
+    boolean existsByChiTietDonHangId(Long chiTietDonHangId);
 }

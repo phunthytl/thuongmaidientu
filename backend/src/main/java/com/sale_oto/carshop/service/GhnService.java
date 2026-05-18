@@ -5,10 +5,12 @@ import com.sale_oto.carshop.entity.DonHang;
 import com.sale_oto.carshop.entity.ChiTietDonHang;
 import com.sale_oto.carshop.entity.DiaChiKhachHang;
 import com.sale_oto.carshop.entity.KhoHang;
+import com.sale_oto.carshop.repository.KhoHangRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
@@ -23,6 +25,7 @@ import java.util.Map;
 public class GhnService {
 
     private final GhnConfig ghnConfig;
+    private final KhoHangRepository khoHangRepository;
     private final RestTemplate restTemplate = new RestTemplate();
 
     private HttpHeaders createHeaders() {
@@ -35,7 +38,7 @@ public class GhnService {
 
     public BigDecimal calculateFee(Integer toDistrictId, String toWardCode, int weight, int length, int width,
             int height) {
-        String url = ghnConfig.getApiUrl() + "/shipping-order/fee";
+        String url = ghnConfig.getApiUrl() + "/v2/shipping-order/fee";
 
         Map<String, Object> request = new HashMap<>();
         request.put("service_type_id", 2); // 2 = Gói chuẩn (Standard)
@@ -59,14 +62,14 @@ public class GhnService {
                     return new BigDecimal(data.get("total").toString());
                 }
             }
-        } catch (Exception e) {
+        } catch (RestClientException e) {
             log.error("Error calculating GHN fee", e);
         }
         return BigDecimal.ZERO;
     }
 
     public String createOrder(DonHang donHang) {
-        String url = ghnConfig.getApiUrl() + "/shipping-order/create";
+        String url = ghnConfig.getApiUrl() + "/v2/shipping-order/create";
 
         Map<String, Object> request = new HashMap<>();
         request.put("payment_type_id", 1); // 1 = Seller pays phí cho GHN (shop trả). COD KH thanh toán cả gốc + phí
@@ -78,6 +81,9 @@ public class GhnService {
 
         DiaChiKhachHang diaChi = donHang.getDiaChiGiaoHang();
         KhoHang kho = donHang.getKhoXuatHang();
+        if (kho == null) {
+            kho = khoHangRepository.findByTrangThai(true).stream().findFirst().orElse(null);
+        }
 
         // ── FROM (Kho xuất hàng) - GHN cần cả tên lẫn mã ID ──
         if (kho != null) {
@@ -99,16 +105,20 @@ public class GhnService {
             request.put("to_ward_code", diaChi.getGhnWardCode());
         } else {
             // Fallback: dùng mã GHN của kho xuát (tạm thời để test)
-            request.put("to_district_id", kho != null ? kho.getGhnDistrictId() : 0);
-            request.put("to_ward_code", kho != null ? kho.getGhnWardCode() : "");
+            Integer fallbackDistrictId = kho != null ? kho.getGhnDistrictId() : null;
+            request.put("to_district_id", fallbackDistrictId != null ? fallbackDistrictId : 0);
+            request.put("to_ward_code", kho != null && kho.getGhnWardCode() != null ? kho.getGhnWardCode() : "");
         }
 
         // Tính cân nặng thực tế từ sản phẩm
         int totalWeight = donHang.getChiTietDonHangs().stream()
                 .filter(ct -> ct.getLoaiSanPham() == com.sale_oto.carshop.enums.LoaiSanPham.PHU_KIEN
                         && ct.getPhuKien() != null)
-                .mapToInt(ct -> ct.getSoLuong()
-                        * (ct.getPhuKien().getTrongLuong() != null ? ct.getPhuKien().getTrongLuong() : 500))
+                .mapToInt(ct -> {
+                    Integer soLuong = ct.getSoLuong();
+                    Integer trongLuong = ct.getPhuKien().getTrongLuong();
+                    return (soLuong != null ? soLuong : 0) * (trongLuong != null ? trongLuong : 500);
+                })
                 .sum();
         if (totalWeight <= 0)
             totalWeight = 500; // Default
@@ -128,9 +138,8 @@ public class GhnService {
             item.put("name", name);
             item.put("quantity", ct.getSoLuong());
             item.put("price", ct.getDonGia().intValue());
-            int itemWeight = ct.getPhuKien() != null && ct.getPhuKien().getTrongLuong() != null
-                    ? ct.getPhuKien().getTrongLuong()
-                    : 500;
+            Integer ctTrongLuong = ct.getPhuKien() != null ? ct.getPhuKien().getTrongLuong() : null;
+            int itemWeight = ctTrongLuong != null ? ctTrongLuong : 500;
             item.put("weight", itemWeight);
             items.add(item);
         }
@@ -148,58 +157,59 @@ public class GhnService {
                 }
             }
             throw new RuntimeException("Tạo đơn lỗi: " + root);
-        } catch (Exception e) {
+        } catch (RestClientException e) {
             log.error("Error creating GHN order", e);
             throw new RuntimeException("Lỗi tạo đơn GHN: " + e.getMessage());
         }
     }
 
     public void cancelOrder(String orderCode) {
-        String url = ghnConfig.getApiUrl() + "/switch-status/cancel";
+        String url = ghnConfig.getApiUrl() + "/v2/switch-status/cancel";
         Map<String, Object> request = new HashMap<>();
         request.put("order_codes", List.of(orderCode));
 
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, createHeaders());
         try {
             restTemplate.postForEntity(url, entity, String.class);
-        } catch (Exception e) {
+        } catch (RestClientException e) {
             log.error("Error canceling GHN order", e);
         }
     }
 
     public String getProvinces() {
-        String url = ghnConfig.getApiUrl() + "/master-data/province";
+        String url = ghnConfig.getApiUrl().replace("/v2", "") + "/master-data/province";
         HttpEntity<String> entity = new HttpEntity<>(createHeaders());
         try {
             return restTemplate.exchange(url, HttpMethod.GET, entity, String.class).getBody();
-        } catch (Exception e) {
+        } catch (RestClientException e) {
             log.error("Error getting provinces from GHN", e);
             throw new RuntimeException("Error fetching provinces");
         }
     }
 
     public String getDistricts(Integer provinceId) {
-        String url = ghnConfig.getApiUrl() + "/master-data/district?province_id=" + provinceId;
+        String baseUrl = ghnConfig.getApiUrl().replace("/v2", "");
+        String url = baseUrl + "/master-data/district?province_id=" + provinceId;
         HttpEntity<String> entity = new HttpEntity<>(createHeaders());
         try {
             if (provinceId == null) {
                 return restTemplate
-                        .exchange(ghnConfig.getApiUrl() + "/master-data/district", HttpMethod.GET, entity, String.class)
+                        .exchange(baseUrl + "/master-data/district", HttpMethod.GET, entity, String.class)
                         .getBody();
             }
             return restTemplate.exchange(url, HttpMethod.GET, entity, String.class).getBody();
-        } catch (Exception e) {
+        } catch (RestClientException e) {
             log.error("Error getting districts from GHN", e);
             throw new RuntimeException("Error fetching districts");
         }
     }
 
     public String getWards(Integer districtId) {
-        String url = ghnConfig.getApiUrl() + "/master-data/ward?district_id=" + districtId;
+        String url = ghnConfig.getApiUrl().replace("/v2", "") + "/master-data/ward?district_id=" + districtId;
         HttpEntity<String> entity = new HttpEntity<>(createHeaders());
         try {
             return restTemplate.exchange(url, HttpMethod.GET, entity, String.class).getBody();
-        } catch (Exception e) {
+        } catch (RestClientException e) {
             log.error("Error getting wards from GHN", e);
             throw new RuntimeException("Error fetching wards");
         }
@@ -207,7 +217,7 @@ public class GhnService {
 
     public String calculateFeeRaw(Integer toDistrictId, String toWardCode, int weight, int length, int width,
             int height) {
-        String url = ghnConfig.getApiUrl() + "/shipping-order/fee";
+        String url = ghnConfig.getApiUrl() + "/v2/shipping-order/fee";
         Map<String, Object> request = new HashMap<>();
         request.put("service_type_id", 2); // 2 = Giao chuẩn
         request.put("insurance_value", 0);
@@ -221,7 +231,7 @@ public class GhnService {
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, createHeaders());
         try {
             return restTemplate.postForEntity(url, entity, String.class).getBody();
-        } catch (Exception e) {
+        } catch (RestClientException e) {
             log.error("Error calculating fee raw", e);
             throw new RuntimeException("Error calculating fee");
         }

@@ -8,7 +8,8 @@ export default function ChiTietKhieuNai() {
     const navigate = useNavigate();
     const [dispute, setDispute] = useState(null);
     const [loading, setLoading] = useState(true);
-    
+    const [images, setImages] = useState([]);
+
     // Reply and status state
     const [replyText, setReplyText] = useState('');
     const [selectedStatus, setSelectedStatus] = useState('');
@@ -22,11 +23,19 @@ export default function ChiTietKhieuNai() {
                 const data = res.data?.data;
                 setDispute(data);
                 setSelectedStatus(data?.trangThai || 'MOI');
-                
+
                 // Get current HR user for NhanVienId
                 const userRes = await api.get('/auth/me');
                 if (userRes.data?.data) {
                     setCurrentUser(userRes.data.data);
+                }
+
+                // Lấy ảnh đính kèm
+                try {
+                    const imgRes = await api.get(`/media/KHIEU_NAI/${id}/images`);
+                    setImages(imgRes.data?.data || []);
+                } catch (imgErr) {
+                    console.warn('Không tải được ảnh đính kèm', imgErr);
                 }
             } catch (err) {
                 console.error(err);
@@ -106,6 +115,19 @@ export default function ChiTietKhieuNai() {
                         <div style={{background: '#f9fafb', padding: '16px', borderRadius: '8px', border: '1px solid #e5e7eb', marginTop: '12px'}}>
                              <p style={{whiteSpace: 'pre-wrap', lineHeight: '1.6'}}>{dispute.noiDung}</p>
                         </div>
+
+                        {images.length > 0 && (
+                            <div style={{marginTop: '20px'}}>
+                                <h3>Bằng Chứng Đính Kèm ({images.length} ảnh)</h3>
+                                <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '12px', marginTop: '12px'}}>
+                                    {images.map(img => (
+                                        <a key={img.id} href={img.url} target="_blank" rel="noopener noreferrer">
+                                            <img src={img.url} alt="" style={{width: '100%', height: '140px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #e5e7eb', cursor: 'zoom-in'}} />
+                                        </a>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
 

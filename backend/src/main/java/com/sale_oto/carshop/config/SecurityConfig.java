@@ -75,6 +75,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                     // Public - Authentication
                     .requestMatchers("/api/auth/**").permitAll()
+                    .requestMatchers("/api/search/**").permitAll()
 
                     // Public - Xem sản phẩm (GET only)
                     .requestMatchers(HttpMethod.GET, "/api/oto/**").permitAll()
@@ -83,6 +84,7 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.GET, "/api/danh-gia/**").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/media/**").permitAll()
                     .requestMatchers("/api/ghn/**").permitAll()
+                    .requestMatchers("/api/thanh-toan/vnpay/return").permitAll()
 
                     // Đánh giá ô tô - user-facing
                     // GET reviews + rating-summary: public (đã cover bởi rule GET /api/oto/** phía trên)
@@ -90,8 +92,8 @@ public class SecurityConfig {
                     // GET /api/user/reviews: yêu cầu đăng nhập (bất kỳ role nào)
                     .requestMatchers("/api/webhook/ghn/**").permitAll()
 
-                    // Media - Upload/Delete (Admin + NV)
-                    .requestMatchers(HttpMethod.POST, "/api/media/**").hasAnyRole("ADMIN", "NHAN_VIEN")
+                    // Media - Upload (Admin + NV + KH cho khiếu nại), Delete (Admin + NV)
+                    .requestMatchers(HttpMethod.POST, "/api/media/**").hasAnyRole("ADMIN", "NHAN_VIEN", "KHACH_HANG")
                     .requestMatchers(HttpMethod.DELETE, "/api/media/**").hasAnyRole("ADMIN", "NHAN_VIEN")
 
                     // Tồn kho - GET public, POST Admin/NV

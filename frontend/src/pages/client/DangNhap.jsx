@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { FaCar, FaArrowLeft } from 'react-icons/fa';
 import { useAuthStore } from '../../stores/authStore';
 import '../../assets/css/Login.css';
@@ -9,12 +9,13 @@ export default function ClientLogin() {
   const [matKhau, setMatKhau] = useState('');
   const { login, isLoading, error } = useAuthStore();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       await login(email, matKhau, 'CLIENT_SIDE');
-      navigate('/');
+      navigate(location.state?.from?.pathname || '/', { replace: true });
     } catch (err) {
       console.error('Login failed', err);
     }

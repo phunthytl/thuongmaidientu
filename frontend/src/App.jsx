@@ -1,4 +1,6 @@
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { useAuthStore } from './stores/authStore';
 import MinimalistAdminLayout from './components/layout/MinimalistAdminLayout';
 import AdminLogin from './pages/admin/DangNhap';
 import Dashboard from './pages/admin/TongQuan';
@@ -34,25 +36,40 @@ import DanhSachDichVu from './pages/client/DanhSachDichVu';
 import ClientChiTietDichVu from './pages/client/ClientChiTietDichVu';
 import ThanhToan from './pages/client/ThanhToan';
 import Profile from './pages/client/Profile';
+import SearchResults from './pages/client/SearchResults';
+import HoTro from './pages/client/HoTro';
+import KhieuNaiCuaToi from './pages/client/KhieuNaiCuaToi';
+import VnpayResult from './pages/client/VnpayResult';
 import ProtectedRoute from './components/routes/ProtectedRoute';
 
 function App() {
+    const checkAuth = useAuthStore((s) => s.checkAuth);
+
+    useEffect(() => {
+        if (localStorage.getItem('access_token')) {
+            checkAuth();
+        }
+    }, [checkAuth]);
+
     return (
         <BrowserRouter>
             <Routes>
                 <Route path="/" element={<Home />} />
+                <Route path="/search" element={<SearchResults />} />
                 <Route path="/products" element={<DanhSachOto />} />
                 <Route path="/products/oto/:id" element={<ClientChiTietOto />} />
                 <Route path="/accessories" element={<DanhSachPhuKien />} />
                 <Route path="/products/accessory/:id" element={<ClientChiTietPhuKien />} />
                 <Route path="/services" element={<DanhSachDichVu />} />
                 <Route path="/services/:id" element={<ClientChiTietDichVu />} />
+                <Route path="/support" element={<HoTro />} />
                 <Route path="/cart" element={<GioHang />} />
                 <Route path="/checkout" element={
                     <ProtectedRoute allowedRoles={['KHACH_HANG', 'ADMIN', 'NHAN_VIEN']}>
                         <ThanhToan />
                     </ProtectedRoute>
                 } />
+                <Route path="/thanh-toan/ket-qua" element={<VnpayResult />} />
                 <Route path="/register" element={<DangKy />} />
                 <Route path="/my-orders" element={
                     <ProtectedRoute allowedRoles={['KHACH_HANG', 'ADMIN', 'NHAN_VIEN']}>
@@ -62,6 +79,11 @@ function App() {
                 <Route path="/profile" element={
                     <ProtectedRoute allowedRoles={['KHACH_HANG', 'ADMIN', 'NHAN_VIEN']}>
                         <Profile />
+                    </ProtectedRoute>
+                } />
+                <Route path="/my-disputes" element={
+                    <ProtectedRoute allowedRoles={['KHACH_HANG', 'ADMIN', 'NHAN_VIEN']}>
+                        <KhieuNaiCuaToi />
                     </ProtectedRoute>
                 } />
 

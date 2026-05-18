@@ -34,6 +34,13 @@ public class OToController {
         return ResponseEntity.ok(ApiResponse.success(oToService.getById(id)));
     }
 
+    @GetMapping("/{id}/tuong-tu")
+    public ResponseEntity<ApiResponse<List<OToResponse>>> getSimilarProducts(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "4") int limit) {
+        return ResponseEntity.ok(ApiResponse.success(oToService.getSimilarProducts(id, limit)));
+    }
+
     @GetMapping
     public ResponseEntity<ApiResponse<Page<OToResponse>>> getAll(Pageable pageable) {
         return ResponseEntity.ok(ApiResponse.success(oToService.getAll(pageable)));
@@ -61,6 +68,16 @@ public class OToController {
     public ResponseEntity<ApiResponse<Page<OToResponse>>> search(
             @RequestParam String keyword, Pageable pageable) {
         return ResponseEntity.ok(ApiResponse.success(oToService.search(keyword, pageable)));
+    }
+
+    @GetMapping("/loc")
+    public ResponseEntity<ApiResponse<Page<OToResponse>>> filter(
+            @RequestParam(required = false) String hangXe,
+            @RequestParam(required = false) BigDecimal giaMin,
+            @RequestParam(required = false) BigDecimal giaMax,
+            @RequestParam(required = false) String keyword,
+            Pageable pageable) {
+        return ResponseEntity.ok(ApiResponse.success(oToService.filter(hangXe, giaMin, giaMax, keyword, pageable)));
     }
 
     @GetMapping("/hang-xe")

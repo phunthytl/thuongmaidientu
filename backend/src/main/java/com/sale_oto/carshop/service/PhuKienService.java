@@ -15,7 +15,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.Normalizer;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,6 +37,7 @@ public class PhuKienService {
     public PhuKienResponse create(PhuKienRequest request) {
         PhuKien pk = new PhuKien();
         mapRequestToEntity(request, pk);
+        pk.setSoLuong(0);
         pk.setTrangThai(true);
         pk = phuKienRepository.save(pk);
         return toResponse(pk);
@@ -53,8 +61,29 @@ public class PhuKienService {
         return phuKienRepository.search(keyword, pageable).map(this::toResponse);
     }
 
+    public Page<PhuKienResponse> filter(String loaiPhuKien, java.math.BigDecimal giaMin, java.math.BigDecimal giaMax, String keyword, Pageable pageable) {
+        String searchKeyword = (keyword != null && !keyword.isEmpty()) ? "%" + keyword + "%" : null;
+        return phuKienRepository
+                .filter(loaiPhuKien, giaMin, giaMax, searchKeyword, pageable)
+                .map(this::toResponse);
+    }
+
     public List<String> getAllLoaiPhuKien() {
         return phuKienRepository.findAllLoaiPhuKien();
+    }
+
+    public List<PhuKienResponse> getSimilarProducts(Long id, int limit) {
+        PhuKien target = phuKienRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Phá»¥ kiá»‡n", id));
+
+        int resultLimit = limit > 0 ? limit : 4;
+        return phuKienRepository.findByTrangThai(true).stream()
+                .filter(pk -> !pk.getId().equals(target.getId()))
+                .sorted(Comparator.comparingDouble((PhuKien pk) -> similarityScore(target, pk)).reversed()
+                        .thenComparing(PhuKien::getNgayTao, Comparator.nullsLast(Comparator.reverseOrder())))
+                .limit(resultLimit)
+                .map(this::toResponse)
+                .collect(Collectors.toList());
     }
 
     @Transactional
@@ -79,8 +108,8 @@ public class PhuKienService {
         pk.setLoaiPhuKien(request.getLoaiPhuKien());
         pk.setHangSanXuat(request.getHangSanXuat());
         pk.setGia(request.getGia());
-        pk.setSoLuong(request.getSoLuong() != null ? request.getSoLuong() : 0);
-        pk.setTrongLuong(request.getTrongLuong() != null ? request.getTrongLuong() : 500);
+        Integer trongLuong = request.getTrongLuong();
+        pk.setTrongLuong(trongLuong != null ? trongLuong : 500);
         pk.setMoTa(request.getMoTa());
     }
 
@@ -109,5 +138,84 @@ public class PhuKienService {
                 .ngayTao(pk.getNgayTao())
                 .ngayCapNhat(pk.getNgayCapNhat())
                 .build();
+    }
+
+    private double similarityScore(PhuKien target, PhuKien candidate) {
+        double score = 0;
+
+        score += sameText(target.getLoaiPhuKien(), candidate.getLoaiPhuKien()) ? 35 : 0;
+        score += sameText(target.getHangSanXuat(), candidate.getHangSanXuat()) ? 20 : 0;
+        score += numericSimilarity(target.getGia(), candidate.getGia(), 0.35) * 20;
+        score += integerSimilarity(target.getTrongLuong(), candidate.getTrongLuong(), 0.5) * 5;
+        score += tokenSimilarity(searchText(target), searchText(candidate)) * 25;
+
+        return score;
+    }
+
+    private boolean sameText(String left, String right) {
+        if (left == null || right == null) {
+            return false;
+        }
+        return normalize(left).equals(normalize(right));
+    }
+
+    private double numericSimilarity(BigDecimal left, BigDecimal right, double tolerance) {
+        if (left == null || right == null || BigDecimal.ZERO.compareTo(left) == 0) {
+            return 0;
+        }
+
+        double diffRatio = left.subtract(right).abs()
+                .divide(left, 6, RoundingMode.HALF_UP)
+                .doubleValue();
+        return Math.max(0, 1 - (diffRatio / tolerance));
+    }
+
+    private double integerSimilarity(Integer left, Integer right, double tolerance) {
+        if (left == null || right == null || left == 0) {
+            return 0;
+        }
+        double diffRatio = Math.abs(left - right) / (double) left;
+        return Math.max(0, 1 - (diffRatio / tolerance));
+    }
+
+    private String searchText(PhuKien pk) {
+        return String.join(" ",
+                safe(pk.getTenPhuKien()),
+                safe(pk.getLoaiPhuKien()),
+                safe(pk.getHangSanXuat()),
+                safe(pk.getMoTa()));
+    }
+
+    private double tokenSimilarity(String left, String right) {
+        Set<String> leftTokens = tokens(left);
+        Set<String> rightTokens = tokens(right);
+        if (leftTokens.isEmpty() || rightTokens.isEmpty()) {
+            return 0;
+        }
+
+        Set<String> intersection = new HashSet<>(leftTokens);
+        intersection.retainAll(rightTokens);
+
+        Set<String> union = new HashSet<>(leftTokens);
+        union.addAll(rightTokens);
+
+        return (double) intersection.size() / union.size();
+    }
+
+    private Set<String> tokens(String value) {
+        return Arrays.stream(normalize(value).split("\\s+"))
+                .filter(token -> token.length() >= 3)
+                .collect(Collectors.toSet());
+    }
+
+    private String normalize(String value) {
+        return Normalizer.normalize(safe(value).toLowerCase(), Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "")
+                .replaceAll("[^a-z0-9\\s]", " ")
+                .trim();
+    }
+
+    private String safe(String value) {
+        return value == null ? "" : value;
     }
 }

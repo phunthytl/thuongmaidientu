@@ -28,7 +28,12 @@ export default function LichDichVu() {
             await bookingService.updateBookingStatus(id, newStatus);
             setBookings(prev => prev.map(b => b.id === id ? { ...b, trangThai: newStatus } : b));
         } catch (err) {
-            alert('Cập nhật thất bại!');
+            console.error('Update status error:', err);
+            const msg = err.response?.data?.message
+                || err.response?.statusText
+                || err.message
+                || 'Không rõ lỗi';
+            alert(`Cập nhật thất bại! (${err.response?.status || ''}) ${msg}`);
         }
     };
 

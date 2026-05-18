@@ -7,17 +7,14 @@ import com.sale_oto.carshop.entity.ChiTietGioHang;
 import com.sale_oto.carshop.entity.DichVu;
 import com.sale_oto.carshop.entity.GioHang;
 import com.sale_oto.carshop.entity.KhachHang;
-import com.sale_oto.carshop.entity.OTo;
 import com.sale_oto.carshop.entity.PhuKien;
 import com.sale_oto.carshop.enums.LoaiSanPham;
-import com.sale_oto.carshop.enums.TrangThaiOTo;
 import com.sale_oto.carshop.exception.BadRequestException;
 import com.sale_oto.carshop.exception.ResourceNotFoundException;
 import com.sale_oto.carshop.repository.ChiTietGioHangRepository;
 import com.sale_oto.carshop.repository.DichVuRepository;
 import com.sale_oto.carshop.repository.GioHangRepository;
 import com.sale_oto.carshop.repository.KhachHangRepository;
-import com.sale_oto.carshop.repository.OToRepository;
 import com.sale_oto.carshop.repository.PhuKienRepository;
 import com.sale_oto.carshop.repository.MediaRepository;
 import com.sale_oto.carshop.enums.LoaiDoiTuong;
@@ -38,7 +35,6 @@ public class GioHangService {
     private final GioHangRepository gioHangRepository;
     private final ChiTietGioHangRepository chiTietGioHangRepository;
     private final KhachHangRepository khachHangRepository;
-    private final OToRepository oToRepository;
     private final PhuKienRepository phuKienRepository;
     private final DichVuRepository dichVuRepository;
     private final MediaRepository mediaRepository;
@@ -66,7 +62,8 @@ public class GioHangService {
 
         BigDecimal donGia = resolveProductAndPrice(chiTiet, request);
 
-        int soLuongMoi = (chiTiet.getId() == null ? 0 : chiTiet.getSoLuong()) + request.getSoLuong();
+        Integer soLuongHienTai = chiTiet.getId() == null ? null : chiTiet.getSoLuong();
+        int soLuongMoi = (soLuongHienTai != null ? soLuongHienTai : 0) + request.getSoLuong();
         validateAvailability(chiTiet, soLuongMoi);
 
         chiTiet.setSoLuong(soLuongMoi);
@@ -88,12 +85,12 @@ public class GioHangService {
         }
         ChiTietGioHang chiTiet = chiTietGioHangRepository.findById(chiTietId)
                 .orElseThrow(() -> new ResourceNotFoundException("Chi tiết giỏ hàng", chiTietId));
-        
+
         validateAvailability(chiTiet, soLuongMoi);
         chiTiet.setSoLuong(soLuongMoi);
         chiTiet.setThanhTien(chiTiet.getDonGia().multiply(BigDecimal.valueOf(soLuongMoi)));
         chiTietGioHangRepository.save(chiTiet);
-        
+
         GioHang gioHang = chiTiet.getGioHang();
         capNhatTongTien(gioHang);
         return getByKhachHang(gioHang.getKhachHang().getId());
@@ -114,11 +111,11 @@ public class GioHangService {
     public GioHangResponse xoaKhoiGio(Long chiTietId) {
         ChiTietGioHang chiTiet = chiTietGioHangRepository.findById(chiTietId)
                 .orElseThrow(() -> new ResourceNotFoundException("Chi tiết giỏ hàng", chiTietId));
-        
+
         GioHang gioHang = chiTiet.getGioHang();
         gioHang.getChiTietGioHangs().remove(chiTiet);
         chiTietGioHangRepository.delete(chiTiet);
-        
+
         capNhatTongTien(gioHang);
         return getByKhachHang(gioHang.getKhachHang().getId());
     }
@@ -127,7 +124,7 @@ public class GioHangService {
     public GioHangResponse xoaToanBoGio(Long khachHangId) {
         GioHang gioHang = gioHangRepository.findByKhachHangId(khachHangId)
                 .orElseThrow(() -> new ResourceNotFoundException("Giỏ hàng của khách hàng", khachHangId));
-        
+
         chiTietGioHangRepository.deleteAll(gioHang.getChiTietGioHangs());
         gioHang.getChiTietGioHangs().clear();
         gioHang.setTongTien(BigDecimal.ZERO);
@@ -166,7 +163,8 @@ public class GioHangService {
                 .filter(item -> item.getLoaiSanPham() == request.getLoaiSanPham())
                 .filter(item -> switch (request.getLoaiSanPham()) {
                     case OTO -> false;
-                    case PHU_KIEN -> item.getPhuKien() != null && item.getPhuKien().getId().equals(request.getPhuKienId());
+                    case PHU_KIEN ->
+                        item.getPhuKien() != null && item.getPhuKien().getId().equals(request.getPhuKienId());
                     case DICH_VU -> item.getDichVu() != null && item.getDichVu().getId().equals(request.getDichVuId());
                 })
                 .findFirst();
@@ -174,7 +172,8 @@ public class GioHangService {
 
     private BigDecimal resolveProductAndPrice(ChiTietGioHang chiTiet, ThemVaoGioHangRequest request) {
         return switch (request.getLoaiSanPham()) {
-            case OTO -> throw new BadRequestException("Ô tô hiện tại chỉ hỗ trợ đặt lịch lái thử, không thể thêm vào giỏ hàng.");
+            case OTO -> throw new BadRequestException(
+                    "Ô tô hiện tại chỉ hỗ trợ đặt lịch lái thử, không thể thêm vào giỏ hàng.");
             case PHU_KIEN -> {
                 if (request.getPhuKienId() == null) {
                     throw new BadRequestException("phuKienId không được để trống");
@@ -223,6 +222,7 @@ public class GioHangService {
                     throw new BadRequestException("Dịch vụ hiện không còn kinh doanh");
                 }
             }
+            default -> throw new BadRequestException("Loại sản phẩm không hỗ trợ trong giỏ hàng.");
         }
     }
 
@@ -253,15 +253,15 @@ public class GioHangService {
 
     private ChiTietGioHangResponse toChiTietResponse(ChiTietGioHang chiTiet) {
         String tenSanPham = switch (chiTiet.getLoaiSanPham()) {
-            case OTO -> "";
             case PHU_KIEN -> chiTiet.getPhuKien() != null ? chiTiet.getPhuKien().getTenPhuKien() : "";
             case DICH_VU -> chiTiet.getDichVu() != null ? chiTiet.getDichVu().getTenDichVu() : "";
+            default -> "Sản phẩm không xác định";
         };
 
         Long sanPhamId = switch (chiTiet.getLoaiSanPham()) {
-            case OTO -> null;
             case PHU_KIEN -> chiTiet.getPhuKien() != null ? chiTiet.getPhuKien().getId() : null;
             case DICH_VU -> chiTiet.getDichVu() != null ? chiTiet.getDichVu().getId() : null;
+            default -> null;
         };
 
         String hinhAnh = "";
@@ -277,8 +277,10 @@ public class GioHangService {
         }
 
         if (idForMedia != null && loaiDoiTuong != null) {
-            List<Media> medias = mediaRepository.findByLoaiDoiTuongAndDoiTuongIdOrderByThuTuAsc(loaiDoiTuong, idForMedia);
-            if (!medias.isEmpty()) hinhAnh = medias.get(0).getUrl();
+            List<Media> medias = mediaRepository.findByLoaiDoiTuongAndDoiTuongIdOrderByThuTuAsc(loaiDoiTuong,
+                    idForMedia);
+            if (!medias.isEmpty())
+                hinhAnh = medias.get(0).getUrl();
         }
 
         return ChiTietGioHangResponse.builder()

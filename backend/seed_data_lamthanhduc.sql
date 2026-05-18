@@ -107,228 +107,8 @@ INSERT INTO dich_vu (
 -- =========================
 -- MEDIA
 -- =========================
--- Car images
-INSERT INTO media (
-    ngay_cap_nhat, ngay_tao, chieu_cao, chieu_rong, dinh_dang, doi_tuong_id, dung_luong,
-    loai_doi_tuong, loai_media, mo_ta, public_id, thoi_luong, thu_tu, url
-)
-SELECT NOW(), NOW(), 400, 1000, 'png', o.id, NULL, 'OTO', 'IMAGE',
-       'Toyota Yaris Cross exterior image', 'seed/toyota-yaris-cross-1', NULL, 1,
-       'https://www.toyota.com.vn/media/wuieo1yn/gia-xe-toyota-yaris-cross-1.jpg?height=333.3333333333333&width=500'
-FROM oto o
-WHERE o.ten_xe = 'Toyota Yaris Cross'
-  AND NOT EXISTS (SELECT 1 FROM media m WHERE m.public_id = 'seed/toyota-yaris-cross-1');
-
-INSERT INTO media (
-    ngay_cap_nhat, ngay_tao, chieu_cao, chieu_rong, dinh_dang, doi_tuong_id, dung_luong,
-    loai_doi_tuong, loai_media, mo_ta, public_id, thoi_luong, thu_tu, url
-)
-SELECT NOW(), NOW(), 400, 1000, 'png', o.id, NULL, 'OTO', 'IMAGE',
-       'Toyota Yaris Cross cabin image', 'seed/toyota-yaris-cross-hev-1', NULL, 1,
-       'https://www.toyota.com.vn/media/5loprm4h/gia-xe-toyota-yaris-cross-4.jpg?height=333.3333333333333&width=500'
-FROM oto o
-WHERE o.ten_xe = 'Toyota Yaris Cross HEV'
-  AND NOT EXISTS (SELECT 1 FROM media m WHERE m.public_id = 'seed/toyota-yaris-cross-hev-1');
-
-INSERT INTO media (
-    ngay_cap_nhat, ngay_tao, chieu_cao, chieu_rong, dinh_dang, doi_tuong_id, dung_luong,
-    loai_doi_tuong, loai_media, mo_ta, public_id, thoi_luong, thu_tu, url
-)
-SELECT NOW(), NOW(), 400, 1000, 'png', o.id, NULL, 'OTO', 'IMAGE',
-       'Toyota Corolla Cross image', 'seed/toyota-corolla-cross-1', NULL, 1,
-       'https://www.toyota.com.vn/media/wuieo1yn/gia-xe-toyota-yaris-cross-1.jpg?height=333.3333333333333&width=500'
-FROM oto o
-WHERE o.ten_xe = 'Toyota Corolla Cross 1.8V'
-  AND NOT EXISTS (SELECT 1 FROM media m WHERE m.public_id = 'seed/toyota-corolla-cross-1');
-
-INSERT INTO media (
-    ngay_cap_nhat, ngay_tao, chieu_cao, chieu_rong, dinh_dang, doi_tuong_id, dung_luong,
-    loai_doi_tuong, loai_media, mo_ta, public_id, thoi_luong, thu_tu, url
-)
-SELECT NOW(), NOW(), 400, 1000, 'png', o.id, NULL, 'OTO', 'IMAGE',
-       'Toyota Corolla Cross hybrid image', 'seed/toyota-corolla-cross-hev-1', NULL, 1,
-       'https://www.toyota.com.vn/media/wuieo1yn/gia-xe-toyota-yaris-cross-1.jpg?height=333.3333333333333&width=500'
-FROM oto o
-WHERE o.ten_xe = 'Toyota Corolla Cross 1.8HEV'
-  AND NOT EXISTS (SELECT 1 FROM media m WHERE m.public_id = 'seed/toyota-corolla-cross-hev-1');
-
-INSERT INTO media (
-    ngay_cap_nhat, ngay_tao, chieu_cao, chieu_rong, dinh_dang, doi_tuong_id, dung_luong,
-    loai_doi_tuong, loai_media, mo_ta, public_id, thoi_luong, thu_tu, url
-)
-SELECT NOW(), NOW(), 400, 1000, 'png', o.id, NULL, 'OTO', 'IMAGE',
-       'Honda City hero image', 'seed/honda-city-rs-1', NULL, 1,
-       'https://cdn.honda.com.vn/automobiles/October2024/2W6sOZo9eoj3a1LPNLZL.png'
-FROM oto o
-WHERE o.ten_xe = 'Honda City RS'
-  AND NOT EXISTS (SELECT 1 FROM media m WHERE m.public_id = 'seed/honda-city-rs-1');
-
-INSERT INTO media (
-    ngay_cap_nhat, ngay_tao, chieu_cao, chieu_rong, dinh_dang, doi_tuong_id, dung_luong,
-    loai_doi_tuong, loai_media, mo_ta, public_id, thoi_luong, thu_tu, url
-)
-SELECT NOW(), NOW(), 400, 1000, 'png', o.id, NULL, 'OTO', 'IMAGE',
-       'Honda BR-V hero image', 'seed/honda-brv-l-1', NULL, 1,
-       'https://cdn.honda.com.vn/automobiles/October2024/qku1lCjhFcnHtLochSE4.png'
-FROM oto o
-WHERE o.ten_xe = 'Honda BR-V L'
-  AND NOT EXISTS (SELECT 1 FROM media m WHERE m.public_id = 'seed/honda-brv-l-1');
-
-INSERT INTO media (
-    ngay_cap_nhat, ngay_tao, chieu_cao, chieu_rong, dinh_dang, doi_tuong_id, dung_luong,
-    loai_doi_tuong, loai_media, mo_ta, public_id, thoi_luong, thu_tu, url
-)
-SELECT NOW(), NOW(), 400, 1000, 'png', o.id, NULL, 'OTO', 'IMAGE',
-       'Honda HR-V hero image', 'seed/honda-hrv-l-1', NULL, 1,
-       'https://cdn.honda.com.vn/automobiles/April2025/mftNfgWHVfND1LCLBg6g.png'
-FROM oto o
-WHERE o.ten_xe = 'Honda HR-V L'
-  AND NOT EXISTS (SELECT 1 FROM media m WHERE m.public_id = 'seed/honda-hrv-l-1');
-
-INSERT INTO media (
-    ngay_cap_nhat, ngay_tao, chieu_cao, chieu_rong, dinh_dang, doi_tuong_id, dung_luong,
-    loai_doi_tuong, loai_media, mo_ta, public_id, thoi_luong, thu_tu, url
-)
-SELECT NOW(), NOW(), 400, 1000, 'png', o.id, NULL, 'OTO', 'IMAGE',
-       'Honda CR-V hero image', 'seed/honda-crv-hev-rs-1', NULL, 1,
-       'https://cdn.honda.com.vn/home_banner_automobile/February2026/bQd04OvWaavdyG9Tbyia.png'
-FROM oto o
-WHERE o.ten_xe = 'Honda CR-V e:HEV RS'
-  AND NOT EXISTS (SELECT 1 FROM media m WHERE m.public_id = 'seed/honda-crv-hev-rs-1');
-
-INSERT INTO media (
-    ngay_cap_nhat, ngay_tao, chieu_cao, chieu_rong, dinh_dang, doi_tuong_id, dung_luong,
-    loai_doi_tuong, loai_media, mo_ta, public_id, thoi_luong, thu_tu, url
-)
-SELECT NOW(), NOW(), 400, 1000, 'png', o.id, NULL, 'OTO', 'IMAGE',
-       'Honda Civic hero image', 'seed/honda-civic-hev-rs-1', NULL, 1,
-       'https://cdn.honda.com.vn/automobiles/October2024/2W6sOZo9eoj3a1LPNLZL.png'
-FROM oto o
-WHERE o.ten_xe = 'Honda Civic e:HEV RS'
-  AND NOT EXISTS (SELECT 1 FROM media m WHERE m.public_id = 'seed/honda-civic-hev-rs-1');
-
-INSERT INTO media (
-    ngay_cap_nhat, ngay_tao, chieu_cao, chieu_rong, dinh_dang, doi_tuong_id, dung_luong,
-    loai_doi_tuong, loai_media, mo_ta, public_id, thoi_luong, thu_tu, url
-)
-SELECT NOW(), NOW(), 333, 500, 'jpg', o.id, NULL, 'OTO', 'IMAGE',
-       'Representative SUV image', 'seed/ford-ranger-wildtrak-1', NULL, 1,
-       'https://www.toyota.com.vn/media/wuieo1yn/gia-xe-toyota-yaris-cross-1.jpg?height=333.3333333333333&width=500'
-FROM oto o
-WHERE o.ten_xe = 'Ford Ranger Wildtrak 2.0L 4x4 AT'
-  AND NOT EXISTS (SELECT 1 FROM media m WHERE m.public_id = 'seed/ford-ranger-wildtrak-1');
-
--- Accessory images
-INSERT INTO media (
-    ngay_cap_nhat, ngay_tao, chieu_cao, chieu_rong, dinh_dang, doi_tuong_id, dung_luong,
-    loai_doi_tuong, loai_media, mo_ta, public_id, thoi_luong, thu_tu, url
-)
-SELECT NOW(), NOW(), 720, 1280, 'jpg', p.id, NULL, 'PHU_KIEN', 'IMAGE',
-       'Accessory category image', 'seed/phu-kien-camera-hanh-trinh-70mai-a500s-1', NULL, 1,
-       'https://www.honda.com.vn/images/o-to/landing-page-phu-kien.jpg'
-FROM phu_kien p
-WHERE p.ten_phu_kien = 'Camera hanh trinh 70mai A500S'
-  AND NOT EXISTS (SELECT 1 FROM media m WHERE m.public_id = 'seed/phu-kien-camera-hanh-trinh-70mai-a500s-1');
-
-INSERT INTO media (
-    ngay_cap_nhat, ngay_tao, chieu_cao, chieu_rong, dinh_dang, doi_tuong_id, dung_luong,
-    loai_doi_tuong, loai_media, mo_ta, public_id, thoi_luong, thu_tu, url
-)
-SELECT NOW(), NOW(), 720, 1280, 'jpg', p.id, NULL, 'PHU_KIEN', 'IMAGE',
-       'Accessory category image', 'seed/phu-kien-man-hinh-zestech-zx10-1', NULL, 1,
-       'https://www.honda.com.vn/images/o-to/landing-page-phu-kien.jpg'
-FROM phu_kien p
-WHERE p.ten_phu_kien = 'Man hinh Android Zestech ZX10'
-  AND NOT EXISTS (SELECT 1 FROM media m WHERE m.public_id = 'seed/phu-kien-man-hinh-zestech-zx10-1');
-
-INSERT INTO media (
-    ngay_cap_nhat, ngay_tao, chieu_cao, chieu_rong, dinh_dang, doi_tuong_id, dung_luong,
-    loai_doi_tuong, loai_media, mo_ta, public_id, thoi_luong, thu_tu, url
-)
-SELECT NOW(), NOW(), 720, 1280, 'jpg', p.id, NULL, 'PHU_KIEN', 'IMAGE',
-       'Accessory category image', 'seed/phu-kien-lop-michelin-primacy4-1', NULL, 1,
-       'https://www.honda.com.vn/images/o-to/landing-page-phu-kien.jpg'
-FROM phu_kien p
-WHERE p.ten_phu_kien = 'Lop Michelin Primacy 4 215/55R17'
-  AND NOT EXISTS (SELECT 1 FROM media m WHERE m.public_id = 'seed/phu-kien-lop-michelin-primacy4-1');
-
-INSERT INTO media (
-    ngay_cap_nhat, ngay_tao, chieu_cao, chieu_rong, dinh_dang, doi_tuong_id, dung_luong,
-    loai_doi_tuong, loai_media, mo_ta, public_id, thoi_luong, thu_tu, url
-)
-SELECT NOW(), NOW(), 720, 1280, 'jpg', p.id, NULL, 'PHU_KIEN', 'IMAGE',
-       'Accessory category image', 'seed/phu-kien-phim-cach-nhiet-3m-1', NULL, 1,
-       'https://www.honda.com.vn/images/o-to/landing-page-phu-kien.jpg'
-FROM phu_kien p
-WHERE p.ten_phu_kien = 'Phim cach nhiet 3M Crystalline goi co ban'
-  AND NOT EXISTS (SELECT 1 FROM media m WHERE m.public_id = 'seed/phu-kien-phim-cach-nhiet-3m-1');
-
-INSERT INTO media (
-    ngay_cap_nhat, ngay_tao, chieu_cao, chieu_rong, dinh_dang, doi_tuong_id, dung_luong,
-    loai_doi_tuong, loai_media, mo_ta, public_id, thoi_luong, thu_tu, url
-)
-SELECT NOW(), NOW(), 720, 1280, 'jpg', p.id, NULL, 'PHU_KIEN', 'IMAGE',
-       'Accessory category image', 'seed/phu-kien-sac-xe-hoi-baseus-1', NULL, 1,
-       'https://www.honda.com.vn/images/o-to/landing-page-phu-kien.jpg'
-FROM phu_kien p
-WHERE p.ten_phu_kien = 'Sac o to Baseus 65W USB-C'
-  AND NOT EXISTS (SELECT 1 FROM media m WHERE m.public_id = 'seed/phu-kien-sac-xe-hoi-baseus-1');
-
--- Service images
-INSERT INTO media (
-    ngay_cap_nhat, ngay_tao, chieu_cao, chieu_rong, dinh_dang, doi_tuong_id, dung_luong,
-    loai_doi_tuong, loai_media, mo_ta, public_id, thoi_luong, thu_tu, url
-)
-SELECT NOW(), NOW(), 720, 1280, 'jpg', d.id, NULL, 'DICH_VU', 'IMAGE',
-       'Service category image', 'seed/dich-vu-bao-duong-5000-1', NULL, 1,
-       'https://www.honda.com.vn/images/o-to/landing-page-service.jpg'
-FROM dich_vu d
-WHERE d.ten_dich_vu = 'Bao duong dinh ky 5.000 km'
-  AND NOT EXISTS (SELECT 1 FROM media m WHERE m.public_id = 'seed/dich-vu-bao-duong-5000-1');
-
-INSERT INTO media (
-    ngay_cap_nhat, ngay_tao, chieu_cao, chieu_rong, dinh_dang, doi_tuong_id, dung_luong,
-    loai_doi_tuong, loai_media, mo_ta, public_id, thoi_luong, thu_tu, url
-)
-SELECT NOW(), NOW(), 720, 1280, 'jpg', d.id, NULL, 'DICH_VU', 'IMAGE',
-       'Service category image', 'seed/dich-vu-thay-dau-dong-co-1', NULL, 1,
-       'https://www.honda.com.vn/images/o-to/landing-page-service.jpg'
-FROM dich_vu d
-WHERE d.ten_dich_vu = 'Thay dau dong co tong hop'
-  AND NOT EXISTS (SELECT 1 FROM media m WHERE m.public_id = 'seed/dich-vu-thay-dau-dong-co-1');
-
-INSERT INTO media (
-    ngay_cap_nhat, ngay_tao, chieu_cao, chieu_rong, dinh_dang, doi_tuong_id, dung_luong,
-    loai_doi_tuong, loai_media, mo_ta, public_id, thoi_luong, thu_tu, url
-)
-SELECT NOW(), NOW(), 720, 1280, 'jpg', d.id, NULL, 'DICH_VU', 'IMAGE',
-       'Service category image', 'seed/dich-vu-ve-sinh-noi-that-1', NULL, 1,
-       'https://www.honda.com.vn/images/o-to/landing-page-service.jpg'
-FROM dich_vu d
-WHERE d.ten_dich_vu = 'Ve sinh noi that co ban'
-  AND NOT EXISTS (SELECT 1 FROM media m WHERE m.public_id = 'seed/dich-vu-ve-sinh-noi-that-1');
-
-INSERT INTO media (
-    ngay_cap_nhat, ngay_tao, chieu_cao, chieu_rong, dinh_dang, doi_tuong_id, dung_luong,
-    loai_doi_tuong, loai_media, mo_ta, public_id, thoi_luong, thu_tu, url
-)
-SELECT NOW(), NOW(), 720, 1280, 'jpg', d.id, NULL, 'DICH_VU', 'IMAGE',
-       'Service category image', 'seed/dich-vu-phu-ceramic-1', NULL, 1,
-       'https://www.honda.com.vn/images/o-to/landing-page-service.jpg'
-FROM dich_vu d
-WHERE d.ten_dich_vu = 'Phu ceramic 1 lop'
-  AND NOT EXISTS (SELECT 1 FROM media m WHERE m.public_id = 'seed/dich-vu-phu-ceramic-1');
-
-INSERT INTO media (
-    ngay_cap_nhat, ngay_tao, chieu_cao, chieu_rong, dinh_dang, doi_tuong_id, dung_luong,
-    loai_doi_tuong, loai_media, mo_ta, public_id, thoi_luong, thu_tu, url
-)
-SELECT NOW(), NOW(), 720, 1280, 'jpg', d.id, NULL, 'DICH_VU', 'IMAGE',
-       'Service category image', 'seed/dich-vu-bao-duong-dieu-hoa-1', NULL, 1,
-       'https://www.honda.com.vn/images/o-to/landing-page-service.jpg'
-FROM dich_vu d
-WHERE d.ten_dich_vu = 'Bao duong he thong dieu hoa'
-  AND NOT EXISTS (SELECT 1 FROM media m WHERE m.public_id = 'seed/dich-vu-bao-duong-dieu-hoa-1');
+-- Media local URLs are inserted once in the EXTENDED MEDIA block below,
+-- matching the current demo DB state and files under frontend/public/demo-images.
 
 -- =========================
 -- EXTENDED OTO
@@ -412,143 +192,61 @@ INSERT INTO media (
     ngay_cap_nhat, ngay_tao, chieu_cao, chieu_rong, dinh_dang, doi_tuong_id, dung_luong,
     loai_doi_tuong, loai_media, mo_ta, public_id, thoi_luong, thu_tu, url
 )
-SELECT NOW(), NOW(), 400, 1000, 'png', o.id, NULL, 'OTO', 'IMAGE',
-       'Representative Honda image', CONCAT('seed/', REPLACE(LOWER(o.ten_xe), ' ', '-'), '-hero'), NULL, 1,
-       'https://cdn.honda.com.vn/automobiles/October2024/2W6sOZo9eoj3a1LPNLZL.png'
-FROM oto o
-WHERE o.ten_xe IN ('Honda Civic G', 'Honda HR-V G', 'Honda City Hatchback RS')
-  AND NOT EXISTS (
-      SELECT 1 FROM media m
-      WHERE m.public_id = CONCAT('seed/', REPLACE(LOWER(o.ten_xe), ' ', '-'), '-hero')
-  );
-
-INSERT INTO media (
-    ngay_cap_nhat, ngay_tao, chieu_cao, chieu_rong, dinh_dang, doi_tuong_id, dung_luong,
-    loai_doi_tuong, loai_media, mo_ta, public_id, thoi_luong, thu_tu, url
-)
-SELECT NOW(), NOW(), 333, 500, 'jpg', o.id, NULL, 'OTO', 'IMAGE',
-       'Representative Toyota image', CONCAT('seed/', REPLACE(LOWER(o.ten_xe), ' ', '-'), '-hero'), NULL, 1,
-       'https://www.toyota.com.vn/media/wuieo1yn/gia-xe-toyota-yaris-cross-1.jpg?height=333.3333333333333&width=500'
-FROM oto o
-WHERE o.ten_xe IN ('Toyota Veloz Cross CVT', 'Toyota Vios G CVT', 'Toyota Raize Turbo')
-  AND NOT EXISTS (
-      SELECT 1 FROM media m
-      WHERE m.public_id = CONCAT('seed/', REPLACE(LOWER(o.ten_xe), ' ', '-'), '-hero')
-  );
-
-INSERT INTO media (
-    ngay_cap_nhat, ngay_tao, chieu_cao, chieu_rong, dinh_dang, doi_tuong_id, dung_luong,
-    loai_doi_tuong, loai_media, mo_ta, public_id, thoi_luong, thu_tu, url
-)
-SELECT NOW(), NOW(), 333, 500, 'jpg', o.id, NULL, 'OTO', 'IMAGE',
-       'Representative car image', CONCAT('seed/', REPLACE(LOWER(o.ten_xe), ' ', '-'), '-rep'), NULL, 1,
-       'https://www.toyota.com.vn/media/wuieo1yn/gia-xe-toyota-yaris-cross-1.jpg?height=333.3333333333333&width=500'
-FROM oto o
-WHERE o.ten_xe IN (
-    'Mazda2 1.5 Luxury',
-    'Mazda CX-30 Luxury',
-    'Hyundai Creta Dac biet',
-    'Hyundai Elantra 2.0 AT',
-    'Kia K3 1.5 Luxury',
-    'Kia Sportage 2.0G Premium',
-    'Ford Territory Titanium X',
-    'Mitsubishi Attrage CVT Premium',
-    'Mitsubishi Outlander 2.4 CVT Premium',
-    'VinFast VF 6 Plus',
-    'VinFast VF 7 Plus'
-)
-  AND NOT EXISTS (
-      SELECT 1 FROM media m
-      WHERE m.public_id = CONCAT('seed/', REPLACE(LOWER(o.ten_xe), ' ', '-'), '-rep')
-  );
-
-INSERT INTO media (
-    ngay_cap_nhat, ngay_tao, chieu_cao, chieu_rong, dinh_dang, doi_tuong_id, dung_luong,
-    loai_doi_tuong, loai_media, mo_ta, public_id, thoi_luong, thu_tu, url
-)
-SELECT NOW(), NOW(), 720, 1280, 'jpg', p.id, NULL, 'PHU_KIEN', 'IMAGE',
-       'Accessory representative image', CONCAT('seed/', REPLACE(LOWER(p.ten_phu_kien), ' ', '-'), '-rep'), NULL, 1,
-       'https://www.honda.com.vn/images/o-to/landing-page-phu-kien.jpg'
-FROM phu_kien p
-WHERE p.ten_phu_kien IN (
-    'Boc ghe da cao cap 5 cho mau den',
-    'May bom lop mini Xiaomi Portable Air Pump',
-    'Ac quy GS MF DIN45L 12V',
-    'Bo day cau binh Stanley 500A',
-    'May hut bui mini cam tay cho o to',
-    'Hop ty tay phu cho sedan hang B',
-    'Quat mini kep cua gio dieu hoa',
-    'May loc khong khi mini cabin',
-    'Loa sub gam ghe JBL BassPro SL2',
-    'Gia noc nhom cho SUV 5 cho'
-)
-  AND NOT EXISTS (
-      SELECT 1 FROM media m
-      WHERE m.public_id = CONCAT('seed/', REPLACE(LOWER(p.ten_phu_kien), ' ', '-'), '-rep')
-  );
-
-INSERT INTO media (
-    ngay_cap_nhat, ngay_tao, chieu_cao, chieu_rong, dinh_dang, doi_tuong_id, dung_luong,
-    loai_doi_tuong, loai_media, mo_ta, public_id, thoi_luong, thu_tu, url
-)
-SELECT NOW(), NOW(), 720, 1280, 'jpg', d.id, NULL, 'DICH_VU', 'IMAGE',
-       'Service representative image', CONCAT('seed/', REPLACE(LOWER(d.ten_dich_vu), ' ', '-'), '-rep'), NULL, 1,
-       'https://www.honda.com.vn/images/o-to/landing-page-service.jpg'
-FROM dich_vu d
-WHERE d.ten_dich_vu IN (
-    'Bao duong hop so tu dong',
-    'Ve sinh kim phun va buong dot',
-    'Phu nano kinh xe',
-    'Ve sinh gam xe',
-    'Phuc hoi den pha bi o',
-    'Goi cham soc xe tong the'
-)
-  AND NOT EXISTS (
-      SELECT 1 FROM media m
-      WHERE m.public_id = CONCAT('seed/', REPLACE(LOWER(d.ten_dich_vu), ' ', '-'), '-rep')
-  );
-
--- Fill remaining records without media so list/detail pages look complete in demo
-INSERT INTO media (
-    ngay_cap_nhat, ngay_tao, chieu_cao, chieu_rong, dinh_dang, doi_tuong_id, dung_luong,
-    loai_doi_tuong, loai_media, mo_ta, public_id, thoi_luong, thu_tu, url
-)
-SELECT NOW(), NOW(), 333, 500, 'jpg', o.id, NULL, 'OTO', 'IMAGE',
-       'Fallback car image for demo coverage',
-       CONCAT('seed/fallback-oto-', o.id),
-       NULL,
-       1,
-       'https://www.toyota.com.vn/media/wuieo1yn/gia-xe-toyota-yaris-cross-1.jpg?height=333.3333333333333&width=500'
-FROM oto o
-LEFT JOIN media m ON m.loai_doi_tuong = 'OTO' AND m.doi_tuong_id = o.id
-WHERE m.id IS NULL;
-
-INSERT INTO media (
-    ngay_cap_nhat, ngay_tao, chieu_cao, chieu_rong, dinh_dang, doi_tuong_id, dung_luong,
-    loai_doi_tuong, loai_media, mo_ta, public_id, thoi_luong, thu_tu, url
-)
-SELECT NOW(), NOW(), 720, 1280, 'jpg', p.id, NULL, 'PHU_KIEN', 'IMAGE',
-       'Fallback accessory image for demo coverage',
-       CONCAT('seed/fallback-phu-kien-', p.id),
-       NULL,
-       1,
-       'https://www.honda.com.vn/images/o-to/landing-page-phu-kien.jpg'
-FROM phu_kien p
-LEFT JOIN media m ON m.loai_doi_tuong = 'PHU_KIEN' AND m.doi_tuong_id = p.id
-WHERE m.id IS NULL;
-
-INSERT INTO media (
-    ngay_cap_nhat, ngay_tao, chieu_cao, chieu_rong, dinh_dang, doi_tuong_id, dung_luong,
-    loai_doi_tuong, loai_media, mo_ta, public_id, thoi_luong, thu_tu, url
-)
-SELECT NOW(), NOW(), 720, 1280, 'jpg', d.id, NULL, 'DICH_VU', 'IMAGE',
-       'Fallback service image for demo coverage',
-       CONCAT('seed/fallback-dich-vu-', d.id),
-       NULL,
-       1,
-       'https://www.honda.com.vn/images/o-to/landing-page-service.jpg'
-FROM dich_vu d
-LEFT JOIN media m ON m.loai_doi_tuong = 'DICH_VU' AND m.doi_tuong_id = d.id
-WHERE m.id IS NULL;
+VALUES
+    (NOW(), NOW(), NULL, NULL, NULL, 1, NULL, 'OTO', 'IMAGE', 'Local demo image', 'demo/oto/1', NULL, 1, '/demo-images/cars/001-toyota-camry-2-5q.jpg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 3, NULL, 'OTO', 'IMAGE', 'Local demo image', 'demo/oto/3', NULL, 1, '/demo-images/cars/003-kia-sorento-signature.jpg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 5, NULL, 'OTO', 'IMAGE', 'Local demo image', 'demo/oto/5', NULL, 1, '/demo-images/cars/005-mercedes-c200-avantgarde.jpg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 6, NULL, 'OTO', 'IMAGE', 'Local demo image', 'demo/oto/6', NULL, 1, '/demo-images/cars/006-vinfast-vf8-plus.jpg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 9, NULL, 'OTO', 'IMAGE', 'Local demo image', 'demo/oto/9', NULL, 1, '/demo-images/cars/009-mitsubishi-xpander-cross.jpg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 10, NULL, 'OTO', 'IMAGE', 'Local demo image', 'demo/oto/10', NULL, 1, '/demo-images/cars/010-toyota-fortuner-legender.jpg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 12, NULL, 'OTO', 'IMAGE', 'Local demo image', 'demo/oto/12', NULL, 1, '/demo-images/cars/012-toyota-corolla-cross-1-8v.jpg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 13, NULL, 'OTO', 'IMAGE', 'Local demo image', 'demo/oto/13', NULL, 1, '/demo-images/cars/013-toyota-corolla-cross-1-8hev.jpg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 16, NULL, 'OTO', 'IMAGE', 'Local demo image', 'demo/oto/16', NULL, 1, '/demo-images/cars/016-toyota-vios-g-cvt.jpg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 17, NULL, 'OTO', 'IMAGE', 'Local demo image', 'demo/oto/17', NULL, 1, '/demo-images/cars/017-toyota-fortuner-legender-2-4at-4x2.jpg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 18, NULL, 'OTO', 'IMAGE', 'Local demo image', 'demo/oto/18', NULL, 1, '/demo-images/cars/018-honda-city-rs.jpg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 20, NULL, 'OTO', 'IMAGE', 'Local demo image', 'demo/oto/20', NULL, 1, '/demo-images/cars/020-honda-hr-v-l.jpg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 21, NULL, 'OTO', 'IMAGE', 'Local demo image', 'demo/oto/21', NULL, 1, '/demo-images/cars/021-honda-cr-v-e-hev-rs.jpeg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 24, NULL, 'OTO', 'IMAGE', 'Local demo image', 'demo/oto/24', NULL, 1, '/demo-images/cars/024-mazda-cx-5-2-5-signature-sport.jpg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 27, NULL, 'OTO', 'IMAGE', 'Local demo image', 'demo/oto/27', NULL, 1, '/demo-images/cars/027-hyundai-tucson-2-0-xang-dac-biet.jpg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 30, NULL, 'OTO', 'IMAGE', 'Local demo image', 'demo/oto/30', NULL, 1, '/demo-images/cars/030-kia-carnival-3-5g-premium.webp'),
+    (NOW(), NOW(), NULL, NULL, NULL, 32, NULL, 'OTO', 'IMAGE', 'Local demo image', 'demo/oto/32', NULL, 1, '/demo-images/cars/032-ford-everest-titanium-2-0l-4x4-at.jpg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 34, NULL, 'OTO', 'IMAGE', 'Local demo image', 'demo/oto/34', NULL, 1, '/demo-images/cars/034-vinfast-vf-8-plus.jpg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 36, NULL, 'OTO', 'IMAGE', 'Local demo image', 'demo/oto/36', NULL, 1, '/demo-images/cars/036-honda-civic-g.jpg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 37, NULL, 'OTO', 'IMAGE', 'Local demo image', 'demo/oto/37', NULL, 1, '/demo-images/cars/037-honda-hr-v-g.jpg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 47, NULL, 'OTO', 'IMAGE', 'Local demo image', 'demo/oto/47', NULL, 1, '/demo-images/cars/047-vinfast-vf-6-plus.jpeg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 48, NULL, 'OTO', 'IMAGE', 'Local demo image', 'demo/oto/48', NULL, 1, '/demo-images/cars/048-vinfast-vf-7-plus.webp'),
+    (NOW(), NOW(), NULL, NULL, NULL, 49, NULL, 'OTO', 'IMAGE', 'Local demo image', 'demo/oto/49', NULL, 1, '/demo-images/cars/049-toyota-raize-turbo.jpg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 2, NULL, 'PHU_KIEN', 'IMAGE', 'Local demo image', 'demo/phu_kien/2', NULL, 1, '/demo-images/accessories/002-l-c-gi-ng-c-toyota.jpg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 6, NULL, 'PHU_KIEN', 'IMAGE', 'Local demo image', 'demo/phu_kien/6', NULL, 1, '/demo-images/accessories/006-th-m-l-t-s-n-3d-toyota-camry.jpg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 9, NULL, 'PHU_KIEN', 'IMAGE', 'Local demo image', 'demo/phu_kien/9', NULL, 1, '/demo-images/accessories/009-b-nh-c-quy-gs-55ah-12v.jpg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 11, NULL, 'PHU_KIEN', 'IMAGE', 'Local demo image', 'demo/phu_kien/11', NULL, 1, '/demo-images/accessories/011-camera-hanh-trinh-70mai-a500s.jpg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 12, NULL, 'PHU_KIEN', 'IMAGE', 'Local demo image', 'demo/phu_kien/12', NULL, 1, '/demo-images/accessories/012-camera-hanh-trinh-vietmap-c61-pro.jpg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 13, NULL, 'PHU_KIEN', 'IMAGE', 'Local demo image', 'demo/phu_kien/13', NULL, 1, '/demo-images/accessories/013-man-hinh-android-zestech-zx10.jpeg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 15, NULL, 'PHU_KIEN', 'IMAGE', 'Local demo image', 'demo/phu_kien/15', NULL, 1, '/demo-images/accessories/015-camera-lui-icar-elliview-s3.jpg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 18, NULL, 'PHU_KIEN', 'IMAGE', 'Local demo image', 'demo/phu_kien/18', NULL, 1, '/demo-images/accessories/018-lop-bridgestone-turanza-t005a-225-50r18.png'),
+    (NOW(), NOW(), NULL, NULL, NULL, 22, NULL, 'PHU_KIEN', 'IMAGE', 'Local demo image', 'demo/phu_kien/22', NULL, 1, '/demo-images/accessories/022-tham-lot-san-5d-sedan-hang-c.jpg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 26, NULL, 'PHU_KIEN', 'IMAGE', 'Local demo image', 'demo/phu_kien/26', NULL, 1, '/demo-images/accessories/026-tui-treo-lung-ghe-da-nang.png'),
+    (NOW(), NOW(), NULL, NULL, NULL, 29, NULL, 'PHU_KIEN', 'IMAGE', 'Local demo image', 'demo/phu_kien/29', NULL, 1, '/demo-images/accessories/029-bo-khan-microfiber-3m-3-chiec.jpg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 30, NULL, 'PHU_KIEN', 'IMAGE', 'Local demo image', 'demo/phu_kien/30', NULL, 1, '/demo-images/accessories/030-may-bom-lop-mini-xiaomi-portable-air-pump.png'),
+    (NOW(), NOW(), NULL, NULL, NULL, 34, NULL, 'PHU_KIEN', 'IMAGE', 'Local demo image', 'demo/phu_kien/34', NULL, 1, '/demo-images/accessories/034-den-led-philips-ultinon-pro6000-h11.jpg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 35, NULL, 'PHU_KIEN', 'IMAGE', 'Local demo image', 'demo/phu_kien/35', NULL, 1, '/demo-images/accessories/035-nuoc-hoa-xe-hoi-kieu-kep-cua-gio.jpg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 39, NULL, 'PHU_KIEN', 'IMAGE', 'Local demo image', 'demo/phu_kien/39', NULL, 1, '/demo-images/accessories/039-tam-lot-cop-xe-chong-tham-suv-hang-c.jpg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 40, NULL, 'PHU_KIEN', 'IMAGE', 'Local demo image', 'demo/phu_kien/40', NULL, 1, '/demo-images/accessories/040-moc-treo-do-sau-ghe-hop-kim-2-chiec.jpg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 50, NULL, 'PHU_KIEN', 'IMAGE', 'Local demo image', 'demo/phu_kien/50', NULL, 1, '/demo-images/accessories/050-hop-de-do-noc-xe-thule-ocean-100.jpg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 54, NULL, 'PHU_KIEN', 'IMAGE', 'Local demo image', 'demo/phu_kien/54', NULL, 1, '/demo-images/accessories/054-cap-loa-pioneer-2-duong-tieng.jpg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 55, NULL, 'PHU_KIEN', 'IMAGE', 'Local demo image', 'demo/phu_kien/55', NULL, 1, '/demo-images/accessories/055-loa-sub-gam-ghe-jbl-basspro-sl2.png'),
+    (NOW(), NOW(), NULL, NULL, NULL, 59, NULL, 'PHU_KIEN', 'IMAGE', 'Local demo image', 'demo/phu_kien/59', NULL, 1, '/demo-images/accessories/059-bat-chong-loa-taplo-da-nang.jpg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 1, NULL, 'DICH_VU', 'IMAGE', 'Local demo image', 'demo/dich_vu/1', NULL, 1, '/demo-images/services/001-bao-duong-dinh-ky-5-000-km.jpg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 4, NULL, 'DICH_VU', 'IMAGE', 'Local demo image', 'demo/dich_vu/4', NULL, 1, '/demo-images/services/004-ve-sinh-noi-that-co-ban.jpeg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 5, NULL, 'DICH_VU', 'IMAGE', 'Local demo image', 'demo/dich_vu/5', NULL, 1, '/demo-images/services/005-ve-sinh-khoang-may.jpg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 8, NULL, 'DICH_VU', 'IMAGE', 'Local demo image', 'demo/dich_vu/8', NULL, 1, '/demo-images/services/008-can-bang-dong-lop.jpg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 9, NULL, 'DICH_VU', 'IMAGE', 'Local demo image', 'demo/dich_vu/9', NULL, 1, '/demo-images/services/009-kiem-tra-he-thong-phanh.jpg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 10, NULL, 'DICH_VU', 'IMAGE', 'Local demo image', 'demo/dich_vu/10', NULL, 1, '/demo-images/services/010-danh-bong-son-xe-1-buoc.jpg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 12, NULL, 'DICH_VU', 'IMAGE', 'Local demo image', 'demo/dich_vu/12', NULL, 1, '/demo-images/services/012-bao-duong-he-thong-dieu-hoa.jpg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 15, NULL, 'DICH_VU', 'IMAGE', 'Local demo image', 'demo/dich_vu/15', NULL, 1, '/demo-images/services/015-ve-sinh-kim-phun-va-buong-dot.jpg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 20, NULL, 'DICH_VU', 'IMAGE', 'Local demo image', 'demo/dich_vu/20', NULL, 1, '/demo-images/services/020-phuc-hoi-den-pha-bi-o.jpg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 22, NULL, 'DICH_VU', 'IMAGE', 'Local demo image', 'demo/dich_vu/22', NULL, 1, '/demo-images/services/022-combo-thay-loc-gio-va-ve-sinh-hut-gio.jpeg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 23, NULL, 'DICH_VU', 'IMAGE', 'Local demo image', 'demo/dich_vu/23', NULL, 1, '/demo-images/services/023-duong-khoang-may-chuyen-sau.jpg'),
+    (NOW(), NOW(), NULL, NULL, NULL, 25, NULL, 'DICH_VU', 'IMAGE', 'Local demo image', 'demo/dich_vu/25', NULL, 1, '/demo-images/services/025-goi-cham-soc-xe-tong-the.jpg');
 
 COMMIT;

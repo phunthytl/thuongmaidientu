@@ -23,6 +23,7 @@ public class OToResponse {
     private String nhienLieu;
     private Integer soKm;
     private BigDecimal gia;
+    private Integer soLuong;
     private String moTa;
     private TrangThaiOTo trangThai;
     private List<String> hinhAnhs;

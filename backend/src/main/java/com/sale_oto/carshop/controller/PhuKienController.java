@@ -32,6 +32,13 @@ public class PhuKienController {
         return ResponseEntity.ok(ApiResponse.success(phuKienService.getById(id)));
     }
 
+    @GetMapping("/{id}/tuong-tu")
+    public ResponseEntity<ApiResponse<List<PhuKienResponse>>> getSimilarProducts(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "4") int limit) {
+        return ResponseEntity.ok(ApiResponse.success(phuKienService.getSimilarProducts(id, limit)));
+    }
+
     @GetMapping
     public ResponseEntity<ApiResponse<Page<PhuKienResponse>>> getAll(Pageable pageable) {
         return ResponseEntity.ok(ApiResponse.success(phuKienService.getAll(pageable)));
@@ -41,6 +48,16 @@ public class PhuKienController {
     public ResponseEntity<ApiResponse<Page<PhuKienResponse>>> search(
             @RequestParam String keyword, Pageable pageable) {
         return ResponseEntity.ok(ApiResponse.success(phuKienService.search(keyword, pageable)));
+    }
+
+    @GetMapping("/loc")
+    public ResponseEntity<ApiResponse<Page<PhuKienResponse>>> filter(
+            @RequestParam(required = false) String loaiPhuKien,
+            @RequestParam(required = false) java.math.BigDecimal giaMin,
+            @RequestParam(required = false) java.math.BigDecimal giaMax,
+            @RequestParam(required = false) String keyword,
+            Pageable pageable) {
+        return ResponseEntity.ok(ApiResponse.success(phuKienService.filter(loaiPhuKien, giaMin, giaMax, keyword, pageable)));
     }
 
     @GetMapping("/loai")

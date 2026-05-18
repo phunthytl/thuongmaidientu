@@ -18,6 +18,11 @@ export const productService = {
     return response.data;
   },
 
+  getSimilarCars: async (id, limit = 4) => {
+    const response = await api.get(`/oto/${id}/tuong-tu?limit=${limit}`);
+    return response.data;
+  },
+
   getCarsByBrand: async (brand, page = 0, size = 12) => {
     const response = await api.get(`/oto/hang-xe/${brand}?page=${page}&size=${size}`);
     return response.data;
@@ -25,6 +30,16 @@ export const productService = {
 
   searchCars: async (keyword, page = 0, size = 12) => {
     const response = await api.get(`/oto/tim-kiem?keyword=${keyword}&page=${page}&size=${size}`);
+    return response.data;
+  },
+
+  getFilteredCars: async (params) => {
+    const response = await api.get('/oto/loc', { params });
+    return response.data;
+  },
+
+  getBrands: async () => {
+    const response = await api.get('/oto/hang-xe');
     return response.data;
   },
 
@@ -46,6 +61,21 @@ export const productService = {
 
   getAccessoryDetail: async (id) => {
     const response = await api.get(`/phu-kien/${id}`);
+    return response.data;
+  },
+
+  getSimilarAccessories: async (id, limit = 4) => {
+    const response = await api.get(`/phu-kien/${id}/tuong-tu?limit=${limit}`);
+    return response.data;
+  },
+
+  getFilteredAccessories: async (params) => {
+    const response = await api.get('/phu-kien/loc', { params });
+    return response.data;
+  },
+
+  getAccessoryTypes: async () => {
+    const response = await api.get('/phu-kien/loai');
     return response.data;
   }
 };

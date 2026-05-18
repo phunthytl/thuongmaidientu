@@ -3,7 +3,7 @@ $ProgressPreference = 'SilentlyContinue'
 
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $imageRoot = Join-Path $repoRoot 'frontend\public\demo-images'
-$mysqlArgs = @('-uroot', '-p27042004', '-D', 'carshop_db', '--default-character-set=utf8mb4', '-N', '-B')
+$mysqlArgs = @('-uroot', '-p123456', '-D', 'carshop_db', '--default-character-set=utf8mb4', '-N', '-B')
 
 $categories = @(
     @{
