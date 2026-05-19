@@ -51,4 +51,7 @@ public class DiaChiKhachHang extends BaseEntity {
 
     @Column(name = "is_default")
     private Boolean isDefault = false;
+
+    @Column(name = "is_deleted", nullable = false)
+    private Boolean isDeleted = false;
 }
