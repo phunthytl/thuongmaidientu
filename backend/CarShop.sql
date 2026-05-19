@@ -21,8 +21,9 @@ USE `carshop_db`;
 --
 -- Table structure for table `chi_tiet_don_hang`
 --
-
-DROP TABLE IF EXISTS `chi_tiet_don_hang`;
+-- ALTER TABLE media
+-- MODIFY COLUMN loai_doi_tuong ENUM('DICH_VU','OTO','PHU_KIEN','KHIEU_NAI') NOT NULL;
+-- DROP TABLE IF EXISTS `chi_tiet_don_hang`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `chi_tiet_don_hang` (
