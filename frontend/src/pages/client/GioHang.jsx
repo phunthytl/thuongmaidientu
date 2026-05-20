@@ -47,7 +47,7 @@ export default function GioHang() {
         }
       }
     });
-  }, [items]);
+  }, [items]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const formatPrice = (price) => {
     if (!price) return '0 ₫';

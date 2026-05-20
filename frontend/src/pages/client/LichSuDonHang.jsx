@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { FaBoxOpen, FaStar, FaTimes, FaCar, FaTools, FaCalendarAlt, FaClipboardList, FaMapMarkerAlt, FaClock, FaExclamationCircle } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+import { FaStar, FaTimes, FaCar, FaTools, FaCalendarAlt, FaClipboardList, FaMapMarkerAlt, FaClock, FaExclamationCircle } from 'react-icons/fa';
 import Navbar from '../../components/layout/Navbar';
 import { useAuthStore } from '../../stores/authStore';
 import { api } from '../../services/api';
@@ -27,7 +27,7 @@ export default function LichSuDonHang() {
         if (user && user.id) {
             fetchData();
         }
-    }, [user, activeTab]);
+    }, [user, activeTab]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const fetchData = async () => {
         setLoading(true);
@@ -82,6 +82,18 @@ export default function LichSuDonHang() {
 
     const formatPrice = (price) => {
         return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price || 0);
+    };
+
+    const canKhieuNai = (order) => {
+        if (!order) return false;
+        if (order.trangThai === 'CHO_XAC_NHAN' || order.trangThai === 'DA_HUY') return false;
+        if (order.trangThai === 'HOAN_THANH') {
+            const moc = order.ngayCapNhat || order.ngayTao;
+            if (!moc) return true;
+            const soNgay = (Date.now() - new Date(moc).getTime()) / (1000 * 60 * 60 * 24);
+            return soNgay <= 7;
+        }
+        return true;
     };
 
     const formatDate = (date, time) => {
@@ -200,11 +212,13 @@ export default function LichSuDonHang() {
                                             ))}
                                         </div>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #f3f4f6' }}>
-                                            <button
-                                                onClick={() => navigate(`/my-disputes?donHangId=${order.id}`)}
-                                                style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', background: '#fff', border: '1px solid #f59e0b', color: '#b45309', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: 600 }}>
-                                                <FaExclamationCircle /> Khiếu nại đơn này
-                                            </button>
+                                            {canKhieuNai(order) ? (
+                                                <button
+                                                    onClick={() => navigate(`/my-disputes?donHangId=${order.id}`)}
+                                                    style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', background: '#fff', border: '1px solid #f59e0b', color: '#b45309', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: 600 }}>
+                                                    <FaExclamationCircle /> Khiếu nại đơn này
+                                                </button>
+                                            ) : <div />}
                                             <div>
                                                 <span style={{ color: '#6b7280', marginRight: '12px' }}>Tổng thanh toán:</span>
                                                 <span style={{ fontSize: '20px', fontWeight: 800, color: '#ef4444' }}>{formatPrice(order.tongTien)}</span>

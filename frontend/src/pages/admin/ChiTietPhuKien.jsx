@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../../services/api';
 import { inventoryService } from '../../services/inventoryService';
+import MediaGalleryManager from '../../components/admin/MediaGalleryManager';
 import '../../assets/css/ChiTiet.css';
 
 export default function ChiTietPhuKien() {
@@ -60,6 +61,18 @@ export default function ChiTietPhuKien() {
                 <div className="view-media-panel">
                     <div className="main-image-wrapper" style={{aspectRatio: '1/1'}}>
                         <img src={mainImage} alt={acc.tenPhuKien} style={{objectFit: 'contain', backgroundColor: '#f9fafb'}}/>
+                    </div>
+                    <div style={{ marginTop: '16px' }}>
+                        <MediaGalleryManager
+                            loaiDoiTuong="PHU_KIEN"
+                            doiTuongId={id}
+                            onChange={async () => {
+                                try {
+                                    const r = await api.get(`/media/PHU_KIEN/${id}`);
+                                    setImages(r.data?.data || []);
+                                } catch (_) {}
+                            }}
+                        />
                     </div>
                 </div>
 

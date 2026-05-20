@@ -10,7 +10,7 @@ export default function KhieuNai() {
 
     const fetchDisputes = async () => {
         try {
-            const res = await api.get('/khieu-nai?size=20&sort=createdAt,desc');
+            const res = await api.get('/khieu-nai?size=20&sort=ngayTao,desc');
             if (res.data?.data?.content) {
                 setDisputes(res.data.data.content);
             } else if (Array.isArray(res.data?.data)) {

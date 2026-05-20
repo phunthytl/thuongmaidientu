@@ -1,5 +1,6 @@
 package com.sale_oto.carshop.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sale_oto.carshop.enums.HangThanhVien;
 import jakarta.persistence.*;
 import lombok.*;
@@ -22,18 +23,23 @@ public class KhachHang extends NguoiDung {
     @Column(name = "hang_thanh_vien")
     private HangThanhVien hangThanhVien = HangThanhVien.DONG;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "khachHang")
     private List<DonHang> donHangs;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "khachHang", cascade = CascadeType.ALL)
     private List<DiaChiKhachHang> diaChiKhachHangs;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "khachHang")
     private List<DanhGia> danhGias;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "khachHang")
     private List<KhieuNai> khieuNais;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "khachHang")
     private List<PhienChat> phienChats;
 }

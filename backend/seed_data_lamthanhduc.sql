@@ -1,5 +1,9 @@
 -- Seed data prepared for Lam Thanh Duc
 -- Scope: oto, phu_kien, dich_vu, media
+-- HUONG DAN: chay file nay SAU khi da chay CarShop.sql
+
+USE `carshop_db`;
+
 -- Notes:
 -- 1. This file avoids hard-coded IDs for media by resolving product IDs from product names.
 -- 2. Prices are realistic reference values for demo use, not official final sale prices.

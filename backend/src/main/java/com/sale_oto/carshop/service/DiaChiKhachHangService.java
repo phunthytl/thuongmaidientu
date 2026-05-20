@@ -23,7 +23,8 @@ public class DiaChiKhachHangService {
 
     @Transactional(readOnly = true)
     public List<DiaChiResponse> getByKhachHangId(Long khachHangId) {
-        return diaChiKhachHangRepository.findByKhachHangId(khachHangId)
+        return diaChiKhachHangRepository
+                .findByKhachHangIdAndIsDeletedFalseOrderByIdAsc(khachHangId)
                 .stream().map(this::toResponse).collect(Collectors.toList());
     }
 
@@ -32,16 +33,22 @@ public class DiaChiKhachHangService {
         KhachHang khachHang = khachHangRepository.findById(khachHangId)
                 .orElseThrow(() -> new ResourceNotFoundException("Khách hàng", khachHangId));
 
+        List<DiaChiKhachHang> existing =
+                diaChiKhachHangRepository.findByKhachHangIdAndIsDeletedFalseOrderByIdAsc(khachHangId);
+
         DiaChiKhachHang diaChi = new DiaChiKhachHang();
         diaChi.setKhachHang(khachHang);
         mapRequestToEntity(request, diaChi);
+        diaChi.setIsDeleted(false);
 
-        // If this is the only address, make it default automatically
-        if (diaChiKhachHangRepository.findByKhachHangId(khachHangId).isEmpty()) {
+        boolean wantDefault = Boolean.TRUE.equals(request.getIsDefault());
+        boolean firstAddress = existing.isEmpty();
+
+        if (firstAddress || wantDefault) {
+            unsetAllDefaults(existing);
             diaChi.setIsDefault(true);
-        } else if (Boolean.TRUE.equals(request.getIsDefault())) {
-            // Remove old default
-            removeOldDefault(khachHangId);
+        } else {
+            diaChi.setIsDefault(false);
         }
 
         return toResponse(diaChiKhachHangRepository.save(diaChi));
@@ -51,13 +58,23 @@ public class DiaChiKhachHangService {
     public DiaChiResponse update(Long id, DiaChiRequest request) {
         DiaChiKhachHang diaChi = diaChiKhachHangRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Địa chỉ", id));
-        
+
+        if (Boolean.TRUE.equals(diaChi.getIsDeleted())) {
+            throw new ResourceNotFoundException("Địa chỉ", id);
+        }
+
+        Long khachHangId = diaChi.getKhachHang().getId();
         mapRequestToEntity(request, diaChi);
-        
-        if (Boolean.TRUE.equals(request.getIsDefault()) && !Boolean.TRUE.equals(diaChi.getIsDefault())) {
-            removeOldDefault(diaChi.getKhachHang().getId());
+
+        if (Boolean.TRUE.equals(request.getIsDefault())) {
+            List<DiaChiKhachHang> others = diaChiKhachHangRepository
+                    .findByKhachHangIdAndIsDeletedFalseOrderByIdAsc(khachHangId)
+                    .stream().filter(d -> !d.getId().equals(id)).toList();
+            unsetAllDefaults(others);
             diaChi.setIsDefault(true);
         }
+
+        ensureExactlyOneDefault(khachHangId, diaChi);
 
         return toResponse(diaChiKhachHangRepository.save(diaChi));
     }
@@ -66,16 +83,48 @@ public class DiaChiKhachHangService {
     public void delete(Long id) {
         DiaChiKhachHang diaChi = diaChiKhachHangRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Địa chỉ", id));
-        diaChiKhachHangRepository.delete(diaChi);
+
+        if (Boolean.TRUE.equals(diaChi.getIsDeleted())) {
+            return;
+        }
+
+        boolean wasDefault = Boolean.TRUE.equals(diaChi.getIsDefault());
+        Long khachHangId = diaChi.getKhachHang().getId();
+
+        diaChi.setIsDeleted(true);
+        diaChi.setIsDefault(false);
+        diaChiKhachHangRepository.save(diaChi);
+
+        if (wasDefault) {
+            diaChiKhachHangRepository
+                    .findFirstByKhachHangIdAndIsDeletedFalseOrderByIdAsc(khachHangId)
+                    .ifPresent(next -> {
+                        next.setIsDefault(true);
+                        diaChiKhachHangRepository.save(next);
+                    });
+        }
     }
 
-    private void removeOldDefault(Long khachHangId) {
-        List<DiaChiKhachHang> dcs = diaChiKhachHangRepository.findByKhachHangId(khachHangId);
-        for (DiaChiKhachHang dc : dcs) {
-            if (Boolean.TRUE.equals(dc.getIsDefault())) {
-                dc.setIsDefault(false);
-                diaChiKhachHangRepository.save(dc);
+    private void unsetAllDefaults(List<DiaChiKhachHang> addresses) {
+        for (DiaChiKhachHang d : addresses) {
+            if (Boolean.TRUE.equals(d.getIsDefault())) {
+                d.setIsDefault(false);
+                diaChiKhachHangRepository.save(d);
             }
+        }
+    }
+
+    private void ensureExactlyOneDefault(Long khachHangId, DiaChiKhachHang current) {
+        List<DiaChiKhachHang> all = diaChiKhachHangRepository
+                .findByKhachHangIdAndIsDeletedFalseOrderByIdAsc(khachHangId);
+        long defaults = all.stream()
+                .filter(d -> Boolean.TRUE.equals(d.getIsDefault()) && !d.getId().equals(current.getId()))
+                .count();
+        if (Boolean.TRUE.equals(current.getIsDefault())) {
+            defaults += 1;
+        }
+        if (defaults == 0 && !all.isEmpty()) {
+            current.setIsDefault(true);
         }
     }
 
@@ -91,9 +140,6 @@ public class DiaChiKhachHangService {
         diaChi.setDiaChiChiTiet(request.getDiaChiChiTiet());
         diaChi.setGhnDistrictId(request.getGhnDistrictId());
         diaChi.setGhnWardCode(request.getGhnWardCode());
-        if (request.getIsDefault() != null) {
-            diaChi.setIsDefault(request.getIsDefault());
-        }
     }
 
     private DiaChiResponse toResponse(DiaChiKhachHang diaChi) {

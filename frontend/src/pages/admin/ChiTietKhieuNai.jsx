@@ -108,7 +108,7 @@ export default function ChiTietKhieuNai() {
                         <h2 style={{color: '#111', marginBottom: '8px', fontSize: '20px'}}>{dispute.tieuDe}</h2>
                         <ul className="spec-list" style={{display: 'flex', gap: '40px', borderBottom: '1px solid #eee', paddingBottom: '16px', marginBottom: '16px'}}>
                             <li><span className="spec-label">Khách Hàng</span><span className="spec-value" style={{fontWeight: 'bold'}}>{dispute.khachHang?.hoTen || '---'} ({dispute.khachHang?.soDienThoai})</span></li>
-                            <li><span className="spec-label">Đơn Hàng Gắn Liền</span><span className="spec-value" style={{fontWeight: 'bold', fontFamily: 'monospace'}}>ORD-{dispute.donHang?.id || 'Không có'}</span></li>
+                            <li><span className="spec-label">Đơn Hàng Gắn Liền</span><span className="spec-value" style={{fontWeight: 'bold', fontFamily: 'monospace'}}>{dispute.donHang?.maDonHang || (dispute.donHang?.id ? `#${dispute.donHang.id}` : 'Không có')}</span></li>
                             <li><span className="spec-label">Ngày Phát Tín</span><span className="spec-value">{new Date(dispute.createdAt || dispute.ngayTao).toLocaleString('vi-VN')}</span></li>
                         </ul>
                         <h3>Nội Dung Trình Bày</h3>
@@ -161,7 +161,7 @@ export default function ChiTietKhieuNai() {
                                 <div style={{background: '#f0fdf4', padding: '16px', borderRadius: '8px', border: '1px solid #bbf7d0', marginTop: '12px'}}>
                                     <p style={{whiteSpace: 'pre-wrap', lineHeight: '1.6', color: '#166534'}}>{dispute.phanHoi}</p>
                                     <div style={{marginTop: '12px', fontSize: '12px', color: '#15803d', fontWeight: 600}}>
-                                        Người trả lời: {dispute.nhanVien?.hoTen || 'Thẩm Định Viên ID: ' + dispute.nhanVien?.id}
+                                        Người trả lời: {dispute.nhanVienXuLy?.hoTen || 'Thẩm Định Viên ID: ' + dispute.nhanVienXuLy?.id}
                                     </div>
                                 </div>
                             </div>
