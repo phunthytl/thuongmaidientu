@@ -34,6 +34,13 @@ public class OToController {
         return ResponseEntity.ok(ApiResponse.success(oToService.getById(id)));
     }
 
+    @GetMapping("/{id}/tuong-tu")
+    public ResponseEntity<ApiResponse<List<OToResponse>>> getSimilarProducts(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "4") int limit) {
+        return ResponseEntity.ok(ApiResponse.success(oToService.getSimilarProducts(id, limit)));
+    }
+
     @GetMapping
     public ResponseEntity<ApiResponse<Page<OToResponse>>> getAll(Pageable pageable) {
         return ResponseEntity.ok(ApiResponse.success(oToService.getAll(pageable)));

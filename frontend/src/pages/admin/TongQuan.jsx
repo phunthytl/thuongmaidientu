@@ -1,9 +1,8 @@
 import { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
-    LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart,
+    XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart,
     PieChart, Pie, Cell, Legend,
-    BarChart, Bar,
 } from 'recharts';
 import { api } from '../../services/api';
 import '../../assets/css/TongQuan.css';

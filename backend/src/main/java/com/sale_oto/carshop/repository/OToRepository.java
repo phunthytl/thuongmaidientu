@@ -17,6 +17,8 @@ public interface OToRepository extends JpaRepository<OTo, Long> {
 
     Page<OTo> findByTrangThai(TrangThaiOTo trangThai, Pageable pageable);
 
+    List<OTo> findByTrangThai(TrangThaiOTo trangThai);
+
     Page<OTo> findByHangXe(String hangXe, Pageable pageable);
 
     @Query("SELECT o FROM OTo o WHERE o.gia BETWEEN :giaMin AND :giaMax AND o.trangThai = :trangThai")

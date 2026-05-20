@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { FaGasPump, FaCogs, FaStar, FaUserCircle, FaCalendarAlt, FaCar, FaInfoCircle, FaComments, FaWarehouse, FaMapMarkerAlt, FaHeadset } from 'react-icons/fa';
+import { Link, useParams } from 'react-router-dom';
+import { FaGasPump, FaCogs, FaStar, FaUserCircle, FaCalendarAlt, FaCar, FaInfoCircle, FaComments, FaWarehouse, FaCheckCircle, FaMapMarkerAlt, FaHeadset } from 'react-icons/fa';
 import Navbar from '../../components/layout/Navbar';
 import { productService } from '../../services/productService';
 import { api } from '../../services/api';
@@ -13,6 +13,7 @@ export default function ClientChiTietOto() {
     const [car, setCar] = useState(null);
     const [images, setImages] = useState([]);
     const [reviews, setReviews] = useState([]);
+    const [similarCars, setSimilarCars] = useState([]);
     const [warehouses, setWarehouses] = useState([]);
     const [selectedKho, setSelectedKho] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -27,11 +28,12 @@ export default function ClientChiTietOto() {
     const fetchCarData = async () => {
         try {
             setLoading(true);
-            const [carRes, imgRes, reviewRes, branchRes] = await Promise.all([
+            const [carRes, imgRes, reviewRes, branchRes, similarRes] = await Promise.all([
                 productService.getCarDetail(id),
                 productService.getCarImages(id).catch(() => ({ data: [] })),
                 api.get(`/danh-gia/oto/${id}?size=10`).catch(() => ({ data: { data: { content: [] } } })),
-                api.get('/kho-hang/active').catch(() => ({ data: { data: [] } }))
+                api.get('/kho-hang/active').catch(() => ({ data: { data: [] } })),
+                productService.getSimilarCars(id, 4).catch(() => ({ data: [] }))
             ]);
             
             const carData = carRes?.data || carRes;
@@ -47,6 +49,8 @@ export default function ClientChiTietOto() {
 
             const revs = reviewRes?.data?.data?.content || reviewRes?.data?.content || [];
             setReviews(revs);
+
+            setSimilarCars(similarRes?.data || similarRes?.data?.data || []);
 
             const branches = branchRes?.data?.data || [];
             setWarehouses(branches);
@@ -125,6 +129,12 @@ export default function ClientChiTietOto() {
                 .stock-badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
                 .stock-badge.in-stock { background: #dcfce7; color: #166534; }
                 .stock-badge.out-of-stock { background: #fee2e2; color: #991b1b; }
+                .similar-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
+                .similar-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; text-decoration: none; color: inherit; transition: all 0.2s ease; }
+                .similar-card:hover { transform: translateY(-3px); box-shadow: 0 12px 24px rgba(0,0,0,0.08); border-color: #111; }
+                .similar-image { width: 100%; aspect-ratio: 16/10; object-fit: cover; background: #f3f4f6; display: block; }
+                @media (max-width: 992px) { .similar-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+                @media (max-width: 640px) { .similar-grid { grid-template-columns: 1fr; } }
             `}</style>
             
             <div style={{ maxWidth: '1280px', margin: '40px auto', padding: '0 20px' }}>
@@ -371,6 +381,44 @@ export default function ClientChiTietOto() {
                         </div>
                     )}
                 </div>
+
+                {similarCars.length > 0 && (
+                    <div style={{ marginTop: '40px', backgroundColor: '#fff', borderRadius: '16px', padding: '32px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
+                        <h2 style={{ fontSize: '24px', fontWeight: 800, margin: '0 0 24px 0', color: '#111' }}>
+                            Sản phẩm tương tự
+                        </h2>
+                        <div className="similar-grid">
+                            {similarCars.map(item => (
+                                <Link key={item.id} to={`/products/oto/${item.id}`} className="similar-card">
+                                    <img
+                                        src={getSafeImage(item.hinhAnhs?.[0], 'car')}
+                                        alt={item.tenXe}
+                                        className="similar-image"
+                                        onError={(e) => {
+                                            e.currentTarget.onerror = null;
+                                            e.currentTarget.src = fallbackImages.car;
+                                        }}
+                                    />
+                                    <div style={{ padding: '16px' }}>
+                                        <div style={{ fontSize: '13px', color: '#6b7280', fontWeight: 700, textTransform: 'uppercase', marginBottom: '8px' }}>
+                                            {item.hangXe}
+                                        </div>
+                                        <h3 style={{ fontSize: '16px', lineHeight: 1.4, minHeight: '44px', margin: '0 0 12px 0', color: '#111' }}>
+                                            {item.tenXe}
+                                        </h3>
+                                        <div style={{ fontWeight: 800, color: '#ef4444', fontSize: '17px' }}>
+                                            {formatPrice(item.gia)}
+                                        </div>
+                                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '12px', fontSize: '13px', color: '#6b7280' }}>
+                                            <span>{item.nhienLieu}</span>
+                                            <span>{item.hopSo}</span>
+                                        </div>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Booking Modal */}
