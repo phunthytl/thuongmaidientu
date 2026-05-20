@@ -290,7 +290,7 @@ export default function DangKy() {
           className="login-right-image"
           style={{
             backgroundImage:
-              'url(/demo-images/cars/006-vinfast-vf8-plus.jpg)',
+              'url(https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1600&q=85)',
           }}
         />
         <div className="login-right-overlay">

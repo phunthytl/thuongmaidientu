@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { 
   FaCar, 
   FaShoppingCart, 
@@ -74,16 +74,16 @@ export default function Navbar() {
         </Link>
       </div>
       <ul className="nav-links">
-        <li><Link to="/">Trang chủ</Link></li>
+        <li><NavLink to="/" end>Trang chủ</NavLink></li>
         <li className="dropdown">
-          <Link to="/products">Sản phẩm <FaChevronDown className="drop-icon" /></Link>
+          <NavLink to="/products">Sản phẩm <FaChevronDown className="drop-icon" /></NavLink>
           <ul className="dropdown-menu">
             <li><Link to="/products">Ô tô</Link></li>
             <li><Link to="/accessories">Phụ kiện</Link></li>
           </ul>
         </li>
-        <li><Link to="/services">Dịch vụ</Link></li>
-        <li><Link to="/support">Hỗ trợ</Link></li>
+        <li><NavLink to="/services">Dịch vụ</NavLink></li>
+        <li><NavLink to="/support">Hỗ trợ</NavLink></li>
       </ul>
       <div className="nav-actions">
         <div className="search-bar">

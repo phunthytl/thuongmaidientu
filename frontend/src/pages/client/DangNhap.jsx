@@ -144,7 +144,7 @@ export default function ClientLogin() {
           className="login-right-image"
           style={{
             backgroundImage:
-              'url(/demo-images/cars/005-mercedes-c200-avantgarde.jpg)',
+              'url(https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1600&q=85)',
           }}
         />
         <div className="login-right-overlay">
