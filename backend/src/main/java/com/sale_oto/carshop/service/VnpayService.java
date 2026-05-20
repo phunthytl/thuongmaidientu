@@ -45,8 +45,10 @@ public class VnpayService {
     private final TonKhoService tonKhoService;
 
     public boolean isConfigured() {
-        return hasText(vnpayConfig.getPaymentUrl()) && hasText(vnpayConfig.getTmnCode())
-                && hasText(vnpayConfig.getHashSecret()) && hasText(vnpayConfig.getReturnUrl());
+        return hasText(vnpayConfig.getPaymentUrl())
+                && hasRealConfigValue(vnpayConfig.getTmnCode())
+                && hasRealConfigValue(vnpayConfig.getHashSecret())
+                && hasText(vnpayConfig.getReturnUrl());
     }
 
     @Transactional
@@ -267,6 +269,10 @@ public class VnpayService {
 
     private boolean hasText(String value) {
         return value != null && !value.trim().isEmpty();
+    }
+
+    private boolean hasRealConfigValue(String value) {
+        return hasText(value) && !value.trim().toLowerCase().startsWith("your_");
     }
 
     private String encodeAscii(String value) {
