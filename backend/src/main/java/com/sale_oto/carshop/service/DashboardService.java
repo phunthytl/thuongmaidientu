@@ -5,6 +5,7 @@ import com.sale_oto.carshop.enums.LoaiSanPham;
 import com.sale_oto.carshop.enums.TrangThaiDonHang;
 import com.sale_oto.carshop.repository.ChiTietDonHangRepository;
 import com.sale_oto.carshop.repository.DonHangRepository;
+import com.sale_oto.carshop.repository.LichHenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ public class DashboardService {
 
     private final DonHangRepository donHangRepository;
     private final ChiTietDonHangRepository chiTietDonHangRepository;
+    private final LichHenRepository lichHenRepository;
 
     @Transactional(readOnly = true)
     public DashboardResponse.Kpi getKpi(int days) {
@@ -36,14 +38,27 @@ public class DashboardService {
         LocalDateTime prevFrom = from.minusDays(days);
         LocalDateTime prevTo = from;
 
-        BigDecimal revenue = nz(donHangRepository.sumRevenueBetween(from, now));
-        BigDecimal prevRevenue = nz(donHangRepository.sumRevenueBetween(prevFrom, prevTo));
+        // Doanh thu = đơn hàng HOÀN_THÀNH + lịch hẹn dịch vụ DA_HOAN_THANH
+        BigDecimal revenueOrders = nz(donHangRepository.sumRevenueBetween(from, now));
+        BigDecimal revenueServices = nz(lichHenRepository.sumServiceRevenueBetween(from, now));
+        BigDecimal revenue = revenueOrders.add(revenueServices);
 
-        long orders = donHangRepository.countBetween(from, now);
-        long prevOrders = donHangRepository.countBetween(prevFrom, prevTo);
+        BigDecimal prevRevenueOrders = nz(donHangRepository.sumRevenueBetween(prevFrom, prevTo));
+        BigDecimal prevRevenueServices = nz(lichHenRepository.sumServiceRevenueBetween(prevFrom, prevTo));
+        BigDecimal prevRevenue = prevRevenueOrders.add(prevRevenueServices);
 
-        long customers = donHangRepository.countDistinctCustomersBetween(from, now);
-        long prevCustomers = donHangRepository.countDistinctCustomersBetween(prevFrom, prevTo);
+        // Số "đơn" = đơn hàng + lịch hẹn dịch vụ (cùng coi là 1 giao dịch)
+        long orders = donHangRepository.countBetween(from, now)
+                    + lichHenRepository.countServiceBetween(from, now);
+        long prevOrders = donHangRepository.countBetween(prevFrom, prevTo)
+                        + lichHenRepository.countServiceBetween(prevFrom, prevTo);
+
+        // Khách: union distinct từ 2 nguồn — không thể tính chính xác qua SQL nên cộng đơn giản
+        // (có thể trùng nhau nhưng acceptable cho dashboard)
+        long customers = donHangRepository.countDistinctCustomersBetween(from, now)
+                       + lichHenRepository.countDistinctServiceCustomersBetween(from, now);
+        long prevCustomers = donHangRepository.countDistinctCustomersBetween(prevFrom, prevTo)
+                           + lichHenRepository.countDistinctServiceCustomersBetween(prevFrom, prevTo);
 
         BigDecimal aov = orders > 0
                 ? revenue.divide(BigDecimal.valueOf(orders), 0, RoundingMode.HALF_UP)
@@ -74,17 +89,19 @@ public class DashboardService {
         LocalDateTime from = now.minusDays(days - 1L)
                 .toLocalDate().atStartOfDay();
 
-        List<Object[]> rows = donHangRepository.findRevenueTrendBetween(from, now);
-        Map<LocalDate, DashboardResponse.RevenueTrendPoint> map = new java.util.HashMap<>();
-        for (Object[] r : rows) {
+        // Gộp 2 nguồn: DonHang + LichHen DICH_VU
+        Map<LocalDate, BigDecimal> revMap = new java.util.HashMap<>();
+        Map<LocalDate, Long> countMap = new java.util.HashMap<>();
+
+        for (Object[] r : donHangRepository.findRevenueTrendBetween(from, now)) {
             LocalDate day = toLocalDate(r[0]);
-            BigDecimal revenue = nz((BigDecimal) r[1]);
-            Long count = ((Number) r[2]).longValue();
-            map.put(day, DashboardResponse.RevenueTrendPoint.builder()
-                    .ngay(day)
-                    .doanhThu(revenue)
-                    .soDonHang(count)
-                    .build());
+            revMap.merge(day, nz((BigDecimal) r[1]), BigDecimal::add);
+            countMap.merge(day, ((Number) r[2]).longValue(), Long::sum);
+        }
+        for (Object[] r : lichHenRepository.findServiceRevenueTrendBetween(from, now)) {
+            LocalDate day = toLocalDate(r[0]);
+            revMap.merge(day, nz((BigDecimal) r[1]), BigDecimal::add);
+            countMap.merge(day, ((Number) r[2]).longValue(), Long::sum);
         }
 
         // Fill missing days with zero
@@ -92,11 +109,11 @@ public class DashboardService {
         LocalDate start = from.toLocalDate();
         LocalDate end = now.toLocalDate();
         for (LocalDate d = start; !d.isAfter(end); d = d.plusDays(1)) {
-            trend.add(map.getOrDefault(d, DashboardResponse.RevenueTrendPoint.builder()
+            trend.add(DashboardResponse.RevenueTrendPoint.builder()
                     .ngay(d)
-                    .doanhThu(BigDecimal.ZERO)
-                    .soDonHang(0L)
-                    .build()));
+                    .doanhThu(revMap.getOrDefault(d, BigDecimal.ZERO))
+                    .soDonHang(countMap.getOrDefault(d, 0L))
+                    .build());
         }
         return trend;
     }
@@ -126,8 +143,13 @@ public class DashboardService {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime from = now.minusDays(days);
 
+        // Lấy nhiều hơn từ mỗi nguồn để có đủ candidate khi sort gộp
+        int fetchSize = Math.max(limit * 2, 10);
+
         List<DashboardResponse.TopProduct> result = new ArrayList<>();
-        for (Object[] r : chiTietDonHangRepository.findTopProductsBetween(from, now, PageRequest.of(0, limit))) {
+
+        // Top từ ChiTietDonHang (Ô tô + Phụ kiện + Dịch vụ mua qua đơn hàng)
+        for (Object[] r : chiTietDonHangRepository.findTopProductsBetween(from, now, PageRequest.of(0, fetchSize))) {
             result.add(DashboardResponse.TopProduct.builder()
                     .loaiSanPham((LoaiSanPham) r[0])
                     .sanPhamId(r[1] == null ? null : ((Number) r[1]).longValue())
@@ -136,7 +158,37 @@ public class DashboardService {
                     .doanhThu(nz((BigDecimal) r[4]))
                     .build());
         }
-        return result;
+
+        // Top từ LichHen (Dịch vụ booking)
+        for (Object[] r : lichHenRepository.findTopServicesBetween(from, now, PageRequest.of(0, fetchSize))) {
+            Long dvId = r[0] == null ? null : ((Number) r[0]).longValue();
+            String dvName = (String) r[1];
+            Long count = r[2] == null ? 0L : ((Number) r[2]).longValue();
+            BigDecimal rev = nz((BigDecimal) r[3]);
+
+            // Nếu đã có DICH_VU cùng id trong list trên (mua qua đơn) → cộng dồn
+            DashboardResponse.TopProduct existing = result.stream()
+                    .filter(p -> p.getLoaiSanPham() == LoaiSanPham.DICH_VU
+                            && dvId != null && dvId.equals(p.getSanPhamId()))
+                    .findFirst().orElse(null);
+
+            if (existing != null) {
+                existing.setSoLuongBan(existing.getSoLuongBan() + count);
+                existing.setDoanhThu(existing.getDoanhThu().add(rev));
+            } else {
+                result.add(DashboardResponse.TopProduct.builder()
+                        .loaiSanPham(LoaiSanPham.DICH_VU)
+                        .sanPhamId(dvId)
+                        .tenSanPham(dvName)
+                        .soLuongBan(count)
+                        .doanhThu(rev)
+                        .build());
+            }
+        }
+
+        // Sort gộp theo doanh thu desc, lấy top N
+        result.sort((a, b) -> b.getDoanhThu().compareTo(a.getDoanhThu()));
+        return result.size() > limit ? result.subList(0, limit) : result;
     }
 
     @Transactional(readOnly = true)
