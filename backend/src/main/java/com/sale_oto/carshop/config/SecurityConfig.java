@@ -105,6 +105,9 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.POST, "/api/kho-hang/**").hasAnyRole("ADMIN", "NHAN_VIEN")
                     .requestMatchers(HttpMethod.PUT, "/api/kho-hang/**").hasAnyRole("ADMIN", "NHAN_VIEN")
 
+                    // Dashboard (admin overview/reports)
+                    .requestMatchers("/api/admin/dashboard/**").hasAnyRole("ADMIN", "NHAN_VIEN")
+
                     // Admin only
                     .requestMatchers("/api/nhan-vien/**").hasRole("ADMIN")
                     .requestMatchers(HttpMethod.DELETE, "/api/oto/**").hasRole("ADMIN")
