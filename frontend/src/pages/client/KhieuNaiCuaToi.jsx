@@ -243,8 +243,8 @@ export default function KhieuNaiCuaToi() {
                     <div style={{ background: '#fff', borderRadius: '16px', width: '100%', maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
                         <button onClick={closeForm} style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#666', zIndex: 1 }}><FaTimes /></button>
 
-                        <form onSubmit={handleSubmit} style={{ padding: '32px' }}>
-                            <h2 style={{ marginTop: 0, marginBottom: '4px' }}>Gửi khiếu nại</h2>
+                        <form onSubmit={handleSubmit} style={{ padding: '32px', fontFamily: 'Manrope, sans-serif' }}>
+                            <h2 className="font-sans" style={{ marginTop: 0, marginBottom: '4px', fontSize: '22px', fontWeight: 700 }}>Gửi khiếu nại</h2>
                             <p style={{ color: '#6b7280', marginBottom: '24px', fontSize: '14px' }}>Vui lòng mô tả rõ vấn đề để chúng tôi hỗ trợ nhanh nhất.</p>
 
                             <div style={{ marginBottom: '16px' }}>
@@ -331,9 +331,9 @@ export default function KhieuNaiCuaToi() {
                     <div style={{ background: '#fff', borderRadius: '16px', width: '100%', maxWidth: '700px', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
                         <button onClick={closeDetail} style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#666', zIndex: 1 }}><FaTimes /></button>
 
-                        <div style={{ padding: '32px' }}>
+                        <div style={{ padding: '32px', fontFamily: 'Manrope, sans-serif' }}>
                             <div style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '4px' }}>KN-{selectedDispute.id}</div>
-                            <h2 style={{ marginTop: 0, marginBottom: '8px' }}>{selectedDispute.tieuDe}</h2>
+                            <h2 className="font-sans" style={{ marginTop: 0, marginBottom: '8px', fontSize: '22px', fontWeight: 700 }}>{selectedDispute.tieuDe}</h2>
                             <div style={{ marginBottom: '24px' }}>
                                 {(() => {
                                     const color = statusColor(selectedDispute.trangThai);

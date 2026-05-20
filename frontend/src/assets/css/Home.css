@@ -6,6 +6,7 @@
 
 /* Navbar */
 .navbar {
+  font-family: 'Manrope', sans-serif;
   display: flex;
   justify-content: space-between;
   align-items: center;
