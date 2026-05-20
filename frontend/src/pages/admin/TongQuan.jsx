@@ -5,6 +5,7 @@ import {
     PieChart, Pie, Cell, Legend,
 } from 'recharts';
 import { api } from '../../services/api';
+import { exportDashboardToExcel, exportDashboardToPdf } from '../../utils/dashboardExport';
 import '../../assets/css/TongQuan.css';
 
 const STATUS_LABEL = {
@@ -25,6 +26,25 @@ const STATUS_COLOR = {
     DA_HUY:       '#ef4444',
 };
 
+const APPT_STATUS_LABEL = {
+    CHO_XAC_NHAN: 'Chờ Xác Nhận',
+    DA_XAC_NHAN:  'Đã Xác Nhận',
+    DA_HOAN_THANH: 'Đã Hoàn Thành',
+    DA_HUY:       'Đã Hủy',
+};
+
+const APPT_STATUS_COLOR = {
+    CHO_XAC_NHAN:  '#f59e0b',
+    DA_XAC_NHAN:   '#3b82f6',
+    DA_HOAN_THANH: '#10b981',
+    DA_HUY:        '#ef4444',
+};
+
+const REVENUE_BREAKDOWN_COLOR = {
+    PHU_KIEN: '#06b6d4',
+    DICH_VU:  '#c5a059',
+};
+
 const PRODUCT_TYPE_LABEL = {
     OTO: 'Ô tô', PHU_KIEN: 'Phụ kiện', DICH_VU: 'Dịch vụ',
 };
@@ -43,7 +63,7 @@ const formatPct = (p) => {
     return `${sign}${p.toFixed(1)}%`;
 };
 
-function KpiCard({ title, value, change, prefix = '', suffix = '' }) {
+function KpiCard({ title, value, change, prefix = '', suffix = '', subInfo = '' }) {
     const isUp = change > 0;
     const isDown = change < 0;
     return (
@@ -52,6 +72,11 @@ function KpiCard({ title, value, change, prefix = '', suffix = '' }) {
             <p className="kpi-value" style={{ fontSize: '36px' }}>
                 {prefix}{value}{suffix}
             </p>
+            {subInfo && (
+                <div style={{ marginTop: 8, fontSize: 11, color: '#6b7280', fontFamily: 'Manrope, sans-serif', letterSpacing: 0.3 }}>
+                    {subInfo}
+                </div>
+            )}
             <div className={`kpi-trend ${isDown ? 'negative' : ''}`} style={{ color: isUp ? '#10b981' : isDown ? '#ef4444' : '#888' }}>
                 {isUp ? '▲' : isDown ? '▼' : '•'} {formatPct(change)} so với kỳ trước
             </div>
@@ -65,6 +90,7 @@ export default function TongQuan() {
     const [kpi, setKpi] = useState(null);
     const [trend, setTrend] = useState([]);
     const [statusStats, setStatusStats] = useState([]);
+    const [apptStatusStats, setApptStatusStats] = useState([]);
     const [topProducts, setTopProducts] = useState([]);
     const [recentOrders, setRecentOrders] = useState([]);
 
@@ -72,16 +98,18 @@ export default function TongQuan() {
         const fetchAll = async () => {
             setLoading(true);
             try {
-                const [kpiR, trendR, statusR, topR, recentR] = await Promise.all([
+                const [kpiR, trendR, statusR, apptStatusR, topR, recentR] = await Promise.all([
                     api.get(`/admin/dashboard/kpi?days=${days}`),
                     api.get(`/admin/dashboard/revenue-trend?days=${days}`),
                     api.get(`/admin/dashboard/order-status?days=${days}`),
+                    api.get(`/admin/dashboard/appointment-status?days=${days}`),
                     api.get(`/admin/dashboard/top-products?days=${days}&limit=5`),
                     api.get(`/admin/dashboard/recent-orders`),
                 ]);
                 setKpi(kpiR.data?.data);
                 setTrend(trendR.data?.data || []);
                 setStatusStats(statusR.data?.data || []);
+                setApptStatusStats(apptStatusR.data?.data || []);
                 setTopProducts(topR.data?.data || []);
                 setRecentOrders(recentR.data?.data || []);
             } catch (err) {
@@ -110,6 +138,23 @@ export default function TongQuan() {
         })),
     [statusStats]);
 
+    const apptStatusPieData = useMemo(() =>
+        (apptStatusStats || []).filter(s => s.soLuong > 0).map(s => ({
+            name: APPT_STATUS_LABEL[s.trangThai] || s.trangThai,
+            value: Number(s.soLuong || 0),
+            color: APPT_STATUS_COLOR[s.trangThai] || '#999',
+        })),
+    [apptStatusStats]);
+
+    const revenueBreakdownData = useMemo(() => {
+        const pk = Number(kpi?.doanhThuPhuKien || 0);
+        const dv = Number(kpi?.doanhThuDichVu || 0);
+        const items = [];
+        if (pk > 0) items.push({ name: 'Phụ kiện', value: pk, color: REVENUE_BREAKDOWN_COLOR.PHU_KIEN });
+        if (dv > 0) items.push({ name: 'Dịch vụ', value: dv, color: REVENUE_BREAKDOWN_COLOR.DICH_VU });
+        return items;
+    }, [kpi]);
+
     const totalOrdersInPeriod = useMemo(() =>
         (statusStats || []).reduce((s, x) => s + Number(x.soLuong || 0), 0),
     [statusStats]);
@@ -117,16 +162,16 @@ export default function TongQuan() {
     return (
         <div className="dashboard-container">
             {/* HEADER */}
-            <header className="dashboard-header" style={{ alignItems: 'center' }}>
+            <header className="dashboard-header" style={{ alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
                 <div className="dashboard-title-group">
                     <h2 className="dashboard-subtitle">BÁO CÁO</h2>
                     <h1 className="dashboard-title">Tổng Quan Kinh Doanh</h1>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <span style={{ fontSize: 13, color: '#666', textTransform: 'uppercase', letterSpacing: '1px' }}>Khoảng thời gian:</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                     <select
                         value={days}
                         onChange={e => setDays(Number(e.target.value))}
+                        title="Khoảng thời gian"
                         style={{
                             padding: '10px 16px', border: '1px solid #d1d5db', borderRadius: '8px',
                             background: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer',
@@ -138,20 +183,54 @@ export default function TongQuan() {
                         <option value={90}>90 ngày qua</option>
                         <option value={365}>1 năm qua</option>
                     </select>
+                    <button
+                        type="button"
+                        onClick={() => exportDashboardToExcel({ days, kpi, trend, statusStats, apptStatusStats, topProducts, recentOrders })}
+                        disabled={loading || !kpi}
+                        style={{
+                            padding: '10px 16px', borderRadius: '8px', border: 'none',
+                            background: '#16a34a', color: '#fff',
+                            fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                            display: 'flex', alignItems: 'center', gap: '6px',
+                            fontFamily: 'inherit',
+                            opacity: (loading || !kpi) ? 0.6 : 1,
+                        }}
+                        title="Tải báo cáo Excel (.xlsx)"
+                    >
+                        📊 Excel
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => exportDashboardToPdf({ days, kpi, trend, statusStats, apptStatusStats, topProducts, recentOrders })}
+                        disabled={loading || !kpi}
+                        style={{
+                            padding: '10px 16px', borderRadius: '8px', border: 'none',
+                            background: '#dc2626', color: '#fff',
+                            fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                            display: 'flex', alignItems: 'center', gap: '6px',
+                            fontFamily: 'inherit',
+                            opacity: (loading || !kpi) ? 0.6 : 1,
+                        }}
+                        title="Tải báo cáo PDF"
+                    >
+                        📄 PDF
+                    </button>
                 </div>
             </header>
 
             {/* KPI CARDS */}
             <div className="dashboard-kpi-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
                 <KpiCard
-                    title="Doanh Thu"
+                    title="Tổng Doanh Thu"
                     value={loading ? '—' : formatVND(kpi?.tongDoanhThu)}
                     change={kpi?.doanhThuChangePercent}
+                    subInfo={!loading && kpi ? `PK ${formatVNDCompact(kpi.doanhThuPhuKien)} · DV ${formatVNDCompact(kpi.doanhThuDichVu)}` : ''}
                 />
                 <KpiCard
-                    title="Số Đơn Hàng"
+                    title="Tổng Giao Dịch"
                     value={loading ? '—' : (kpi?.soDonHang ?? 0)}
                     change={kpi?.donHangChangePercent}
+                    subInfo={!loading && kpi ? `${kpi.soDonPhuKien} đơn PK · ${kpi.soLuotDichVu} lượt DV` : ''}
                 />
                 <KpiCard
                     title="Khách Đặt Hàng"
@@ -232,6 +311,82 @@ export default function TongQuan() {
                                         iconType="circle"
                                         wrapperStyle={{ fontSize: 11 }}
                                     />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* SECONDARY CHARTS: cơ cấu doanh thu + status lịch hẹn */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '48px' }} className="dashboard-charts-row">
+
+                {/* REVENUE BREAKDOWN */}
+                <div className="chart-card">
+                    <div className="chart-card-header">
+                        <h3>Cơ cấu doanh thu</h3>
+                        <span className="chart-card-sub">Phụ kiện vs Dịch vụ — {days} ngày</span>
+                    </div>
+                    {revenueBreakdownData.length === 0 ? (
+                        <div className="chart-empty">Chưa có doanh thu trong kỳ này</div>
+                    ) : (
+                        <div style={{ width: '100%', height: 280 }}>
+                            <ResponsiveContainer>
+                                <PieChart>
+                                    <Pie
+                                        data={revenueBreakdownData}
+                                        innerRadius={55}
+                                        outerRadius={90}
+                                        paddingAngle={2}
+                                        dataKey="value"
+                                        label={(e) => {
+                                            const total = revenueBreakdownData.reduce((s, x) => s + x.value, 0);
+                                            const pct = total > 0 ? Math.round((e.value / total) * 100) : 0;
+                                            return `${pct}%`;
+                                        }}
+                                    >
+                                        {revenueBreakdownData.map((s, i) => (
+                                            <Cell key={i} fill={s.color} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip
+                                        formatter={(v, n) => [formatVND(v), n]}
+                                        contentStyle={{ border: '1px solid #e5e5e5', borderRadius: '8px', fontSize: 13 }}
+                                    />
+                                    <Legend verticalAlign="bottom" iconType="circle" wrapperStyle={{ fontSize: 12 }} />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </div>
+                    )}
+                </div>
+
+                {/* APPOINTMENT STATUS DONUT */}
+                <div className="chart-card">
+                    <div className="chart-card-header">
+                        <h3>Trạng thái lịch hẹn dịch vụ</h3>
+                        <span className="chart-card-sub">
+                            Tổng {(apptStatusStats || []).reduce((s, x) => s + Number(x.soLuong || 0), 0)} lượt
+                        </span>
+                    </div>
+                    {apptStatusPieData.length === 0 ? (
+                        <div className="chart-empty">Chưa có lịch hẹn trong kỳ này</div>
+                    ) : (
+                        <div style={{ width: '100%', height: 280 }}>
+                            <ResponsiveContainer>
+                                <PieChart>
+                                    <Pie
+                                        data={apptStatusPieData}
+                                        innerRadius={55}
+                                        outerRadius={90}
+                                        paddingAngle={2}
+                                        dataKey="value"
+                                    >
+                                        {apptStatusPieData.map((s, i) => (
+                                            <Cell key={i} fill={s.color} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip formatter={(v, n) => [`${v} lượt`, n]} contentStyle={{ border: '1px solid #e5e5e5', borderRadius: '8px', fontSize: 13 }} />
+                                    <Legend verticalAlign="bottom" iconType="circle" wrapperStyle={{ fontSize: 11 }} />
                                 </PieChart>
                             </ResponsiveContainer>
                         </div>

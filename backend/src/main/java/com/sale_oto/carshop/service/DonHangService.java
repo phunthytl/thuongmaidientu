@@ -8,6 +8,7 @@ import com.sale_oto.carshop.dto.response.DonHangResponse;
 import com.sale_oto.carshop.entity.*;
 import com.sale_oto.carshop.enums.LoaiSanPham;
 import com.sale_oto.carshop.enums.TrangThaiDonHang;
+import com.sale_oto.carshop.exception.BadRequestException;
 import com.sale_oto.carshop.exception.ResourceNotFoundException;
 import com.sale_oto.carshop.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +32,6 @@ public class DonHangService {
     private final NhanVienRepository nhanVienRepository;
     private final OToRepository oToRepository;
     private final PhuKienRepository phuKienRepository;
-    private final DichVuRepository dichVuRepository;
     private final DiaChiKhachHangRepository diaChiKhachHangRepository;
     private final KhoHangRepository khoHangRepository;
     private final TonKhoService tonKhoService;
@@ -246,12 +246,8 @@ public class DonHangService {
                 chiTiet.setPhuKien(pk);
                 yield pk.getGia();
             }
-            case DICH_VU -> {
-                DichVu dv = dichVuRepository.findById(request.getDichVuId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Dịch vụ", request.getDichVuId()));
-                chiTiet.setDichVu(dv);
-                yield dv.getGia();
-            }
+            case DICH_VU -> throw new BadRequestException(
+                    "Dịch vụ chỉ được đặt qua lịch hẹn, không thể tạo đơn hàng.");
         };
     }
 

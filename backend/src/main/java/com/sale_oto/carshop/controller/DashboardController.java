@@ -37,6 +37,12 @@ public class DashboardController {
         return ResponseEntity.ok(ApiResponse.success(dashboardService.getOrderStatusStats(clamp(days))));
     }
 
+    @GetMapping("/appointment-status")
+    public ResponseEntity<ApiResponse<List<DashboardResponse.AppointmentStatusStat>>> appointmentStatus(
+            @RequestParam(defaultValue = "30") int days) {
+        return ResponseEntity.ok(ApiResponse.success(dashboardService.getAppointmentStatusStats(clamp(days))));
+    }
+
     @GetMapping("/top-products")
     public ResponseEntity<ApiResponse<List<DashboardResponse.TopProduct>>> topProducts(
             @RequestParam(defaultValue = "30") int days,
