@@ -4,7 +4,6 @@ import com.sale_oto.carshop.dto.request.ThemVaoGioHangRequest;
 import com.sale_oto.carshop.dto.response.ChiTietGioHangResponse;
 import com.sale_oto.carshop.dto.response.GioHangResponse;
 import com.sale_oto.carshop.entity.ChiTietGioHang;
-import com.sale_oto.carshop.entity.DichVu;
 import com.sale_oto.carshop.entity.GioHang;
 import com.sale_oto.carshop.entity.KhachHang;
 import com.sale_oto.carshop.entity.PhuKien;
@@ -12,7 +11,6 @@ import com.sale_oto.carshop.enums.LoaiSanPham;
 import com.sale_oto.carshop.exception.BadRequestException;
 import com.sale_oto.carshop.exception.ResourceNotFoundException;
 import com.sale_oto.carshop.repository.ChiTietGioHangRepository;
-import com.sale_oto.carshop.repository.DichVuRepository;
 import com.sale_oto.carshop.repository.GioHangRepository;
 import com.sale_oto.carshop.repository.KhachHangRepository;
 import com.sale_oto.carshop.repository.PhuKienRepository;
@@ -36,7 +34,6 @@ public class GioHangService {
     private final ChiTietGioHangRepository chiTietGioHangRepository;
     private final KhachHangRepository khachHangRepository;
     private final PhuKienRepository phuKienRepository;
-    private final DichVuRepository dichVuRepository;
     private final MediaRepository mediaRepository;
 
     @Transactional
@@ -162,10 +159,9 @@ public class GioHangService {
         return chiTietGioHangRepository.findByGioHangId(gioHangId).stream()
                 .filter(item -> item.getLoaiSanPham() == request.getLoaiSanPham())
                 .filter(item -> switch (request.getLoaiSanPham()) {
-                    case OTO -> false;
+                    case OTO, DICH_VU -> false;
                     case PHU_KIEN ->
                         item.getPhuKien() != null && item.getPhuKien().getId().equals(request.getPhuKienId());
-                    case DICH_VU -> item.getDichVu() != null && item.getDichVu().getId().equals(request.getDichVuId());
                 })
                 .findFirst();
     }
@@ -185,17 +181,8 @@ public class GioHangService {
                 chiTiet.setDichVu(null);
                 yield phuKien.getGia();
             }
-            case DICH_VU -> {
-                if (request.getDichVuId() == null) {
-                    throw new BadRequestException("dichVuId không được để trống");
-                }
-                DichVu dichVu = dichVuRepository.findById(request.getDichVuId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Dịch vụ", request.getDichVuId()));
-                chiTiet.setDichVu(dichVu);
-                chiTiet.setOto(null);
-                chiTiet.setPhuKien(null);
-                yield dichVu.getGia();
-            }
+            case DICH_VU -> throw new BadRequestException(
+                    "Dịch vụ chỉ được đặt qua lịch hẹn, không thể thêm vào giỏ hàng.");
         };
     }
 
@@ -211,15 +198,6 @@ public class GioHangService {
                 }
                 if (phuKien.getSoLuong() == null || phuKien.getSoLuong() < soLuongMoi) {
                     throw new BadRequestException("Số lượng phụ kiện trong kho không đủ");
-                }
-            }
-            case DICH_VU -> {
-                DichVu dichVu = chiTiet.getDichVu();
-                if (dichVu == null) {
-                    throw new BadRequestException("Dịch vụ không hợp lệ");
-                }
-                if (!Boolean.TRUE.equals(dichVu.getTrangThai())) {
-                    throw new BadRequestException("Dịch vụ hiện không còn kinh doanh");
                 }
             }
             default -> throw new BadRequestException("Loại sản phẩm không hỗ trợ trong giỏ hàng.");

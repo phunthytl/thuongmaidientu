@@ -16,12 +16,12 @@ import java.math.RoundingMode;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -38,27 +38,25 @@ public class DashboardService {
         LocalDateTime prevFrom = from.minusDays(days);
         LocalDateTime prevTo = from;
 
-        // Doanh thu = đơn hàng HOÀN_THÀNH + lịch hẹn dịch vụ DA_HOAN_THANH
-        BigDecimal revenueOrders = nz(donHangRepository.sumRevenueBetween(from, now));
-        BigDecimal revenueServices = nz(lichHenRepository.sumServiceRevenueBetween(from, now));
-        BigDecimal revenue = revenueOrders.add(revenueServices);
+        // ===== Doanh thu phân rã theo nguồn =====
+        BigDecimal revenuePhuKien = nz(donHangRepository.sumRevenueBetween(from, now));
+        BigDecimal revenueDichVu  = nz(lichHenRepository.sumServiceRevenueBetween(from, now));
+        BigDecimal revenue = revenuePhuKien.add(revenueDichVu);
 
-        BigDecimal prevRevenueOrders = nz(donHangRepository.sumRevenueBetween(prevFrom, prevTo));
-        BigDecimal prevRevenueServices = nz(lichHenRepository.sumServiceRevenueBetween(prevFrom, prevTo));
-        BigDecimal prevRevenue = prevRevenueOrders.add(prevRevenueServices);
+        BigDecimal prevRevenuePhuKien = nz(donHangRepository.sumRevenueBetween(prevFrom, prevTo));
+        BigDecimal prevRevenueDichVu  = nz(lichHenRepository.sumServiceRevenueBetween(prevFrom, prevTo));
+        BigDecimal prevRevenue = prevRevenuePhuKien.add(prevRevenueDichVu);
 
-        // Số "đơn" = đơn hàng + lịch hẹn dịch vụ (cùng coi là 1 giao dịch)
-        long orders = donHangRepository.countBetween(from, now)
-                    + lichHenRepository.countServiceBetween(from, now);
+        // ===== Số giao dịch phân rã =====
+        long soDonPhuKien = donHangRepository.countBetween(from, now);
+        long soLuotDichVu = lichHenRepository.countServiceBetween(from, now);
+        long orders = soDonPhuKien + soLuotDichVu;
         long prevOrders = donHangRepository.countBetween(prevFrom, prevTo)
                         + lichHenRepository.countServiceBetween(prevFrom, prevTo);
 
-        // Khách: union distinct từ 2 nguồn — không thể tính chính xác qua SQL nên cộng đơn giản
-        // (có thể trùng nhau nhưng acceptable cho dashboard)
-        long customers = donHangRepository.countDistinctCustomersBetween(from, now)
-                       + lichHenRepository.countDistinctServiceCustomersBetween(from, now);
-        long prevCustomers = donHangRepository.countDistinctCustomersBetween(prevFrom, prevTo)
-                           + lichHenRepository.countDistinctServiceCustomersBetween(prevFrom, prevTo);
+        // ===== Khách hàng: UNION DISTINCT (dùng Set để lọc trùng giữa 2 nguồn) =====
+        long customers = countUnionCustomers(from, now);
+        long prevCustomers = countUnionCustomers(prevFrom, prevTo);
 
         BigDecimal aov = orders > 0
                 ? revenue.divide(BigDecimal.valueOf(orders), 0, RoundingMode.HALF_UP)
@@ -71,9 +69,13 @@ public class DashboardService {
                 .tongDoanhThu(revenue)
                 .doanhThuKyTruoc(prevRevenue)
                 .doanhThuChangePercent(percentChange(revenue, prevRevenue))
+                .doanhThuPhuKien(revenuePhuKien)
+                .doanhThuDichVu(revenueDichVu)
                 .soDonHang(orders)
                 .soDonHangKyTruoc(prevOrders)
                 .donHangChangePercent(percentChange(orders, prevOrders))
+                .soDonPhuKien(soDonPhuKien)
+                .soLuotDichVu(soLuotDichVu)
                 .khachMoi(customers)
                 .khachMoiKyTruoc(prevCustomers)
                 .khachMoiChangePercent(percentChange(customers, prevCustomers))
@@ -81,6 +83,16 @@ public class DashboardService {
                 .aovKyTruoc(prevAov)
                 .aovChangePercent(percentChange(aov, prevAov))
                 .build();
+    }
+
+    /**
+     * Đếm khách hàng UNIQUE giữa 2 nguồn (đơn hàng + lịch hẹn dịch vụ).
+     * Dùng Set để loại trùng — 1 khách vừa mua phụ kiện vừa đặt lịch chỉ tính 1.
+     */
+    private long countUnionCustomers(LocalDateTime from, LocalDateTime to) {
+        Set<Long> ids = new HashSet<>(donHangRepository.findDistinctCustomerIdsBetween(from, to));
+        ids.addAll(lichHenRepository.findDistinctServiceCustomerIdsBetween(from, to));
+        return ids.size();
     }
 
     @Transactional(readOnly = true)
@@ -116,6 +128,26 @@ public class DashboardService {
                     .build());
         }
         return trend;
+    }
+
+    @Transactional(readOnly = true)
+    public List<DashboardResponse.AppointmentStatusStat> getAppointmentStatusStats(int days) {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime from = now.minusDays(days);
+
+        Map<com.sale_oto.carshop.entity.LichHen.TrangThaiLichHen, Long> map = new java.util.EnumMap<>(com.sale_oto.carshop.entity.LichHen.TrangThaiLichHen.class);
+        for (Object[] r : lichHenRepository.findAppointmentStatusStatsBetween(from, now)) {
+            map.put((com.sale_oto.carshop.entity.LichHen.TrangThaiLichHen) r[0], ((Number) r[1]).longValue());
+        }
+
+        List<DashboardResponse.AppointmentStatusStat> result = new ArrayList<>();
+        for (com.sale_oto.carshop.entity.LichHen.TrangThaiLichHen st : com.sale_oto.carshop.entity.LichHen.TrangThaiLichHen.values()) {
+            result.add(DashboardResponse.AppointmentStatusStat.builder()
+                    .trangThai(st)
+                    .soLuong(map.getOrDefault(st, 0L))
+                    .build());
+        }
+        return result;
     }
 
     @Transactional(readOnly = true)
@@ -227,6 +259,7 @@ public class DashboardService {
     }
 
     private static LocalDate toLocalDate(Object dbDate) {
+        if (dbDate == null) return LocalDate.now();
         if (dbDate instanceof LocalDate ld) return ld;
         if (dbDate instanceof Date sqlDate) return sqlDate.toLocalDate();
         if (dbDate instanceof java.util.Date utilDate) {

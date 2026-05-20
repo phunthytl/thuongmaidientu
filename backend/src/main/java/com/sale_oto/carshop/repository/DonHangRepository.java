@@ -50,6 +50,11 @@ public interface DonHangRepository extends JpaRepository<DonHang, Long> {
     long countDistinctCustomersBetween(@Param("tuNgay") LocalDateTime tuNgay,
                                        @Param("denNgay") LocalDateTime denNgay);
 
+    @Query("SELECT DISTINCT dh.khachHang.id FROM DonHang dh " +
+           "WHERE dh.ngayTao BETWEEN :tuNgay AND :denNgay")
+    List<Long> findDistinctCustomerIdsBetween(@Param("tuNgay") LocalDateTime tuNgay,
+                                              @Param("denNgay") LocalDateTime denNgay);
+
     @Query("SELECT FUNCTION('DATE', dh.ngayTao), " +
            "       COALESCE(SUM(CASE WHEN dh.trangThai = com.sale_oto.carshop.enums.TrangThaiDonHang.HOAN_THANH THEN dh.tongTien ELSE 0 END), 0), " +
            "       COUNT(dh) " +

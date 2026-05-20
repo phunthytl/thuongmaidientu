@@ -37,6 +37,19 @@ public interface LichHenRepository extends JpaRepository<LichHen, Long> {
     long countDistinctServiceCustomersBetween(@Param("tuNgay") LocalDateTime tuNgay,
                                               @Param("denNgay") LocalDateTime denNgay);
 
+    @Query("SELECT DISTINCT lh.nguoiDung.id FROM LichHen lh " +
+           "WHERE lh.loaiLich = com.sale_oto.carshop.entity.LichHen.LoaiLichHen.DICH_VU " +
+           "  AND lh.ngayTao BETWEEN :tuNgay AND :denNgay")
+    List<Long> findDistinctServiceCustomerIdsBetween(@Param("tuNgay") LocalDateTime tuNgay,
+                                                     @Param("denNgay") LocalDateTime denNgay);
+
+    @Query("SELECT lh.trangThai, COUNT(lh) FROM LichHen lh " +
+           "WHERE lh.loaiLich = com.sale_oto.carshop.entity.LichHen.LoaiLichHen.DICH_VU " +
+           "  AND lh.ngayTao BETWEEN :tuNgay AND :denNgay " +
+           "GROUP BY lh.trangThai")
+    List<Object[]> findAppointmentStatusStatsBetween(@Param("tuNgay") LocalDateTime tuNgay,
+                                                     @Param("denNgay") LocalDateTime denNgay);
+
     @Query("SELECT FUNCTION('DATE', lh.ngayTao), " +
            "       COALESCE(SUM(CASE WHEN lh.trangThai = com.sale_oto.carshop.entity.LichHen.TrangThaiLichHen.DA_HOAN_THANH THEN lh.dichVu.gia ELSE 0 END), 0), " +
            "       COUNT(lh) " +

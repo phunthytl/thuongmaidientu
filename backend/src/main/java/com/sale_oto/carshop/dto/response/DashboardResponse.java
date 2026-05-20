@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 
 public class DashboardResponse {
 
@@ -19,21 +18,52 @@ public class DashboardResponse {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class Kpi {
+        // Tổng (gồm cả 2 luồng)
         private BigDecimal tongDoanhThu;
         private BigDecimal doanhThuKyTruoc;
         private Double doanhThuChangePercent;
 
+        // Phân rã doanh thu theo nguồn
+        private BigDecimal doanhThuPhuKien;
+        private BigDecimal doanhThuDichVu;
+
+        // Tổng số giao dịch (đơn hàng + lịch hẹn)
         private Long soDonHang;
         private Long soDonHangKyTruoc;
         private Double donHangChangePercent;
 
+        // Phân rã số giao dịch theo nguồn
+        private Long soDonPhuKien;
+        private Long soLuotDichVu;
+
+        // Khách hàng (đã lọc trùng giữa 2 nguồn bằng Set)
         private Long khachMoi;
         private Long khachMoiKyTruoc;
         private Double khachMoiChangePercent;
 
+        // Giá trị TB / giao dịch
         private BigDecimal aov;
         private BigDecimal aovKyTruoc;
         private Double aovChangePercent;
+    }
+
+    @Data
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class AppointmentStatusStat {
+        private com.sale_oto.carshop.entity.LichHen.TrangThaiLichHen trangThai;
+        private Long soLuong;
+    }
+
+    @Data
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class RevenueBreakdown {
+        private BigDecimal phuKien;
+        private BigDecimal dichVu;
+        private BigDecimal tong;
     }
 
     @Data
