@@ -6,7 +6,7 @@ import AdminLogin from './pages/admin/DangNhap';
 import Dashboard from './pages/admin/TongQuan';
 import Oto from './pages/admin/Oto';
 import ThemOto from './pages/admin/ThemOto';
-import ChiTietOto from './pages/admin/ChiTietOto';
+import ChiTietOto from './pages/admin/ChiTietOTo';
 import PhuKien from './pages/admin/PhuKien';
 import ThemPhuKien from './pages/admin/ThemPhuKien';
 import ChiTietPhuKien from './pages/admin/ChiTietPhuKien';
