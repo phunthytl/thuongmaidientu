@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1.7
-
 # ---------- Stage 1: Build ----------
 FROM node:20-alpine AS builder
 
@@ -12,7 +10,7 @@ COPY . .
 
 ARG REACT_APP_API_URL=/api
 ENV REACT_APP_API_URL=${REACT_APP_API_URL}
-ENV CI=true
+ENV CI=false
 ENV GENERATE_SOURCEMAP=false
 
 RUN npm run build
