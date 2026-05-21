@@ -24,6 +24,8 @@ public class DonHangResponse {
     private TrangThaiDonHang trangThai;
     private String ghiChu;
     private DiaChiResponse diaChiGiaoHang;
+    private KhoHangResponse khoXuatHang;
+    private ThanhToanResponse thanhToan;
     private BigDecimal phiVanChuyen;
     private String maDonHangGhn;
     private List<ChiTietDonHangResponse> chiTietDonHangs;

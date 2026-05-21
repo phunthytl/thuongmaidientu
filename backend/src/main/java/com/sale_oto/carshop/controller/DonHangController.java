@@ -72,4 +72,10 @@ public class DonHangController {
             @PathVariable Long donHangId, @PathVariable Long nhanVienId) {
         return ResponseEntity.ok(ApiResponse.success(donHangService.ganNhanVien(donHangId, nhanVienId)));
     }
+
+    @PatchMapping("/{donHangId}/phan-cong-kho/{khoHangId}")
+    public ResponseEntity<ApiResponse<DonHangResponse>> phanCongKho(
+            @PathVariable Long donHangId, @PathVariable Long khoHangId) {
+        return ResponseEntity.ok(ApiResponse.success(donHangService.phanCongKho(donHangId, khoHangId)));
+    }
 }

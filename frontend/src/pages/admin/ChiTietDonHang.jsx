@@ -61,7 +61,9 @@ export default function ChiTietDonHang() {
     };
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    useEffect(() => { fetchOrder(); }, [id]);
+    useEffect(() => { 
+        fetchOrder(); 
+    }, [id]);
 
     const handleUpdateStatus = async () => {
         if (!status || status === order.trangThai) return;
@@ -195,7 +197,7 @@ export default function ChiTietDonHang() {
                                 </li>
                                 <li>
                                     <span className="spec-label">Địa điểm</span>
-                                    <span className="spec-value">{kho.tinhThanhTen}</span>
+                                    <span className="spec-value">{kho.tinhThanhName || kho.tinhThanhTen}</span>
                                 </li>
                                 <li>
                                     <span className="spec-label">SĐT kho</span>
