@@ -70,6 +70,7 @@ function App() {
                     </ProtectedRoute>
                 } />
                 <Route path="/thanh-toan/ket-qua" element={<VnpayResult />} />
+                <Route path="/payment/vnpay-result" element={<VnpayResult />} />
                 <Route path="/register" element={<DangKy />} />
                 <Route path="/my-orders" element={
                     <ProtectedRoute allowedRoles={['KHACH_HANG', 'ADMIN', 'NHAN_VIEN']}>

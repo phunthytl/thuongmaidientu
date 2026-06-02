@@ -9,6 +9,32 @@ $envFile    = Join-Path $scriptDir '.env'
 $schemaFile = Join-Path $scriptDir 'CarShop.sql'
 $seedFile   = Join-Path $scriptDir 'seed_data_lamthanhduc.sql'
 
+function Invoke-MysqlFile {
+    param(
+        [string]$FilePath,
+        [string]$DatabaseName
+    )
+
+    $reader = New-Object System.IO.StreamReader($FilePath, $true)
+    try {
+        $content = $reader.ReadToEnd()
+    } finally {
+        $reader.Close()
+    }
+
+    $tempFile = Join-Path $env:TEMP ("carshop-import-{0}.sql" -f ([guid]::NewGuid().ToString('N')))
+    $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+    [System.IO.File]::WriteAllText($tempFile, $content, $utf8NoBom)
+
+    try {
+        $mysqlSourcePath = $tempFile.Replace('\', '/')
+        & mysql -h $dbHost -P $dbPort -u $dbUser "--password=$dbPass" --default-character-set=utf8mb4 $DatabaseName "--execute=source $mysqlSourcePath"
+        if ($LASTEXITCODE -ne 0) { throw "Failed to import $FilePath" }
+    } finally {
+        Remove-Item -LiteralPath $tempFile -Force -ErrorAction SilentlyContinue
+    }
+}
+
 # --- Parse .env ---
 $envVars = @{}
 if (Test-Path $envFile) {
@@ -33,19 +59,15 @@ $dropSql = "DROP DATABASE IF EXISTS ``$dbName``; CREATE DATABASE ``$dbName`` CHA
 $dropSql | & mysql -h $dbHost -P $dbPort -u $dbUser "--password=$dbPass"
 if ($LASTEXITCODE -ne 0) { throw "Failed to drop/create database" }
 
-# --- 2. Import schema (CarShop.sql la UTF-16 LE, can convert sang UTF-8) ---
+# --- 2. Import schema/data with UTF-8 so Vietnamese text is preserved ---
 Write-Host "==> Importing schema from CarShop.sql..." -ForegroundColor Yellow
 if (-not (Test-Path $schemaFile)) { throw "Not found: $schemaFile" }
-$schemaContent = Get-Content -Path $schemaFile -Encoding Unicode -Raw
-$schemaContent | & mysql -h $dbHost -P $dbPort -u $dbUser "--password=$dbPass" --default-character-set=utf8mb4 $dbName
-if ($LASTEXITCODE -ne 0) { throw "Failed to import schema" }
+Invoke-MysqlFile -FilePath $schemaFile -DatabaseName $dbName
 
 # --- 3. Import seed data ---
 Write-Host "==> Importing seed_data_lamthanhduc.sql..." -ForegroundColor Yellow
 if (-not (Test-Path $seedFile)) { throw "Not found: $seedFile" }
-$seedContent = Get-Content -Path $seedFile -Encoding UTF8 -Raw
-$seedContent | & mysql -h $dbHost -P $dbPort -u $dbUser "--password=$dbPass" --default-character-set=utf8mb4 $dbName
-if ($LASTEXITCODE -ne 0) { throw "Failed to import seed data" }
+Invoke-MysqlFile -FilePath $seedFile -DatabaseName $dbName
 
 Write-Host ""
 Write-Host "Database '$dbName' has been reset successfully!" -ForegroundColor Green

@@ -35,11 +35,13 @@ CREATE TABLE `chi_tiet_don_hang` (
   `thanh_tien` decimal(15,2) NOT NULL,
   `dich_vu_id` bigint DEFAULT NULL,
   `don_hang_id` bigint NOT NULL,
+  `kho_hang_id` bigint DEFAULT NULL,
   `oto_id` bigint DEFAULT NULL,
   `phu_kien_id` bigint DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FKoldfctjd9b1f2x8fwipg96vpi` (`dich_vu_id`),
   KEY `FKt57maavf6s28hxyar724mdr1b` (`don_hang_id`),
+  KEY `FK_chi_tiet_don_hang_kho_hang` (`kho_hang_id`),
   KEY `FK2g0lmvtod8ma79ay95nb2ylhf` (`oto_id`),
   KEY `FK1ij1xe4e34g3xprjxvm2vcj9g` (`phu_kien_id`),
   CONSTRAINT `FK1ij1xe4e34g3xprjxvm2vcj9g` FOREIGN KEY (`phu_kien_id`) REFERENCES `phu_kien` (`id`),
@@ -55,7 +57,7 @@ CREATE TABLE `chi_tiet_don_hang` (
 
 LOCK TABLES `chi_tiet_don_hang` WRITE;
 /*!40000 ALTER TABLE `chi_tiet_don_hang` DISABLE KEYS */;
-INSERT INTO `chi_tiet_don_hang` VALUES (1,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000',1250000.00,'PHU_KIEN',1,1250000.00,NULL,1,NULL,1),(2,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000',280000.00,'PHU_KIEN',2,560000.00,NULL,2,NULL,3),(3,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000',350000.00,'PHU_KIEN',2,700000.00,NULL,2,NULL,2),(4,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000',1500000.00,'PHU_KIEN',1,1500000.00,NULL,2,NULL,6),(5,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000',1800000.00,'PHU_KIEN',1,1800000.00,NULL,3,NULL,4),(6,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000',420000.00,'PHU_KIEN',2,420000.00,NULL,3,NULL,7),(7,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000',1390000000.00,'OTO',1,1390000000.00,NULL,4,1,NULL),(8,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000',320000.00,'PHU_KIEN',2,640000.00,NULL,5,NULL,8),(9,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000',450000.00,'PHU_KIEN',1,450000.00,NULL,5,NULL,10),(10,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000',2300000.00,'PHU_KIEN',1,2300000.00,NULL,6,NULL,9),(11,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000',420000.00,'PHU_KIEN',1,420000.00,NULL,6,NULL,7),(12,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000',1218000000.00,'OTO',1,1218000000.00,NULL,7,2,NULL),(13,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000',890000.00,'PHU_KIEN',2,1800000.00,NULL,7,NULL,5),(14,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000',890000.00,'PHU_KIEN',1,890000.00,NULL,8,NULL,5),(15,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000',1250000.00,'PHU_KIEN',1,1250000.00,NULL,9,NULL,1),(16,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000',890000.00,'PHU_KIEN',1,890000.00,NULL,9,NULL,5),(17,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000',2300000.00,'PHU_KIEN',1,2300000.00,NULL,10,NULL,9),(18,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000',280000.00,'PHU_KIEN',4,1120000.00,NULL,10,NULL,3);
+INSERT INTO `chi_tiet_don_hang` (`id`,`ngay_cap_nhat`,`ngay_tao`,`don_gia`,`loai_san_pham`,`so_luong`,`thanh_tien`,`dich_vu_id`,`don_hang_id`,`oto_id`,`phu_kien_id`) VALUES (1,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000',1250000.00,'PHU_KIEN',1,1250000.00,NULL,1,NULL,1),(2,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000',280000.00,'PHU_KIEN',2,560000.00,NULL,2,NULL,3),(3,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000',350000.00,'PHU_KIEN',2,700000.00,NULL,2,NULL,2),(4,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000',1500000.00,'PHU_KIEN',1,1500000.00,NULL,2,NULL,6),(5,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000',1800000.00,'PHU_KIEN',1,1800000.00,NULL,3,NULL,4),(6,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000',420000.00,'PHU_KIEN',2,420000.00,NULL,3,NULL,7),(7,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000',1390000000.00,'OTO',1,1390000000.00,NULL,4,1,NULL),(8,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000',320000.00,'PHU_KIEN',2,640000.00,NULL,5,NULL,8),(9,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000',450000.00,'PHU_KIEN',1,450000.00,NULL,5,NULL,10),(10,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000',2300000.00,'PHU_KIEN',1,2300000.00,NULL,6,NULL,9),(11,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000',420000.00,'PHU_KIEN',1,420000.00,NULL,6,NULL,7),(12,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000',1218000000.00,'OTO',1,1218000000.00,NULL,7,2,NULL),(13,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000',890000.00,'PHU_KIEN',2,1800000.00,NULL,7,NULL,5),(14,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000',890000.00,'PHU_KIEN',1,890000.00,NULL,8,NULL,5),(15,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000',1250000.00,'PHU_KIEN',1,1250000.00,NULL,9,NULL,1),(16,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000',890000.00,'PHU_KIEN',1,890000.00,NULL,9,NULL,5),(17,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000',2300000.00,'PHU_KIEN',1,2300000.00,NULL,10,NULL,9),(18,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000',280000.00,'PHU_KIEN',4,1120000.00,NULL,10,NULL,3);
 /*!40000 ALTER TABLE `chi_tiet_don_hang` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -74,11 +76,15 @@ CREATE TABLE `danh_gia` (
   `loai_san_pham` enum('DICH_VU','OTO','PHU_KIEN') NOT NULL,
   `noi_dung` text,
   `trang_thai` bit(1) NOT NULL,
+  `chi_tiet_don_hang_id` bigint DEFAULT NULL,
   `dich_vu_id` bigint DEFAULT NULL,
   `khach_hang_id` bigint NOT NULL,
+  `lich_hen_id` bigint DEFAULT NULL,
   `oto_id` bigint DEFAULT NULL,
   `phu_kien_id` bigint DEFAULT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `UK_danh_gia_chi_tiet_don_hang` (`chi_tiet_don_hang_id`),
+  UNIQUE KEY `UK_danh_gia_lich_hen` (`lich_hen_id`),
   KEY `FK758aiv316rc2cspjaa3xofvjp` (`dich_vu_id`),
   KEY `FKs24q7va704gwc33kjomar4s4p` (`khach_hang_id`),
   KEY `FK23s5l3cbgcuc8xvg3rd6llias` (`oto_id`),
@@ -117,6 +123,8 @@ CREATE TABLE `dia_chi_khach_hang` (
   `ten_nguoi_nhan` varchar(100) NOT NULL,
   `tinh_thanh_id` int NOT NULL,
   `tinh_thanh_ten` varchar(100) NOT NULL,
+  `quan_huyen_id` int DEFAULT NULL,
+  `quan_huyen_ten` varchar(100) DEFAULT NULL,
   `xa_phuong_id` int DEFAULT NULL,
   `xa_phuong_ten` varchar(100) DEFAULT NULL,
   `khach_hang_id` bigint NOT NULL,
@@ -134,7 +142,7 @@ CREATE TABLE `dia_chi_khach_hang` (
 
 LOCK TABLES `dia_chi_khach_hang` WRITE;
 /*!40000 ALTER TABLE `dia_chi_khach_hang` DISABLE KEYS */;
-INSERT INTO `dia_chi_khach_hang` VALUES (1,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000','12 Phố Giải Phóng, Phường Yên Sở, Quận Hoàng Mai, Hà Nội',_binary '','0911000001','Nguyễn Văn An',1,'Hà Nội',1001,'Phường Yên Sở',10,1490,'1A0814'),(2,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000','88 Nguyễn Huệ, Phường Trung Mỹ Tây, Quận 12, TP.HCM',_binary '\0','0911000001','Nguyễn Văn An',2,'TP Hồ Chí Minh',2001,'Phường Trung Mỹ Tây',10,1454,'21211'),(3,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000','45 Trần Đại Nghĩa, Phường Định Công, Quận Hoàng Mai, Hà Nội',_binary '','0911000002','Trần Thị Bảo',1,'Hà Nội',1002,'Phường Định Công',11,1490,'1A0802'),(4,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000','67 Bạch Đằng, Xã Tân Thành, Quận Sơn Trà, Đà Nẵng',_binary '','0911000003','Lê Hoàng Cường',3,'Đà Nẵng',3001,'Xã Tân Thành',12,1823,'640706'),(5,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000','99 Đinh Tiên Hoàng, Phường Trung Mỹ Tây, Quận 12, TP.HCM',_binary '','0911000004','Phạm Thị Dung',2,'TP Hồ Chí Minh',2001,'Phường Trung Mỹ Tây',13,1454,'21211'),(6,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000','23 Lê Trọng Tấn, Phường Hoàng Liệt, Quận Hoàng Mai, Hà Nội',_binary '','0911000005','Hoàng Văn Em',1,'Hà Nội',1003,'Phường Hoàng Liệt',14,1490,'1A0804'),(7,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000','11 Nguyễn Chí Thanh, Xã Hiệp Lợi, Quận Sơn Trà, Đà Nẵng',_binary '','0911000006','Vũ Thị Phương',3,'Đà Nẵng',3002,'Xã Hiệp Lợi',15,1823,'640705'),(8,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000','55 Lý Tự Trọng, Phường Thọi An, Quận 12, TP.HCM',_binary '\0','0911000006','Vũ Thị Phương',2,'TP Hồ Chí Minh',2002,'Phường Thọi An',15,1454,'21210'),(9,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000','7 Hùng Vương, Phường Ngã Bảy, Quận Sơn Trà, Đà Nẵng',_binary '\0','0911000004','Phạm Thị Dung',3,'Đà Nẵng',3003,'Phường Ngã Bảy',13,1823,'640703'),(10,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000','5 Tôn Đức Thắng, Phường Thanh Trì, Quận Hoàng Mai, Hà Nội',_binary '\0','0911000003','Lê Hoàng Cường',1,'Hà Nội',1004,'Phường Thanh Trì',12,1490,'1A0809');
+INSERT INTO `dia_chi_khach_hang` (`id`,`ngay_cap_nhat`,`ngay_tao`,`dia_chi_chi_tiet`,`is_default`,`so_dien_thoai`,`ten_nguoi_nhan`,`tinh_thanh_id`,`tinh_thanh_ten`,`xa_phuong_id`,`xa_phuong_ten`,`khach_hang_id`,`ghn_district_id`,`ghn_ward_code`) VALUES (1,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000','12 Phố Giải Phóng, Phường Yên Sở, Quận Hoàng Mai, Hà Nội',_binary '','0911000001','Nguyễn Văn An',1,'Hà Nội',1001,'Phường Yên Sở',10,1490,'1A0814'),(2,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000','88 Nguyễn Huệ, Phường Trung Mỹ Tây, Quận 12, TP.HCM',_binary '\0','0911000001','Nguyễn Văn An',2,'TP Hồ Chí Minh',2001,'Phường Trung Mỹ Tây',10,1454,'21211'),(3,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000','45 Trần Đại Nghĩa, Phường Định Công, Quận Hoàng Mai, Hà Nội',_binary '','0911000002','Trần Thị Bảo',1,'Hà Nội',1002,'Phường Định Công',11,1490,'1A0802'),(4,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000','67 Bạch Đằng, Xã Tân Thành, Quận Sơn Trà, Đà Nẵng',_binary '','0911000003','Lê Hoàng Cường',3,'Đà Nẵng',3001,'Xã Tân Thành',12,1823,'640706'),(5,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000','99 Đinh Tiên Hoàng, Phường Trung Mỹ Tây, Quận 12, TP.HCM',_binary '','0911000004','Phạm Thị Dung',2,'TP Hồ Chí Minh',2001,'Phường Trung Mỹ Tây',13,1454,'21211'),(6,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000','23 Lê Trọng Tấn, Phường Hoàng Liệt, Quận Hoàng Mai, Hà Nội',_binary '','0911000005','Hoàng Văn Em',1,'Hà Nội',1003,'Phường Hoàng Liệt',14,1490,'1A0804'),(7,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000','11 Nguyễn Chí Thanh, Xã Hiệp Lợi, Quận Sơn Trà, Đà Nẵng',_binary '','0911000006','Vũ Thị Phương',3,'Đà Nẵng',3002,'Xã Hiệp Lợi',15,1823,'640705'),(8,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000','55 Lý Tự Trọng, Phường Thọi An, Quận 12, TP.HCM',_binary '\0','0911000006','Vũ Thị Phương',2,'TP Hồ Chí Minh',2002,'Phường Thọi An',15,1454,'21210'),(9,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000','7 Hùng Vương, Phường Ngã Bảy, Quận Sơn Trà, Đà Nẵng',_binary '\0','0911000004','Phạm Thị Dung',3,'Đà Nẵng',3003,'Phường Ngã Bảy',13,1823,'640703'),(10,'2026-04-06 16:44:00.000000','2026-04-06 16:44:00.000000','5 Tôn Đức Thắng, Phường Thanh Trì, Quận Hoàng Mai, Hà Nội',_binary '\0','0911000003','Lê Hoàng Cường',1,'Hà Nội',1004,'Phường Thanh Trì',12,1490,'1A0809');
 /*!40000 ALTER TABLE `dia_chi_khach_hang` ENABLE KEYS */;
 UNLOCK TABLES;
 

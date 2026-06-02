@@ -1,4 +1,4 @@
-﻿[
+[
     {
         "dbType":  "OTO",
         "objectId":  2,
@@ -191,49 +191,49 @@
     {
         "dbType":  "PHU_KIEN",
         "objectId":  1,
-        "objectName":  "L???p xe Michelin 215/60R16",
+        "objectName":  "Lốp xe Michelin 215/60R16",
         "query":  "Michelin 215 60R16 tire product photo",
         "error":  "No usable image found for query: Michelin 215 60R16 tire product photo"
     },
     {
         "dbType":  "PHU_KIEN",
         "objectId":  3,
-        "objectName":  "D???u nh???t Castrol 5W-30 (4L)",
+        "objectName":  "Dầu nhớt Castrol 5W-30 (4L)",
         "query":  "Castrol 5W-30 4L engine oil product photo",
         "error":  "No usable image found for query: Castrol 5W-30 4L engine oil product photo"
     },
     {
         "dbType":  "PHU_KIEN",
         "objectId":  4,
-        "objectName":  "Camera l??i 360 ????? HD",
+        "objectName":  "Camera lùi 360 độ HD",
         "query":  "HD rear view camera car product photo",
         "error":  "No usable image found for query: HD rear view camera car product photo"
     },
     {
         "dbType":  "PHU_KIEN",
         "objectId":  5,
-        "objectName":  "C???m bi???n ??p su???t l???p TPMS",
+        "objectName":  "Cảm biến áp suất lốp TPMS",
         "query":  "TPMS tire pressure sensor product photo",
         "error":  "No usable image found for query: TPMS tire pressure sensor product photo"
     },
     {
         "dbType":  "PHU_KIEN",
         "objectId":  7,
-        "objectName":  "G????ng chi???u h???u g???p ??i???n",
+        "objectName":  "Gương chiếu hậu gập điện",
         "query":  "power folding side mirror car product photo",
         "error":  "No usable image found for query: power folding side mirror car product photo"
     },
     {
         "dbType":  "PHU_KIEN",
         "objectId":  8,
-        "objectName":  "????n LED n???i th???t 12V b??? 4",
+        "objectName":  "Đèn LED nội thất 12V bộ 4",
         "query":  "12V interior LED light kit car product photo",
         "error":  "No usable image found for query: 12V interior LED light kit car product photo"
     },
     {
         "dbType":  "PHU_KIEN",
         "objectId":  10,
-        "objectName":  "B??? k???p ??i???n c???u h??? Stanley",
+        "objectName":  "Bộ kẹp điện cứu hộ Stanley",
         "query":  "Stanley jumper cable product photo",
         "error":  "No usable image found for query: Stanley jumper cable product photo"
     },

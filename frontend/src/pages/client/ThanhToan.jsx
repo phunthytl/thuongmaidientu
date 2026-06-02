@@ -35,6 +35,46 @@ export default function ThanhToan() {
 
     const [paymentMethod, setPaymentMethod] = useState('COD'); // 'COD' or 'VNPAY'
 
+    const unwrapApiData = (res) => res.data?.data || res.data || [];
+
+    const fetchActiveWarehouses = async () => {
+        const res = await api.get('/kho-hang/active');
+        return unwrapApiData(res);
+    };
+
+    const buildFallbackProvinces = (warehouses) => {
+        const provinceMap = new Map();
+        warehouses.forEach(kho => {
+            const id = kho.ghnProvinceId || kho.tinhThanhId;
+            const name = kho.tinhThanhName || kho.tinhThanhTen;
+            if (id && name && !provinceMap.has(id)) {
+                provinceMap.set(id, { ProvinceID: id, ProvinceName: name });
+            }
+        });
+        return Array.from(provinceMap.values());
+    };
+
+    const buildFallbackDistricts = (warehouses, provinceId) => warehouses
+        .filter(kho => {
+            const id = kho.ghnProvinceId || kho.tinhThanhId;
+            return !provinceId || id?.toString() === provinceId?.toString();
+        })
+        .filter(kho => kho.ghnDistrictId)
+        .map(kho => ({
+            DistrictID: kho.ghnDistrictId,
+            DistrictName: kho.quanHuyenName || kho.tenKho,
+            ProvinceID: kho.ghnProvinceId || kho.tinhThanhId
+        }));
+
+    const buildFallbackWards = (warehouses, districtId) => warehouses
+        .filter(kho => kho.ghnDistrictId?.toString() === districtId?.toString())
+        .filter(kho => kho.ghnWardCode)
+        .map(kho => ({
+            WardCode: kho.ghnWardCode,
+            WardName: kho.phuongXaName || kho.xaPhuongTen || kho.tenKho,
+            DistrictID: kho.ghnDistrictId
+        }));
+
     useEffect(() => {
         if (items.length === 0) {
             navigate('/cart');
@@ -94,6 +134,9 @@ export default function ThanhToan() {
             const data = typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
             let list = data.data || [];
             list = list.filter(p => p.ProvinceName && !p.ProvinceName.toLowerCase().includes('test') && !p.ProvinceName.includes('02'));
+            if (list.length === 0) {
+                list = buildFallbackProvinces(await fetchActiveWarehouses());
+            }
             setProvinces(list);
         } catch (error) {
             console.error('Lỗi tải danh sách tỉnh thành:', error);
@@ -106,6 +149,9 @@ export default function ThanhToan() {
             const data = typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
             let list = data.data || [];
             list = list.filter(d => d.DistrictName && !d.DistrictName.toLowerCase().includes('test') && !d.DistrictName.includes('02'));
+            if (list.length === 0) {
+                list = buildFallbackDistricts(await fetchActiveWarehouses(), provinceId);
+            }
             setDistricts(list);
         } catch (error) {
             console.error('Lỗi tải danh sách quận huyện:', error);
@@ -118,6 +164,9 @@ export default function ThanhToan() {
             const data = typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
             let list = data.data || [];
             list = list.filter(w => w.WardName && !w.WardName.toLowerCase().includes('test') && !w.WardName.includes('02'));
+            if (list.length === 0) {
+                list = buildFallbackWards(await fetchActiveWarehouses(), districtId);
+            }
             setWards(list);
         } catch (error) {
             console.error('Lỗi tải danh sách phường xã:', error);

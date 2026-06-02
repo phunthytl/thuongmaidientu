@@ -8,7 +8,7 @@ import { Screen } from '../components/Screen';
 import { useAuthStore } from '../store/authStore';
 import { useCartStore } from '../store/cartStore';
 import { colors } from '../styles/theme';
-import { money } from '../utils/format';
+import { money, productImage } from '../utils/format';
 
 export function CartScreen({ navigation }) {
   const user = useAuthStore((state) => state.user);
@@ -29,7 +29,7 @@ export function CartScreen({ navigation }) {
     <Screen>
       {items.map((item) => (
         <View key={item.id} style={styles.item}>
-          {item.hinhAnh ? <Image source={{ uri: item.hinhAnh }} style={styles.image} /> : <View style={styles.image} />}
+          {productImage(item) ? <Image source={{ uri: productImage(item) }} style={styles.image} /> : <View style={styles.image} />}
           <View style={styles.info}>
             <Text style={styles.name}>{item.tenSanPham}</Text>
             <Text style={styles.price}>{money(item.thanhTien)}</Text>

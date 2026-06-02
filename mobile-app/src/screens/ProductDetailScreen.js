@@ -20,6 +20,8 @@ const errorMessageOf = (error) => {
 
 export function ProductDetailScreen({ route, navigation }) {
   const { id, type } = route.params;
+  const productType = String(type || '').toUpperCase();
+  const productId = Number(id);
   const user = useAuthStore((state) => state.user);
   const add = useCartStore((state) => state.add);
   const { toggle, isFavorite } = useFavoriteStore();
@@ -27,40 +29,75 @@ export function ProductDetailScreen({ route, navigation }) {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
+  const [notice, setNotice] = useState(null);
 
   useEffect(() => {
     const load = async () => {
       setLoading(true);
       const [detail, reviewPage] = await Promise.all([
-        type === 'OTO' ? productApi.car(id) : productApi.accessory(id),
-        productApi.reviews(type, id)
+        productType === 'OTO' ? productApi.car(productId) : productApi.accessory(productId),
+        productApi.reviews(productType, productId)
       ]);
       setProduct(detail);
       setReviews(productApi.pageContent(reviewPage));
       setLoading(false);
     };
     load().catch(() => setLoading(false));
-  }, [id, type]);
+  }, [productId, productType]);
 
   const addToCart = async () => {
+    setNotice(null);
+
     if (!user || user.vaiTro !== 'KHACH_HANG') {
       Alert.alert('Không thêm được', 'Bạn cần đăng nhập bằng tài khoản khách hàng để thêm sản phẩm vào giỏ.');
+      setNotice({
+        type: 'error',
+        title: 'Không thêm được',
+        body: 'Bạn cần đăng nhập bằng tài khoản khách hàng để thêm sản phẩm vào giỏ.'
+      });
+      return;
+    }
+
+    if (productType === 'OTO') {
+      Alert.alert('Không thêm được', 'Ô tô hiện chỉ hỗ trợ đặt lịch lái thử, không thêm vào giỏ hàng.');
+      setNotice({
+        type: 'error',
+        title: 'Không thêm được',
+        body: 'Ô tô hiện chỉ hỗ trợ đặt lịch lái thử, không thêm vào giỏ hàng.'
+      });
+      return;
+    }
+
+    if (!['PHU_KIEN', 'DICH_VU'].includes(productType) || !Number.isFinite(productId) || productId <= 0) {
+      Alert.alert('Không thêm được', 'Thông tin sản phẩm không hợp lệ.');
+      setNotice({
+        type: 'error',
+        title: 'Không thêm được',
+        body: 'Thông tin sản phẩm không hợp lệ.'
+      });
       return;
     }
 
     setAdding(true);
     try {
       await add(user, {
-        loaiSanPham: type,
-        sanPhamId: id,
+        loaiSanPham: productType,
+        sanPhamId: productId,
         soLuong: 1
       });
-      Alert.alert('Đã thêm vào giỏ', 'Sản phẩm đã nằm trong giỏ hàng.', [
-        { text: 'Tiếp tục xem' },
-        { text: 'Xem giỏ hàng', onPress: () => navigation.navigate('Main', { screen: 'Cart' }) }
-      ]);
+      setNotice({
+        type: 'success',
+        title: 'Thêm hàng thành công',
+        body: 'Sản phẩm đã được thêm vào giỏ hàng.'
+      });
     } catch (error) {
-      Alert.alert('Không thêm được', errorMessageOf(error));
+      const message = errorMessageOf(error);
+      Alert.alert('Không thêm được', message);
+      setNotice({
+        type: 'error',
+        title: 'Không thêm được',
+        body: message
+      });
     } finally {
       setAdding(false);
     }
@@ -79,7 +116,7 @@ export function ProductDetailScreen({ route, navigation }) {
   }
 
   const image = productImage(product);
-  const specs = type === 'OTO'
+  const specs = productType === 'OTO'
     ? [
         ['Hãng', product.hangXe],
         ['Dòng xe', product.dongXe],
@@ -103,12 +140,32 @@ export function ProductDetailScreen({ route, navigation }) {
           <Text style={styles.name}>{productName(product)}</Text>
           <Text style={styles.price}>{money(product.gia)}</Text>
         </View>
-        <Pressable onPress={() => toggle({ ...product, loaiSanPham: type })}>
-          <Ionicons name={isFavorite(type, id) ? 'heart' : 'heart-outline'} size={28} color={colors.danger} />
+        <Pressable onPress={() => toggle({ ...product, loaiSanPham: productType })}>
+          <Ionicons name={isFavorite(productType, productId) ? 'heart' : 'heart-outline'} size={28} color={colors.danger} />
         </Pressable>
       </View>
       <Text style={styles.stock}>Tồn kho: {product.soLuong ?? 0}</Text>
       <Button title="Thêm vào giỏ" icon="cart-outline" onPress={addToCart} loading={adding} />
+      {notice ? (
+        <View style={[styles.notice, notice.type === 'error' ? styles.noticeError : styles.noticeSuccess]}>
+          <Ionicons
+            name={notice.type === 'error' ? 'alert-circle-outline' : 'checkmark-circle-outline'}
+            size={20}
+            color={notice.type === 'error' ? colors.danger : colors.success}
+          />
+          <View style={styles.noticeContent}>
+            <Text style={[styles.noticeTitle, notice.type === 'error' ? styles.noticeTitleError : styles.noticeTitleSuccess]}>
+              {notice.title}
+            </Text>
+            <Text style={styles.noticeBody}>{notice.body}</Text>
+          </View>
+          {notice.type === 'success' ? (
+            <Pressable onPress={() => navigation.navigate('Main', { screen: 'Cart' })}>
+              <Text style={styles.noticeAction}>Xem giỏ</Text>
+            </Pressable>
+          ) : null}
+        </View>
+      ) : null}
       <Text style={styles.section}>Thông số</Text>
       <View style={styles.specs}>
         {specs.filter(([, value]) => value).map(([label, value]) => (
@@ -122,7 +179,7 @@ export function ProductDetailScreen({ route, navigation }) {
       <Text style={styles.description}>{product.moTa || 'Chưa có mô tả.'}</Text>
       <View style={styles.reviewHeader}>
         <Text style={styles.section}>Đánh giá</Text>
-        <Pressable onPress={() => navigation.navigate('Review', { product, type })}>
+        <Pressable onPress={() => navigation.navigate('Review', { product, type: productType })}>
           <Text style={styles.reviewAction}>Viết đánh giá</Text>
         </Pressable>
       </View>
@@ -170,6 +227,45 @@ const styles = StyleSheet.create({
   stock: {
     color: colors.success,
     fontWeight: '700'
+  },
+  notice: {
+    minHeight: 48,
+    borderRadius: 8,
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10
+  },
+  noticeSuccess: {
+    backgroundColor: '#ecfdf5',
+    borderColor: '#bbf7d0'
+  },
+  noticeError: {
+    backgroundColor: '#fef2f2',
+    borderColor: '#fecaca'
+  },
+  noticeContent: {
+    flex: 1,
+    gap: 2
+  },
+  noticeTitle: {
+    fontWeight: '900'
+  },
+  noticeTitleSuccess: {
+    color: colors.success
+  },
+  noticeTitleError: {
+    color: colors.danger
+  },
+  noticeBody: {
+    color: colors.muted,
+    lineHeight: 18
+  },
+  noticeAction: {
+    color: colors.primary,
+    fontWeight: '900'
   },
   section: {
     color: colors.ink,

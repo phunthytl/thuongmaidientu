@@ -24,5 +24,8 @@ public class KhoHangResponse {
     private String diaChiChiTiet;
     private Boolean trangThai;
     private String ghnShopId;
+    private Integer ghnProvinceId;
+    private Integer ghnDistrictId;
+    private String ghnWardCode;
     private LocalDateTime ngayTao;
 }

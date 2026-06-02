@@ -57,6 +57,8 @@ public class GioHangService {
                     return gioHangRepository.save(gioHangMoi);
                 });
 
+        xoaChiTietGioHangMoCoi(gioHang.getId());
+
         ChiTietGioHang chiTiet = timChiTietTrung(gioHang.getId(), request)
                 .orElseGet(() -> taoChiTietMoi(gioHang, request.getLoaiSanPham()));
 
@@ -132,7 +134,7 @@ public class GioHangService {
         return getByKhachHang(khachHangId);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public GioHangResponse getByKhachHang(Long khachHangId) {
         KhachHang khachHang = khachHangRepository.findById(khachHangId)
                 .orElseThrow(() -> new ResourceNotFoundException("Khách hàng", khachHangId));
@@ -148,7 +150,10 @@ public class GioHangService {
                     .build();
         }
 
-        return toResponse(gioHangOpt.get());
+        GioHang gioHang = gioHangOpt.get();
+        xoaChiTietGioHangMoCoi(gioHang.getId());
+        capNhatTongTien(gioHang);
+        return toResponse(gioHang);
     }
 
     private ChiTietGioHang taoChiTietMoi(GioHang gioHang, LoaiSanPham loaiSanPham) {
@@ -159,15 +164,17 @@ public class GioHangService {
     }
 
     private Optional<ChiTietGioHang> timChiTietTrung(Long gioHangId, ThemVaoGioHangRequest request) {
-        return chiTietGioHangRepository.findByGioHangId(gioHangId).stream()
-                .filter(item -> item.getLoaiSanPham() == request.getLoaiSanPham())
-                .filter(item -> switch (request.getLoaiSanPham()) {
-                    case OTO -> false;
-                    case PHU_KIEN ->
-                        item.getPhuKien() != null && item.getPhuKien().getId().equals(request.getPhuKienId());
-                    case DICH_VU -> item.getDichVu() != null && item.getDichVu().getId().equals(request.getDichVuId());
-                })
-                .findFirst();
+        return switch (request.getLoaiSanPham()) {
+            case OTO -> Optional.empty();
+            case PHU_KIEN -> request.getPhuKienId() == null
+                    ? Optional.empty()
+                    : chiTietGioHangRepository.findFirstByGioHangIdAndLoaiSanPhamAndPhuKienId(
+                            gioHangId, LoaiSanPham.PHU_KIEN, request.getPhuKienId());
+            case DICH_VU -> request.getDichVuId() == null
+                    ? Optional.empty()
+                    : chiTietGioHangRepository.findFirstByGioHangIdAndLoaiSanPhamAndDichVuId(
+                            gioHangId, LoaiSanPham.DICH_VU, request.getDichVuId());
+        };
     }
 
     private BigDecimal resolveProductAndPrice(ChiTietGioHang chiTiet, ThemVaoGioHangRequest request) {
@@ -234,6 +241,11 @@ public class GioHangService {
 
         gioHang.setTongTien(tongTien);
         gioHangRepository.save(gioHang);
+    }
+
+    private void xoaChiTietGioHangMoCoi(Long gioHangId) {
+        chiTietGioHangRepository.deleteOrphanPhuKienItems(gioHangId);
+        chiTietGioHangRepository.deleteOrphanDichVuItems(gioHangId);
     }
 
     private GioHangResponse toResponse(GioHang gioHang) {

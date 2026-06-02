@@ -4,6 +4,33 @@ import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaTimes, FaUserLock } from 'react-
 import { bookingService } from '../../services/bookingService';
 import { useAuthStore } from '../../stores/authStore';
 
+const toDateInputValue = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const getTodayInputValue = () => toDateInputValue(new Date());
+
+const getMaxBookingDateInputValue = () => {
+  const maxDate = new Date();
+  maxDate.setFullYear(maxDate.getFullYear() + 1);
+  return toDateInputValue(maxDate);
+};
+
+const isValidBookingDate = (value) => {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+
+  const selectedDate = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(selectedDate.getTime())) return false;
+
+  const today = new Date(`${getTodayInputValue()}T00:00:00`);
+  const maxDate = new Date(`${getMaxBookingDateInputValue()}T00:00:00`);
+
+  return selectedDate >= today && selectedDate <= maxDate;
+};
+
 export default function BookingModal({ isOpen, onClose, product, type, selectedBranch }) {
   const { user } = useAuthStore();
   const navigate = useNavigate();
@@ -44,6 +71,16 @@ export default function BookingModal({ isOpen, onClose, product, type, selectedB
       return;
     }
 
+    if (!isValidBookingDate(formData.ngayHen)) {
+      alert('Ngày hẹn không hợp lệ. Vui lòng chọn ngày trong vòng 1 năm tới.');
+      return;
+    }
+
+    if (!/^\d{2}:\d{2}$/.test(formData.gioHen)) {
+      alert('Giờ hẹn không hợp lệ. Vui lòng chọn lại giờ hẹn.');
+      return;
+    }
+
     setSubmitting(true);
     try {
       const payload = {
@@ -65,13 +102,13 @@ export default function BookingModal({ isOpen, onClose, product, type, selectedB
   };
 
   return (
-    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }}>
-      <div style={{ backgroundColor: '#fff', borderRadius: '16px', width: '100%', maxWidth: '500px', overflow: 'hidden', position: 'relative', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}>
-        <button onClick={onClose} style={{ position: 'absolute', top: '16px', right: '16px', border: 'none', background: 'none', cursor: 'pointer', color: '#9ca3af' }}>
+    <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '16px' }}>
+      <div style={{ backgroundColor: '#fff', borderRadius: '16px', width: '100%', maxWidth: '560px', maxHeight: 'calc(100vh - 32px)', overflow: 'hidden', position: 'relative', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)', display: 'flex', flexDirection: 'column' }}>
+        <button onClick={onClose} style={{ position: 'absolute', top: '14px', right: '14px', border: 'none', background: '#fff', cursor: 'pointer', color: '#9ca3af', zIndex: 2, width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 6px 18px rgba(15,23,42,0.12)' }}>
           <FaTimes size={24} />
         </button>
 
-        <div style={{ padding: '32px' }}>
+        <div style={{ padding: '28px 32px', overflowY: 'auto', flex: 1 }}>
           {!user ? (
             <div style={{ textAlign: 'center', padding: '20px 0' }}>
                <div style={{ width: '80px', height: '80px', backgroundColor: '#fef2f2', color: '#ef4444', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', margin: '0 auto 24px' }}>
@@ -93,7 +130,7 @@ export default function BookingModal({ isOpen, onClose, product, type, selectedB
               </h2>
               <p style={{ color: '#6b7280', marginBottom: '24px' }}>{product.tenXe || product.tenDichVu}</p>
 
-              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 <div style={{ backgroundColor: '#eff6ff', padding: '12px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <FaMapMarkerAlt color="#3b82f6" />
                   <div style={{ fontSize: '14px', color: '#1e40af' }}>
@@ -125,7 +162,7 @@ export default function BookingModal({ isOpen, onClose, product, type, selectedB
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                   <div className="form-group">
                     <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px', color: '#4b5563' }}>Ngày hẹn *</label>
-                    <input required type="date" value={formData.ngayHen} onChange={e => setFormData({...formData, ngayHen: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '14px' }} min={new Date().toISOString().split('T')[0]} />
+                    <input required type="date" value={formData.ngayHen} onChange={e => setFormData({...formData, ngayHen: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '14px' }} min={getTodayInputValue()} max={getMaxBookingDateInputValue()} />
                   </div>
                   <div className="form-group">
                     <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px', color: '#4b5563' }}>Giờ hẹn *</label>
@@ -138,7 +175,7 @@ export default function BookingModal({ isOpen, onClose, product, type, selectedB
                   <textarea rows="2" value={formData.ghiChu} onChange={e => setFormData({...formData, ghiChu: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '14px', resize: 'none' }} placeholder="VD: Tôi muốn lái thử bản cao cấp nhất..."></textarea>
                 </div>
 
-                <button disabled={submitting} type="submit" style={{ marginTop: '12px', padding: '16px', borderRadius: '12px', border: 'none', backgroundColor: '#111', color: '#fff', fontWeight: 'bold', cursor: submitting ? 'not-allowed' : 'pointer', opacity: submitting ? 0.7 : 1, fontSize: '16px' }}>
+                <button disabled={submitting} type="submit" style={{ marginTop: '4px', padding: '16px', borderRadius: '12px', border: 'none', backgroundColor: '#111', color: '#fff', fontWeight: 'bold', cursor: submitting ? 'not-allowed' : 'pointer', opacity: submitting ? 0.7 : 1, fontSize: '16px', position: 'sticky', bottom: 0, boxShadow: '0 -8px 18px rgba(255,255,255,0.9)' }}>
                   {submitting ? 'Đang gửi yêu cầu...' : 'Xác nhận Đặt lịch'}
                 </button>
               </form>

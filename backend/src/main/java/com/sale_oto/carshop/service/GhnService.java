@@ -183,7 +183,7 @@ public class GhnService {
             return restTemplate.exchange(url, HttpMethod.GET, entity, String.class).getBody();
         } catch (RestClientException e) {
             log.error("Error getting provinces from GHN", e);
-            throw new RuntimeException("Error fetching provinces");
+            return fallbackProvinces();
         }
     }
 
@@ -200,7 +200,7 @@ public class GhnService {
             return restTemplate.exchange(url, HttpMethod.GET, entity, String.class).getBody();
         } catch (RestClientException e) {
             log.error("Error getting districts from GHN", e);
-            throw new RuntimeException("Error fetching districts");
+            return fallbackDistricts(provinceId);
         }
     }
 
@@ -211,7 +211,7 @@ public class GhnService {
             return restTemplate.exchange(url, HttpMethod.GET, entity, String.class).getBody();
         } catch (RestClientException e) {
             log.error("Error getting wards from GHN", e);
-            throw new RuntimeException("Error fetching wards");
+            return fallbackWards(districtId);
         }
     }
 
@@ -233,7 +233,86 @@ public class GhnService {
             return restTemplate.postForEntity(url, entity, String.class).getBody();
         } catch (RestClientException e) {
             log.error("Error calculating fee raw", e);
-            throw new RuntimeException("Error calculating fee");
+            return "{\"code\":200,\"message\":\"Fallback fee\",\"data\":{\"total\":45000}}";
         }
+    }
+
+    private String fallbackProvinces() {
+        List<Map<String, Object>> data = khoHangRepository.findByTrangThai(true).stream()
+                .filter(kho -> kho.getGhnProvinceId() != null || kho.getTinhThanhId() != null)
+                .collect(ArrayList::new, (list, kho) -> {
+                    Integer provinceId = kho.getGhnProvinceId() != null ? kho.getGhnProvinceId() : kho.getTinhThanhId();
+                    boolean exists = list.stream()
+                            .anyMatch(item -> provinceId.equals(item.get("ProvinceID")));
+                    if (!exists) {
+                        Map<String, Object> item = new HashMap<>();
+                        item.put("ProvinceID", provinceId);
+                        item.put("ProvinceName", kho.getTinhThanhTen());
+                        list.add(item);
+                    }
+                }, ArrayList::addAll);
+        return masterDataResponse(data);
+    }
+
+    private String fallbackDistricts(Integer provinceId) {
+        List<Map<String, Object>> data = khoHangRepository.findByTrangThai(true).stream()
+                .filter(kho -> provinceId == null
+                        || provinceId.equals(kho.getGhnProvinceId())
+                        || provinceId.equals(kho.getTinhThanhId()))
+                .filter(kho -> kho.getGhnDistrictId() != null)
+                .map(kho -> {
+                    Map<String, Object> item = new HashMap<>();
+                    item.put("DistrictID", kho.getGhnDistrictId());
+                    item.put("DistrictName", kho.getTenKho());
+                    item.put("ProvinceID", kho.getGhnProvinceId() != null ? kho.getGhnProvinceId() : kho.getTinhThanhId());
+                    return item;
+                })
+                .toList();
+        return masterDataResponse(data);
+    }
+
+    private String fallbackWards(Integer districtId) {
+        List<Map<String, Object>> data = khoHangRepository.findByTrangThai(true).stream()
+                .filter(kho -> districtId != null && districtId.equals(kho.getGhnDistrictId()))
+                .filter(kho -> kho.getGhnWardCode() != null)
+                .map(kho -> {
+                    Map<String, Object> item = new HashMap<>();
+                    item.put("WardCode", kho.getGhnWardCode());
+                    item.put("WardName", kho.getXaPhuongTen() != null ? kho.getXaPhuongTen() : kho.getTenKho());
+                    item.put("DistrictID", kho.getGhnDistrictId());
+                    return item;
+                })
+                .toList();
+        return masterDataResponse(data);
+    }
+
+    private String masterDataResponse(List<Map<String, Object>> data) {
+        StringBuilder json = new StringBuilder("{\"code\":200,\"message\":\"Fallback from warehouses\",\"data\":[");
+        for (int i = 0; i < data.size(); i++) {
+            if (i > 0) {
+                json.append(',');
+            }
+            json.append('{');
+            int fieldIndex = 0;
+            for (Map.Entry<String, Object> entry : data.get(i).entrySet()) {
+                if (fieldIndex++ > 0) {
+                    json.append(',');
+                }
+                json.append('"').append(entry.getKey()).append('"').append(':');
+                Object value = entry.getValue();
+                if (value instanceof Number || value instanceof Boolean) {
+                    json.append(value);
+                } else {
+                    json.append('"').append(escapeJson(String.valueOf(value))).append('"');
+                }
+            }
+            json.append('}');
+        }
+        json.append("]}");
+        return json.toString();
+    }
+
+    private String escapeJson(String value) {
+        return value.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 }

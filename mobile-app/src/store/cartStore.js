@@ -6,7 +6,7 @@ export const useCartStore = create((set, get) => ({
   cart: null,
   loading: false,
   load: async (user) => {
-    const khachHangId = customerIdOf(user);
+    const khachHangId = Number(customerIdOf(user));
     if (!khachHangId || user?.vaiTro !== 'KHACH_HANG') {
       throw new Error('Bạn cần đăng nhập bằng tài khoản khách hàng để thêm giỏ hàng.');
     }
@@ -20,8 +20,22 @@ export const useCartStore = create((set, get) => ({
     }
   },
   add: async (user, payload) => {
-    const khachHangId = customerIdOf(user);
-    const cart = await cartApi.add({ khachHangId, ...payload });
+    const khachHangId = Number(customerIdOf(user));
+    if (!khachHangId || user?.vaiTro !== 'KHACH_HANG') {
+      throw new Error('Bạn cần đăng nhập bằng tài khoản khách hàng để thêm giỏ hàng.');
+    }
+    const loaiSanPham = String(payload?.loaiSanPham || '').toUpperCase();
+    const sanPhamId = Number(payload?.sanPhamId);
+    if (!loaiSanPham || !Number.isFinite(sanPhamId) || sanPhamId <= 0) {
+      throw new Error('Thông tin sản phẩm không hợp lệ.');
+    }
+    const cart = await cartApi.add({
+      ...payload,
+      khachHangId,
+      loaiSanPham,
+      sanPhamId,
+      soLuong: Number(payload?.soLuong) || 1
+    });
     set({ cart });
     return cart;
   },

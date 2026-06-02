@@ -1,4 +1,4 @@
-﻿[
+[
     {
         "dbType":  "OTO",
         "objectId":  1,
@@ -163,21 +163,21 @@
     {
         "dbType":  "PHU_KIEN",
         "objectId":  2,
-        "objectName":  "L???c gi?? ?????ng c?? Toyota",
+        "objectName":  "Lọc gió động cơ Toyota",
         "sourceUrl":  "https://i.ebayimg.com/images/g/~F8AAOSwPe1mPQcQ/s-l1600.jpg",
         "localUrl":  "/demo-images/accessories/002-l-c-gi-ng-c-toyota.jpg"
     },
     {
         "dbType":  "PHU_KIEN",
         "objectId":  6,
-        "objectName":  "Th???m l??t s??n 3D Toyota Camry",
+        "objectName":  "Thảm lót sàn 3D Toyota Camry",
         "sourceUrl":  "https://i.ebayimg.com/images/g/H-YAAOSwURVlZhWP/s-l1200.jpg",
         "localUrl":  "/demo-images/accessories/006-th-m-l-t-s-n-3d-toyota-camry.jpg"
     },
     {
         "dbType":  "PHU_KIEN",
         "objectId":  9,
-        "objectName":  "B??nh ???c quy GS 55Ah 12V",
+        "objectName":  "Bình ắc quy GS 55Ah 12V",
         "sourceUrl":  "https://parade.com/.image/MTkwNTgwOTc1NzQzOTM1NjEz/GRADUATION-CARD-2.jpg?profile=w1536",
         "localUrl":  "/demo-images/accessories/009-b-nh-c-quy-gs-55ah-12v.jpg"
     },
