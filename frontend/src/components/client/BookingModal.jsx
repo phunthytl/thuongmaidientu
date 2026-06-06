@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaTimes, FaUserLock } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaTimes, FaUserLock } from 'react-icons/fa';
 import { bookingService } from '../../services/bookingService';
 import { useAuthStore } from '../../stores/authStore';
 

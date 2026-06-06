@@ -1,396 +1,477 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { FaCalendarAlt, FaCar, FaChartLine, FaClipboardList, FaExclamationCircle } from 'react-icons/fa';
+import { useEffect, useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
+import {
+    XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart,
+    PieChart, Pie, Cell, Legend,
+} from 'recharts';
 import { api } from '../../services/api';
+import { exportDashboardToExcel, exportDashboardToPdf } from '../../utils/dashboardExport';
 import '../../assets/css/TongQuan.css';
 
-const PERIODS = [
-    { key: 'day', label: 'Ngày' },
-    { key: 'week', label: 'Tuần' },
-    { key: 'month', label: 'Tháng' },
-    { key: 'year', label: 'Năm' },
-];
-
-const STATUS_LABELS = {
-    CHO_XAC_NHAN: 'Chờ xác nhận',
-    DA_XAC_NHAN: 'Đã xác nhận',
-    DANG_GIAO: 'Đang giao',
-    HOAN_THANH: 'Hoàn thành',
-    DA_HUY: 'Đã hủy',
+const STATUS_LABEL = {
+    CHO_XAC_NHAN: 'Chờ Xác Nhận',
+    DA_XAC_NHAN:  'Đã Xác Nhận',
+    DANG_XU_LY:   'Đang Xử Lý',
+    DANG_GIAO:    'Đang Giao',
+    HOAN_THANH:   'Hoàn Thành',
+    DA_HUY:       'Đã Hủy',
 };
 
-const formatCurrency = (value) =>
-    new Intl.NumberFormat('vi-VN', {
-        style: 'currency',
-        currency: 'VND',
-        maximumFractionDigits: 0,
-    }).format(value || 0);
-
-const formatDate = (date) =>
-    new Intl.DateTimeFormat('vi-VN', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-    }).format(date);
-
-const toDate = (value) => (value ? new Date(value) : new Date());
-
-const isSameDay = (date, now) =>
-    date.getFullYear() === now.getFullYear()
-    && date.getMonth() === now.getMonth()
-    && date.getDate() === now.getDate();
-
-const getWeekStart = (date) => {
-    const result = new Date(date);
-    const day = result.getDay() || 7;
-    result.setHours(0, 0, 0, 0);
-    result.setDate(result.getDate() - day + 1);
-    return result;
+const STATUS_COLOR = {
+    CHO_XAC_NHAN: '#f59e0b',
+    DA_XAC_NHAN:  '#3b82f6',
+    DANG_XU_LY:   '#8b5cf6',
+    DANG_GIAO:    '#06b6d4',
+    HOAN_THANH:   '#10b981',
+    DA_HUY:       '#ef4444',
 };
 
-const getPeriodStart = (period, now = new Date()) => {
-    const start = new Date(now);
-    start.setHours(0, 0, 0, 0);
-
-    if (period === 'day') return start;
-    if (period === 'week') return getWeekStart(now);
-    if (period === 'month') {
-        start.setDate(1);
-        return start;
-    }
-    start.setMonth(0, 1);
-    return start;
+const APPT_STATUS_LABEL = {
+    CHO_XAC_NHAN: 'Chờ Xác Nhận',
+    DA_XAC_NHAN:  'Đã Xác Nhận',
+    DA_HOAN_THANH: 'Đã Hoàn Thành',
+    DA_HUY:       'Đã Hủy',
 };
 
-const isInPeriod = (date, period, now = new Date()) => {
-    if (period === 'day') return isSameDay(date, now);
-    return date >= getPeriodStart(period, now) && date <= now;
+const APPT_STATUS_COLOR = {
+    CHO_XAC_NHAN:  '#f59e0b',
+    DA_XAC_NHAN:   '#3b82f6',
+    DA_HOAN_THANH: '#10b981',
+    DA_HUY:        '#ef4444',
 };
 
-const getChartBuckets = (period, now = new Date()) => {
-    if (period === 'day') {
-        return Array.from({ length: 8 }, (_, index) => {
-            const hour = index * 3;
-            const from = new Date(now);
-            from.setHours(hour, 0, 0, 0);
-            const to = new Date(now);
-            to.setHours(hour + 2, 59, 59, 999);
-            return { label: `${hour.toString().padStart(2, '0')}h`, from, to };
-        });
-    }
-
-    if (period === 'week') {
-        const start = getWeekStart(now);
-        return Array.from({ length: 7 }, (_, index) => {
-            const from = new Date(start);
-            from.setDate(start.getDate() + index);
-            const to = new Date(from);
-            to.setHours(23, 59, 59, 999);
-            return { label: index + 2 > 7 ? 'CN' : `T${index + 2}`, from, to };
-        });
-    }
-
-    if (period === 'month') {
-        const year = now.getFullYear();
-        const month = now.getMonth();
-        const ranges = [
-            [1, 7],
-            [8, 14],
-            [15, 21],
-            [22, 31],
-        ];
-        return ranges.map(([first, last], index) => {
-            const from = new Date(year, month, first);
-            const to = new Date(year, month, last, 23, 59, 59, 999);
-            return { label: `Tuần ${index + 1}`, from, to };
-        });
-    }
-
-    return Array.from({ length: 12 }, (_, index) => ({
-        label: `T${index + 1}`,
-        from: new Date(now.getFullYear(), index, 1),
-        to: new Date(now.getFullYear(), index + 1, 0, 23, 59, 59, 999),
-    }));
+const REVENUE_BREAKDOWN_COLOR = {
+    PHU_KIEN: '#06b6d4',
+    DICH_VU:  '#c5a059',
 };
 
-const isRevenueOrder = (order) => order.trangThai !== 'DA_HUY';
+const PRODUCT_TYPE_LABEL = {
+    OTO: 'Ô tô', PHU_KIEN: 'Phụ kiện', DICH_VU: 'Dịch vụ',
+};
 
-function RevenueLineChart({ data }) {
-    const width = 720;
-    const height = 260;
-    const padding = 34;
-    const max = Math.max(...data.map((item) => item.value), 1);
-    const step = data.length > 1 ? (width - padding * 2) / (data.length - 1) : 0;
+const formatVND = (n) => new Intl.NumberFormat('vi-VN').format(Math.round(n || 0)) + '₫';
+const formatVNDCompact = (n) => {
+    const v = Number(n || 0);
+    if (v >= 1e9) return (v / 1e9).toFixed(1).replace(/\.0$/, '') + 'B';
+    if (v >= 1e6) return (v / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
+    if (v >= 1e3) return (v / 1e3).toFixed(0) + 'K';
+    return v.toString();
+};
+const formatPct = (p) => {
+    if (p == null || isNaN(p)) return '—';
+    const sign = p > 0 ? '+' : '';
+    return `${sign}${p.toFixed(1)}%`;
+};
 
-    const points = data.map((item, index) => {
-        const x = padding + step * index;
-        const y = height - padding - (item.value / max) * (height - padding * 2);
-        return { ...item, x, y };
-    });
-
-    const path = points.map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`).join(' ');
-    const chartKey = data.map((item) => `${item.label}:${item.value}`).join('|');
-
+function KpiCard({ title, value, change, prefix = '', suffix = '', subInfo = '' }) {
+    const isUp = change > 0;
+    const isDown = change < 0;
     return (
-        <div className="revenue-chart">
-            <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Biểu đồ doanh thu">
-                <line className="chart-axis" x1={padding} y1={height - padding} x2={width - padding} y2={height - padding} />
-                <line className="chart-axis" x1={padding} y1={padding} x2={padding} y2={height - padding} />
-                {[0.25, 0.5, 0.75].map((ratio) => (
-                    <line
-                        key={ratio}
-                        className="chart-grid-line"
-                        x1={padding}
-                        y1={height - padding - ratio * (height - padding * 2)}
-                        x2={width - padding}
-                        y2={height - padding - ratio * (height - padding * 2)}
-                    />
-                ))}
-                <path key={chartKey} className="chart-line" d={path} pathLength="100" />
-                {points.map((point) => (
-                    <g key={`${point.label}-${point.value}`} className="chart-point-group">
-                        <circle className="chart-point" cx={point.x} cy={point.y} r="5" />
-                        <title>{`${point.label}: ${formatCurrency(point.value)}`}</title>
-                        <text className="chart-label" x={point.x} y={height - 8} textAnchor="middle">{point.label}</text>
-                    </g>
-                ))}
-            </svg>
+        <div className="kpi-card">
+            <h3 className="kpi-title">{title}</h3>
+            <p className="kpi-value" style={{ fontSize: '36px' }}>
+                {prefix}{value}{suffix}
+            </p>
+            {subInfo && (
+                <div style={{ marginTop: 8, fontSize: 11, color: '#6b7280', fontFamily: 'Manrope, sans-serif', letterSpacing: 0.3 }}>
+                    {subInfo}
+                </div>
+            )}
+            <div className={`kpi-trend ${isDown ? 'negative' : ''}`} style={{ color: isUp ? '#10b981' : isDown ? '#ef4444' : '#888' }}>
+                {isUp ? '▲' : isDown ? '▼' : '•'} {formatPct(change)} so với kỳ trước
+            </div>
         </div>
     );
 }
 
 export default function TongQuan() {
-    const navigate = useNavigate();
-    const [period, setPeriod] = useState('month');
-    const [orders, setOrders] = useState([]);
-    const [stats, setStats] = useState({ oto: 0, phuKien: 0, khieuNai: 0 });
+    const [days, setDays] = useState(30);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+    const [kpi, setKpi] = useState(null);
+    const [trend, setTrend] = useState([]);
+    const [statusStats, setStatusStats] = useState([]);
+    const [apptStatusStats, setApptStatusStats] = useState([]);
+    const [topProducts, setTopProducts] = useState([]);
+    const [recentOrders, setRecentOrders] = useState([]);
 
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchAll = async () => {
             setLoading(true);
-            setError('');
             try {
-                const [otoRes, phuKienRes, donHangRes, khieuNaiRes] = await Promise.all([
-                    api.get('/oto?size=1'),
-                    api.get('/phu-kien?size=1'),
-                    api.get('/don-hang?size=1000'),
-                    api.get('/khieu-nai?size=1'),
+                const [kpiR, trendR, statusR, apptStatusR, topR, recentR] = await Promise.all([
+                    api.get(`/admin/dashboard/kpi?days=${days}`),
+                    api.get(`/admin/dashboard/revenue-trend?days=${days}`),
+                    api.get(`/admin/dashboard/order-status?days=${days}`),
+                    api.get(`/admin/dashboard/appointment-status?days=${days}`),
+                    api.get(`/admin/dashboard/top-products?days=${days}&limit=5`),
+                    api.get(`/admin/dashboard/recent-orders`),
                 ]);
-
-                setStats({
-                    oto: otoRes.data?.data?.totalElements || 0,
-                    phuKien: phuKienRes.data?.data?.totalElements || 0,
-                    khieuNai: khieuNaiRes.data?.data?.totalElements || 0,
-                });
-                setOrders(donHangRes.data?.data?.content || []);
+                setKpi(kpiR.data?.data);
+                setTrend(trendR.data?.data || []);
+                setStatusStats(statusR.data?.data || []);
+                setApptStatusStats(apptStatusR.data?.data || []);
+                setTopProducts(topR.data?.data || []);
+                setRecentOrders(recentR.data?.data || []);
             } catch (err) {
-                setError(err.response?.data?.message || 'Không thể tải dữ liệu tổng quan.');
+                console.error('Dashboard load error', err);
             } finally {
                 setLoading(false);
             }
         };
+        fetchAll();
+    }, [days]);
 
-        fetchData();
-    }, []);
+    const trendChartData = useMemo(() =>
+        (trend || []).map(p => ({
+            ngay: p.ngay,
+            label: p.ngay ? new Date(p.ngay).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' }) : '',
+            doanhThu: Number(p.doanhThu || 0),
+            soDonHang: Number(p.soDonHang || 0),
+        })),
+    [trend]);
 
-    const dashboardData = useMemo(() => {
-        const now = new Date();
-        const revenueOrders = orders.filter(isRevenueOrder);
-        const filteredOrders = revenueOrders.filter((order) => isInPeriod(toDate(order.ngayTao), period, now));
-        const buckets = getChartBuckets(period, now).map((bucket) => {
-            const value = filteredOrders
-                .filter((order) => {
-                    const date = toDate(order.ngayTao);
-                    return date >= bucket.from && date <= bucket.to;
-                })
-                .reduce((sum, order) => sum + Number(order.tongTien || 0), 0);
-            return { ...bucket, value };
-        });
+    const statusPieData = useMemo(() =>
+        (statusStats || []).filter(s => s.soLuong > 0).map(s => ({
+            name: STATUS_LABEL[s.trangThai] || s.trangThai,
+            value: Number(s.soLuong || 0),
+            color: STATUS_COLOR[s.trangThai] || '#999',
+        })),
+    [statusStats]);
 
-        const totalRevenue = filteredOrders.reduce((sum, order) => sum + Number(order.tongTien || 0), 0);
-        const averageOrder = filteredOrders.length ? totalRevenue / filteredOrders.length : 0;
-        const statusCounts = orders.reduce((acc, order) => {
-            acc[order.trangThai] = (acc[order.trangThai] || 0) + 1;
-            return acc;
-        }, {});
-        const recentOrders = [...orders]
-            .sort((a, b) => toDate(b.ngayTao) - toDate(a.ngayTao))
-            .slice(0, 6);
+    const apptStatusPieData = useMemo(() =>
+        (apptStatusStats || []).filter(s => s.soLuong > 0).map(s => ({
+            name: APPT_STATUS_LABEL[s.trangThai] || s.trangThai,
+            value: Number(s.soLuong || 0),
+            color: APPT_STATUS_COLOR[s.trangThai] || '#999',
+        })),
+    [apptStatusStats]);
 
-        return {
-            filteredOrders,
-            buckets,
-            totalRevenue,
-            averageOrder,
-            statusCounts,
-            recentOrders,
-        };
-    }, [orders, period]);
+    const revenueBreakdownData = useMemo(() => {
+        const pk = Number(kpi?.doanhThuPhuKien || 0);
+        const dv = Number(kpi?.doanhThuDichVu || 0);
+        const items = [];
+        if (pk > 0) items.push({ name: 'Phụ kiện', value: pk, color: REVENUE_BREAKDOWN_COLOR.PHU_KIEN });
+        if (dv > 0) items.push({ name: 'Dịch vụ', value: dv, color: REVENUE_BREAKDOWN_COLOR.DICH_VU });
+        return items;
+    }, [kpi]);
 
-    const maxStatus = Math.max(...Object.values(dashboardData.statusCounts), 1);
-    const currentPeriod = PERIODS.find((item) => item.key === period)?.label.toLowerCase();
-    const goTo = (path) => navigate(path);
+    const totalOrdersInPeriod = useMemo(() =>
+        (statusStats || []).reduce((s, x) => s + Number(x.soLuong || 0), 0),
+    [statusStats]);
 
     return (
         <div className="dashboard-container">
-            <header className="dashboard-header">
-                <div>
-                    <p className="dashboard-subtitle">Báo cáo vận hành</p>
-                    <h1 className="dashboard-title">Tổng quan kinh doanh</h1>
-                    <p className="dashboard-description">Theo dõi doanh thu, đơn hàng và trạng thái hệ thống theo thời gian.</p>
+            {/* HEADER */}
+            <header className="dashboard-header" style={{ alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+                <div className="dashboard-title-group">
+                    <h2 className="dashboard-subtitle">BÁO CÁO</h2>
+                    <h1 className="dashboard-title">Tổng Quan Kinh Doanh</h1>
                 </div>
-                <div className="dashboard-date-group">
-                    <span><FaCalendarAlt /> Ngày hệ thống</span>
-                    <strong>{formatDate(new Date())}</strong>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                    <select
+                        value={days}
+                        onChange={e => setDays(Number(e.target.value))}
+                        title="Khoảng thời gian"
+                        style={{
+                            padding: '10px 16px', border: '1px solid #d1d5db', borderRadius: '8px',
+                            background: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer',
+                            fontFamily: 'inherit',
+                        }}
+                    >
+                        <option value={7}>7 ngày qua</option>
+                        <option value={30}>30 ngày qua</option>
+                        <option value={90}>90 ngày qua</option>
+                        <option value={365}>1 năm qua</option>
+                    </select>
+                    <button
+                        type="button"
+                        onClick={() => exportDashboardToExcel({ days, kpi, trend, statusStats, apptStatusStats, topProducts, recentOrders })}
+                        disabled={loading || !kpi}
+                        style={{
+                            padding: '10px 16px', borderRadius: '8px', border: 'none',
+                            background: '#16a34a', color: '#fff',
+                            fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                            display: 'flex', alignItems: 'center', gap: '6px',
+                            fontFamily: 'inherit',
+                            opacity: (loading || !kpi) ? 0.6 : 1,
+                        }}
+                        title="Tải báo cáo Excel (.xlsx)"
+                    >
+                        📊 Excel
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => exportDashboardToPdf({ days, kpi, trend, statusStats, apptStatusStats, topProducts, recentOrders })}
+                        disabled={loading || !kpi}
+                        style={{
+                            padding: '10px 16px', borderRadius: '8px', border: 'none',
+                            background: '#dc2626', color: '#fff',
+                            fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                            display: 'flex', alignItems: 'center', gap: '6px',
+                            fontFamily: 'inherit',
+                            opacity: (loading || !kpi) ? 0.6 : 1,
+                        }}
+                        title="Tải báo cáo PDF"
+                    >
+                        📄 PDF
+                    </button>
                 </div>
             </header>
 
-            <div className="dashboard-filter-bar">
-                <div>
-                    <span className="filter-label">Lọc doanh thu</span>
-                    <div className="period-tabs" role="tablist" aria-label="Lọc doanh thu">
-                        {PERIODS.map((item) => (
-                            <button
-                                key={item.key}
-                                type="button"
-                                className={period === item.key ? 'active' : ''}
-                                onClick={() => setPeriod(item.key)}
-                            >
-                                {item.label}
-                            </button>
-                        ))}
+            {/* KPI CARDS */}
+            <div className="dashboard-kpi-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
+                <KpiCard
+                    title="Tổng Doanh Thu"
+                    value={loading ? '—' : formatVND(kpi?.tongDoanhThu)}
+                    change={kpi?.doanhThuChangePercent}
+                    subInfo={!loading && kpi ? `PK ${formatVNDCompact(kpi.doanhThuPhuKien)} · DV ${formatVNDCompact(kpi.doanhThuDichVu)}` : ''}
+                />
+                <KpiCard
+                    title="Tổng Giao Dịch"
+                    value={loading ? '—' : (kpi?.soDonHang ?? 0)}
+                    change={kpi?.donHangChangePercent}
+                    subInfo={!loading && kpi ? `${kpi.soDonPhuKien} đơn PK · ${kpi.soLuotDichVu} lượt DV` : ''}
+                />
+                <KpiCard
+                    title="Khách Đặt Hàng"
+                    value={loading ? '—' : (kpi?.khachMoi ?? 0)}
+                    change={kpi?.khachMoiChangePercent}
+                />
+                <KpiCard
+                    title="Giá Trị TB / Đơn"
+                    value={loading ? '—' : formatVND(kpi?.aov)}
+                    change={kpi?.aovChangePercent}
+                />
+            </div>
+
+            {/* CHARTS ROW */}
+            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px', marginBottom: '48px' }} className="dashboard-charts-row">
+
+                {/* REVENUE TREND */}
+                <div className="chart-card">
+                    <div className="chart-card-header">
+                        <h3>Doanh thu theo ngày</h3>
+                        <span className="chart-card-sub">{days} ngày qua — chỉ tính đơn HOÀN THÀNH</span>
                     </div>
+                    <div style={{ width: '100%', height: 280 }}>
+                        <ResponsiveContainer>
+                            <AreaChart data={trendChartData} margin={{ top: 10, right: 16, left: 0, bottom: 0 }}>
+                                <defs>
+                                    <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stopColor="#c5a059" stopOpacity={0.35} />
+                                        <stop offset="100%" stopColor="#c5a059" stopOpacity={0.02} />
+                                    </linearGradient>
+                                </defs>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
+                                <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#888' }} axisLine={false} tickLine={false} />
+                                <YAxis tickFormatter={formatVNDCompact} tick={{ fontSize: 11, fill: '#888' }} axisLine={false} tickLine={false} />
+                                <Tooltip
+                                    formatter={(v) => [formatVND(v), 'Doanh thu']}
+                                    labelFormatter={(l) => 'Ngày ' + l}
+                                    contentStyle={{ border: '1px solid #e5e5e5', borderRadius: '8px', fontSize: 13 }}
+                                />
+                                <Area
+                                    type="monotone"
+                                    dataKey="doanhThu"
+                                    stroke="#c5a059"
+                                    strokeWidth={2.5}
+                                    fill="url(#revGrad)"
+                                />
+                            </AreaChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+
+                {/* ORDER STATUS DONUT */}
+                <div className="chart-card">
+                    <div className="chart-card-header">
+                        <h3>Trạng thái đơn</h3>
+                        <span className="chart-card-sub">Tổng {totalOrdersInPeriod} đơn</span>
+                    </div>
+                    {statusPieData.length === 0 ? (
+                        <div className="chart-empty">Chưa có đơn hàng trong kỳ này</div>
+                    ) : (
+                        <div style={{ width: '100%', height: 280 }}>
+                            <ResponsiveContainer>
+                                <PieChart>
+                                    <Pie
+                                        data={statusPieData}
+                                        innerRadius={55}
+                                        outerRadius={90}
+                                        paddingAngle={2}
+                                        dataKey="value"
+                                    >
+                                        {statusPieData.map((s, i) => (
+                                            <Cell key={i} fill={s.color} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip formatter={(v, n) => [`${v} đơn`, n]} contentStyle={{ border: '1px solid #e5e5e5', borderRadius: '8px', fontSize: 13 }} />
+                                    <Legend
+                                        verticalAlign="bottom"
+                                        iconType="circle"
+                                        wrapperStyle={{ fontSize: 11 }}
+                                    />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </div>
+                    )}
                 </div>
             </div>
 
-            {error && <div className="dashboard-alert">{error}</div>}
+            {/* SECONDARY CHARTS: cơ cấu doanh thu + status lịch hẹn */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '48px' }} className="dashboard-charts-row">
 
-            <section className="dashboard-kpi-grid">
-                <article
-                    className="kpi-card revenue-card clickable-card"
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => goTo('/admin/orders')}
-                    onKeyDown={(event) => event.key === 'Enter' && goTo('/admin/orders')}
-                >
-                    <div className="kpi-icon"><FaChartLine /></div>
-                    <span className="kpi-title">Doanh thu {currentPeriod}</span>
-                    <strong className="kpi-value money">{formatCurrency(dashboardData.totalRevenue)}</strong>
-                    <span className="kpi-note">Không tính đơn đã hủy</span>
-                </article>
-                <article
-                    className="kpi-card clickable-card"
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => goTo('/admin/orders')}
-                    onKeyDown={(event) => event.key === 'Enter' && goTo('/admin/orders')}
-                >
-                    <div className="kpi-icon"><FaClipboardList /></div>
-                    <span className="kpi-title">Đơn hàng {currentPeriod}</span>
-                    <strong className="kpi-value">{dashboardData.filteredOrders.length}</strong>
-                    <span className="kpi-note">Giá trị TB: {formatCurrency(dashboardData.averageOrder)}</span>
-                </article>
-                <article
-                    className="kpi-card clickable-card"
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => goTo('/admin/products')}
-                    onKeyDown={(event) => event.key === 'Enter' && goTo('/admin/products')}
-                >
-                    <div className="kpi-icon"><FaCar /></div>
-                    <span className="kpi-title">Sản phẩm đang quản lý</span>
-                    <strong className="kpi-value">{stats.oto + stats.phuKien}</strong>
-                    <span className="kpi-note">{stats.oto} ô tô, {stats.phuKien} phụ kiện</span>
-                </article>
-                <article
-                    className="kpi-card clickable-card"
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => goTo('/admin/disputes')}
-                    onKeyDown={(event) => event.key === 'Enter' && goTo('/admin/disputes')}
-                >
-                    <div className="kpi-icon warning"><FaExclamationCircle /></div>
-                    <span className="kpi-title">Khiếu nại</span>
-                    <strong className="kpi-value">{stats.khieuNai}</strong>
-                    <span className="kpi-note">Cần theo dõi xử lý</span>
-                </article>
-            </section>
-
-            <section className="dashboard-main-grid">
-                <article className="dashboard-panel chart-panel">
-                    <div className="panel-heading">
-                        <div>
-                            <h2>Biểu đồ doanh thu</h2>
-                            <p>Doanh thu gom theo mốc thời gian đã chọn</p>
+                {/* REVENUE BREAKDOWN */}
+                <div className="chart-card">
+                    <div className="chart-card-header">
+                        <h3>Cơ cấu doanh thu</h3>
+                        <span className="chart-card-sub">Phụ kiện vs Dịch vụ — {days} ngày</span>
+                    </div>
+                    {revenueBreakdownData.length === 0 ? (
+                        <div className="chart-empty">Chưa có doanh thu trong kỳ này</div>
+                    ) : (
+                        <div style={{ width: '100%', height: 280 }}>
+                            <ResponsiveContainer>
+                                <PieChart>
+                                    <Pie
+                                        data={revenueBreakdownData}
+                                        innerRadius={55}
+                                        outerRadius={90}
+                                        paddingAngle={2}
+                                        dataKey="value"
+                                        label={(e) => {
+                                            const total = revenueBreakdownData.reduce((s, x) => s + x.value, 0);
+                                            const pct = total > 0 ? Math.round((e.value / total) * 100) : 0;
+                                            return `${pct}%`;
+                                        }}
+                                    >
+                                        {revenueBreakdownData.map((s, i) => (
+                                            <Cell key={i} fill={s.color} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip
+                                        formatter={(v, n) => [formatVND(v), n]}
+                                        contentStyle={{ border: '1px solid #e5e5e5', borderRadius: '8px', fontSize: 13 }}
+                                    />
+                                    <Legend verticalAlign="bottom" iconType="circle" wrapperStyle={{ fontSize: 12 }} />
+                                </PieChart>
+                            </ResponsiveContainer>
                         </div>
-                        {loading && <span className="panel-chip">Đang tải...</span>}
-                    </div>
-                    <RevenueLineChart data={dashboardData.buckets} />
-                </article>
-
-                <article className="dashboard-panel status-panel">
-                    <div className="panel-heading">
-                        <div>
-                            <h2>Trạng thái đơn</h2>
-                            <p>Tổng hợp toàn bộ đơn hàng</p>
-                        </div>
-                    </div>
-                    <div className="status-list">
-                        {Object.entries(STATUS_LABELS).map(([key, label]) => {
-                            const value = dashboardData.statusCounts[key] || 0;
-                            return (
-                                <div
-                                    className="status-item clickable-status"
-                                    key={key}
-                                    role="button"
-                                    tabIndex={0}
-                                    onClick={() => goTo('/admin/orders')}
-                                    onKeyDown={(event) => event.key === 'Enter' && goTo('/admin/orders')}
-                                >
-                                    <div className="status-item-row">
-                                        <span>{label}</span>
-                                        <strong>{value}</strong>
-                                    </div>
-                                    <div className="status-bar">
-                                        <span style={{ width: `${(value / maxStatus) * 100}%` }} />
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </article>
-            </section>
-
-            <section className="dashboard-panel recent-panel">
-                <div className="panel-heading">
-                    <div>
-                        <h2>Đơn hàng gần đây</h2>
-                        <p>Các giao dịch mới nhất trong hệ thống</p>
-                    </div>
+                    )}
                 </div>
-                <div className="recent-table">
-                    <div className="recent-row recent-head">
-                        <span>Mã đơn</span>
-                        <span>Khách hàng</span>
-                        <span>Ngày tạo</span>
-                        <span>Trạng thái</span>
-                        <span>Giá trị</span>
+
+                {/* APPOINTMENT STATUS DONUT */}
+                <div className="chart-card">
+                    <div className="chart-card-header">
+                        <h3>Trạng thái lịch hẹn dịch vụ</h3>
+                        <span className="chart-card-sub">
+                            Tổng {(apptStatusStats || []).reduce((s, x) => s + Number(x.soLuong || 0), 0)} lượt
+                        </span>
                     </div>
-                    {dashboardData.recentOrders.length === 0 ? (
-                        <div className="empty-state">Chưa có đơn hàng để hiển thị.</div>
-                    ) : dashboardData.recentOrders.map((order) => (
-                        <div className="recent-row" key={order.id}>
-                            <span className="order-code">{order.maDonHang || `ORD-${order.id}`}</span>
-                            <span>{order.tenKhachHang || 'Khách hàng'}</span>
-                            <span>{formatDate(toDate(order.ngayTao))}</span>
-                            <span><em>{STATUS_LABELS[order.trangThai] || order.trangThai}</em></span>
-                            <span className="money-cell">{formatCurrency(order.tongTien)}</span>
+                    {apptStatusPieData.length === 0 ? (
+                        <div className="chart-empty">Chưa có lịch hẹn trong kỳ này</div>
+                    ) : (
+                        <div style={{ width: '100%', height: 280 }}>
+                            <ResponsiveContainer>
+                                <PieChart>
+                                    <Pie
+                                        data={apptStatusPieData}
+                                        innerRadius={55}
+                                        outerRadius={90}
+                                        paddingAngle={2}
+                                        dataKey="value"
+                                    >
+                                        {apptStatusPieData.map((s, i) => (
+                                            <Cell key={i} fill={s.color} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip formatter={(v, n) => [`${v} lượt`, n]} contentStyle={{ border: '1px solid #e5e5e5', borderRadius: '8px', fontSize: 13 }} />
+                                    <Legend verticalAlign="bottom" iconType="circle" wrapperStyle={{ fontSize: 11 }} />
+                                </PieChart>
+                            </ResponsiveContainer>
                         </div>
-                    ))}
+                    )}
                 </div>
-            </section>
+            </div>
+
+            {/* TOP PRODUCTS + RECENT ORDERS */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '24px' }} className="dashboard-bottom-row">
+
+                {/* TOP PRODUCTS */}
+                <div className="chart-card">
+                    <div className="chart-card-header">
+                        <h3>Top 5 sản phẩm bán chạy</h3>
+                        <span className="chart-card-sub">Theo doanh thu — {days} ngày</span>
+                    </div>
+                    {topProducts.length === 0 ? (
+                        <div className="chart-empty">Chưa có sản phẩm bán ra</div>
+                    ) : (
+                        <ul className="top-product-list">
+                            {topProducts.map((p, i) => (
+                                <li key={`${p.loaiSanPham}-${p.sanPhamId}`}>
+                                    <span className="rank">{i + 1}</span>
+                                    <div className="info">
+                                        <div className="name" title={p.tenSanPham}>{p.tenSanPham}</div>
+                                        <div className="meta">
+                                            <span className={`type-badge type-${p.loaiSanPham}`}>{PRODUCT_TYPE_LABEL[p.loaiSanPham] || p.loaiSanPham}</span>
+                                            <span>· {p.soLuongBan} đã bán</span>
+                                        </div>
+                                    </div>
+                                    <div className="revenue">{formatVND(p.doanhThu)}</div>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
+
+                {/* RECENT ORDERS */}
+                <div className="chart-card">
+                    <div className="chart-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                            <h3>Đơn hàng gần đây</h3>
+                            <span className="chart-card-sub">10 đơn mới nhất</span>
+                        </div>
+                        <Link to="/admin/orders" style={{ fontSize: 12, color: '#c5a059', textDecoration: 'none', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>
+                            Xem tất cả →
+                        </Link>
+                    </div>
+                    {recentOrders.length === 0 ? (
+                        <div className="chart-empty">Chưa có đơn hàng</div>
+                    ) : (
+                        <table className="recent-orders-table">
+                            <thead>
+                                <tr>
+                                    <th>Mã đơn</th>
+                                    <th>Khách hàng</th>
+                                    <th style={{ textAlign: 'right' }}>Tổng tiền</th>
+                                    <th>Trạng thái</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {recentOrders.map(o => (
+                                    <tr key={o.id}>
+                                        <td className="mono">{o.maDonHang || `#${o.id}`}</td>
+                                        <td>{o.tenKhachHang || '—'}</td>
+                                        <td className="num">{formatVND(o.tongTien)}</td>
+                                        <td>
+                                            <span className="status-pill" style={{
+                                                background: (STATUS_COLOR[o.trangThai] || '#999') + '20',
+                                                color: STATUS_COLOR[o.trangThai] || '#999',
+                                            }}>
+                                                {STATUS_LABEL[o.trangThai] || o.trangThai}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <Link to={`/admin/orders/${o.id}`} className="row-action-link">→</Link>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
+                </div>
+            </div>
         </div>
     );
 }

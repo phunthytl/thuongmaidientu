@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FaUserCircle, FaMapMarkerAlt, FaPlus, FaTrash, FaStar, FaPhoneAlt } from 'react-icons/fa';
+import { FaUserCircle, FaMapMarkerAlt, FaPlus, FaTrash, FaPhoneAlt } from 'react-icons/fa';
 import Navbar from '../../components/layout/Navbar';
 import { useAuthStore } from '../../stores/authStore';
 import { api } from '../../services/api';
@@ -52,7 +52,7 @@ export default function Profile() {
                 soDienThoai: user.soDienThoai || ''
             });
         }
-    }, [user]);
+    }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const fetchAddresses = async () => {
         try {

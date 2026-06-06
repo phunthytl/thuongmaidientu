@@ -1,19 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
-    FaCar,
-    FaShoppingCart,
-    FaUser,
-    FaSearch,
     FaFilter,
     FaGasPump,
     FaCogs,
-    FaArrowRight,
-    FaFacebookF,
-    FaTwitter,
-    FaInstagram,
-    FaYoutube,
-    FaChevronDown
+    FaArrowRight
 } from 'react-icons/fa';
 import { productService } from '../../services/productService';
 import Navbar from '../../components/layout/Navbar';
@@ -68,7 +59,7 @@ export default function DanhSachOto() {
 
     useEffect(() => {
         fetchCars();
-    }, [params.page, params.hangXe, params.keyword, params.giaMin, params.giaMax, params.sort]);
+    }, [params.page, params.hangXe, params.keyword, params.giaMin, params.giaMax, params.sort]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const fetchCars = async () => {
         try {

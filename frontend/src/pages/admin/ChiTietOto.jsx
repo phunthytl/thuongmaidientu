@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../../services/api';
+import MediaGalleryManager from '../../components/admin/MediaGalleryManager';
 import '../../assets/css/ChiTiet.css';
 
 export default function ChiTietOto() {
@@ -58,15 +59,18 @@ export default function ChiTietOto() {
                     <div className="main-image-wrapper">
                         <img src={mainImage} alt={car.tenXe} />
                     </div>
-                    {images.length > 1 && (
-                        <div className="gallery-grid">
-                            {images.slice(1).map((img, idx) => (
-                                <div key={idx} className="gallery-item">
-                                    <img src={img.url} alt={`Gallery ${idx}`} />
-                                </div>
-                            ))}
-                        </div>
-                    )}
+                    <div style={{ marginTop: '16px' }}>
+                        <MediaGalleryManager
+                            loaiDoiTuong="OTO"
+                            doiTuongId={id}
+                            onChange={async () => {
+                                try {
+                                    const r = await api.get(`/media/OTO/${id}`);
+                                    setImages(r.data?.data || []);
+                                } catch (_) {}
+                            }}
+                        />
+                    </div>
                 </div>
 
                 {/* Right Panel: Specs & Pricing */}

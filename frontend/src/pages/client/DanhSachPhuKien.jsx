@@ -1,18 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { 
-  FaCar, 
-  FaShoppingCart, 
-  FaUser, 
-  FaSearch, 
-  FaFilter, 
-  FaTools,
-  FaArrowRight,
-  FaFacebookF,
-  FaTwitter,
-  FaInstagram,
-  FaYoutube,
-  FaChevronDown
+import {
+  FaFilter,
+  FaArrowRight
 } from 'react-icons/fa';
 import { productService } from '../../services/productService';
 import Navbar from '../../components/layout/Navbar';
@@ -63,7 +53,7 @@ export default function DanhSachPhuKien() {
 
   useEffect(() => {
     fetchAccessories();
-  }, [params.page, params.loai, params.keyword, params.giaMin, params.giaMax, params.sort]);
+  }, [params.page, params.loai, params.keyword, params.giaMin, params.giaMax, params.sort]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchAccessories = async () => {
     try {

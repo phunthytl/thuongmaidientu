@@ -2,20 +2,12 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
     FaCar,
-    FaShoppingCart,
-    FaUser,
     FaShieldAlt,
     FaClock,
     FaCheckCircle,
     FaGasPump,
     FaCogs,
-    FaArrowRight,
-    FaFacebookF,
-    FaTwitter,
-    FaInstagram,
-    FaYoutube,
-    FaSearch,
-    FaChevronDown
+    FaArrowRight
 } from 'react-icons/fa';
 import { productService } from '../../services/productService';
 import Navbar from '../../components/layout/Navbar';

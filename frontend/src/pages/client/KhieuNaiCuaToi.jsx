@@ -33,29 +33,35 @@ export default function KhieuNaiCuaToi() {
         if (khachHangId) {
             fetchData();
         }
-    }, [khachHangId]);
+    }, [khachHangId]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         if (presetDonHangId && !formOpen) {
             setForm(prev => ({ ...prev, donHangId: presetDonHangId }));
             setFormOpen(true);
         }
-    }, [presetDonHangId]);
+    }, [presetDonHangId]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const fetchData = async () => {
         setLoading(true);
-        try {
-            const [disputesRes, ordersRes] = await Promise.all([
-                api.get(`/khieu-nai/khach-hang/${khachHangId}?size=50&sort=ngayTao,desc`),
-                api.get(`/don-hang/khach-hang/${khachHangId}?size=50`)
-            ]);
-            setDisputes(disputesRes.data?.data?.content || []);
-            setOrders(ordersRes.data?.data?.content || []);
-        } catch (err) {
-            console.error('Lỗi tải khiếu nại:', err);
-        } finally {
-            setLoading(false);
+        const [disputesRes, ordersRes] = await Promise.allSettled([
+            api.get(`/khieu-nai/khach-hang/${khachHangId}?size=50&sort=ngayTao,desc`),
+            api.get(`/don-hang/khach-hang/${khachHangId}?size=50`)
+        ]);
+
+        if (disputesRes.status === 'fulfilled') {
+            setDisputes(disputesRes.value.data?.data?.content || []);
+        } else {
+            console.error('Lỗi tải danh sách khiếu nại:', disputesRes.reason);
         }
+
+        if (ordersRes.status === 'fulfilled') {
+            setOrders(ordersRes.value.data?.data?.content || []);
+        } else {
+            console.error('Lỗi tải danh sách đơn hàng:', ordersRes.reason);
+        }
+
+        setLoading(false);
     };
 
     const openForm = () => {
@@ -135,6 +141,19 @@ export default function KhieuNaiCuaToi() {
         setDetailOpen(false);
         setSelectedDispute(null);
         setDisputeImages([]);
+    };
+
+    const handleHuy = async () => {
+        if (!selectedDispute) return;
+        if (!window.confirm('Bạn chắc chắn muốn hủy khiếu nại này? Thao tác không thể khôi phục.')) return;
+        try {
+            await api.delete(`/khieu-nai/${selectedDispute.id}?khachHangId=${khachHangId}`);
+            alert('Đã hủy khiếu nại.');
+            closeDetail();
+            fetchData();
+        } catch (err) {
+            alert(err.response?.data?.message || 'Không thể hủy khiếu nại');
+        }
     };
 
     const statusLabel = (st) => ({
@@ -224,8 +243,8 @@ export default function KhieuNaiCuaToi() {
                     <div style={{ background: '#fff', borderRadius: '16px', width: '100%', maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
                         <button onClick={closeForm} style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#666', zIndex: 1 }}><FaTimes /></button>
 
-                        <form onSubmit={handleSubmit} style={{ padding: '32px' }}>
-                            <h2 style={{ marginTop: 0, marginBottom: '4px' }}>Gửi khiếu nại</h2>
+                        <form onSubmit={handleSubmit} style={{ padding: '32px', fontFamily: 'Manrope, sans-serif' }}>
+                            <h2 className="font-sans" style={{ marginTop: 0, marginBottom: '4px', fontSize: '22px', fontWeight: 700 }}>Gửi khiếu nại</h2>
                             <p style={{ color: '#6b7280', marginBottom: '24px', fontSize: '14px' }}>Vui lòng mô tả rõ vấn đề để chúng tôi hỗ trợ nhanh nhất.</p>
 
                             <div style={{ marginBottom: '16px' }}>
@@ -246,12 +265,20 @@ export default function KhieuNaiCuaToi() {
                                     onChange={(e) => setForm({ ...form, donHangId: e.target.value })}
                                     style={{ width: '100%', padding: '10px 12px', border: '1px solid #d1d5db', borderRadius: '8px', fontSize: '14px', background: '#fff' }}>
                                     <option value="">-- Không gắn đơn nào --</option>
+                                    {form.donHangId && !orders.some(o => String(o.id) === String(form.donHangId)) && (
+                                        <option value={form.donHangId}>Đơn #{form.donHangId}</option>
+                                    )}
                                     {orders.map(o => (
                                         <option key={o.id} value={o.id}>
-                                            {o.maDonHang || `#${o.id}`} — {new Date(o.ngayTao).toLocaleDateString('vi-VN')}
+                                            {o.maDonHang || `#${o.id}`} — {o.ngayTao ? new Date(o.ngayTao).toLocaleDateString('vi-VN') : ''}
                                         </option>
                                     ))}
                                 </select>
+                                {orders.length === 0 && (
+                                    <div style={{ marginTop: '6px', fontSize: '12px', color: '#9ca3af' }}>
+                                        {loading ? 'Đang tải đơn hàng...' : 'Không tải được danh sách đơn hàng. Bạn vẫn có thể gửi khiếu nại không gắn đơn.'}
+                                    </div>
+                                )}
                             </div>
 
                             <div style={{ marginBottom: '16px' }}>
@@ -304,9 +331,9 @@ export default function KhieuNaiCuaToi() {
                     <div style={{ background: '#fff', borderRadius: '16px', width: '100%', maxWidth: '700px', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
                         <button onClick={closeDetail} style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#666', zIndex: 1 }}><FaTimes /></button>
 
-                        <div style={{ padding: '32px' }}>
+                        <div style={{ padding: '32px', fontFamily: 'Manrope, sans-serif' }}>
                             <div style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '4px' }}>KN-{selectedDispute.id}</div>
-                            <h2 style={{ marginTop: 0, marginBottom: '8px' }}>{selectedDispute.tieuDe}</h2>
+                            <h2 className="font-sans" style={{ marginTop: 0, marginBottom: '8px', fontSize: '22px', fontWeight: 700 }}>{selectedDispute.tieuDe}</h2>
                             <div style={{ marginBottom: '24px' }}>
                                 {(() => {
                                     const color = statusColor(selectedDispute.trangThai);
@@ -353,6 +380,16 @@ export default function KhieuNaiCuaToi() {
                             ) : (
                                 <div style={{ padding: '16px', background: '#fef9c3', borderRadius: '8px', color: '#854d0e', fontSize: '14px' }}>
                                     Khiếu nại đang chờ nhân viên xử lý. Vui lòng kiên nhẫn chờ phản hồi.
+                                </div>
+                            )}
+
+                            {selectedDispute.trangThai === 'MOI' && (
+                                <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end' }}>
+                                    <button
+                                        onClick={handleHuy}
+                                        style={{ padding: '10px 18px', background: '#fff', color: '#b91c1c', border: '1px solid #fecaca', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '14px' }}>
+                                        Hủy khiếu nại
+                                    </button>
                                 </div>
                             )}
                         </div>

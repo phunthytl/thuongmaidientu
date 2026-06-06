@@ -32,10 +32,11 @@ const fmt = (price) =>
 const fmtDate = (d) => (d ? new Date(d).toLocaleString('vi-VN') : '---');
 
 const getProductName = (item) => {
-    if (item.loaiSanPham === 'OTO')     return item.oto?.tenXe     || 'Ô Tô';
-    if (item.loaiSanPham === 'PHU_KIEN') return item.phuKien?.tenPhuKien || 'Phụ Kiện';
-    if (item.loaiSanPham === 'DICH_VU') return item.dichVu?.tenDichVu   || 'Dịch Vụ';
-    return 'Sản phẩm';
+    if (item.tenSanPham && item.tenSanPham.trim()) return item.tenSanPham;
+    if (item.loaiSanPham === 'OTO')     return 'Ô Tô (đã xoá)';
+    if (item.loaiSanPham === 'PHU_KIEN') return 'Phụ Kiện (đã xoá)';
+    if (item.loaiSanPham === 'DICH_VU') return 'Dịch Vụ (đã xoá)';
+    return 'Sản phẩm không xác định';
 };
 
 export default function ChiTietDonHang() {
@@ -59,6 +60,7 @@ export default function ChiTietDonHang() {
         }
     };
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => { fetchOrder(); }, [id]);
 
     const handleUpdateStatus = async () => {

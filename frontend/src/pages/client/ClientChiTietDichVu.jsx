@@ -17,7 +17,7 @@ export default function ClientChiTietDichVu() {
 
     useEffect(() => {
         fetchServiceData();
-    }, [id]);
+    }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const fetchServiceData = async () => {
         try {

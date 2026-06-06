@@ -7,6 +7,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
+
 @Repository
 public interface KhieuNaiRepository extends JpaRepository<KhieuNai, Long> {
 
@@ -17,4 +19,6 @@ public interface KhieuNaiRepository extends JpaRepository<KhieuNai, Long> {
     Page<KhieuNai> findByNhanVienXuLyId(Long nhanVienId, Pageable pageable);
 
     long countByTrangThai(TrangThaiKhieuNai trangThai);
+
+    boolean existsByDonHangIdAndTrangThaiIn(Long donHangId, Collection<TrangThaiKhieuNai> trangThais);
 }
