@@ -77,6 +77,9 @@ public class KhoHangService {
                 .diaChiChiTiet(kho.getDiaChiChiTiet())
                 .trangThai(kho.getTrangThai())
                 .ghnShopId(kho.getGhnShopId())
+                .ghnProvinceId(kho.getGhnProvinceId())
+                .ghnDistrictId(kho.getGhnDistrictId())
+                .ghnWardCode(kho.getGhnWardCode())
                 .ngayTao(kho.getNgayTao())
                 .build();
     }

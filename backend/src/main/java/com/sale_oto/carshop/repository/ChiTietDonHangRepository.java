@@ -21,25 +21,28 @@ public interface ChiTietDonHangRepository extends JpaRepository<ChiTietDonHang, 
     // Chỉ tính chi tiết từ đơn HOAN_THANH trong khoảng thời gian
     @Query("SELECT ct.loaiSanPham, " +
            "       CASE ct.loaiSanPham " +
-           "            WHEN com.sale_oto.carshop.enums.LoaiSanPham.OTO THEN ct.oto.id " +
-           "            WHEN com.sale_oto.carshop.enums.LoaiSanPham.PHU_KIEN THEN ct.phuKien.id " +
-           "            WHEN com.sale_oto.carshop.enums.LoaiSanPham.DICH_VU THEN ct.dichVu.id " +
+           "            WHEN com.sale_oto.carshop.enums.LoaiSanPham.OTO THEN oto.id " +
+           "            WHEN com.sale_oto.carshop.enums.LoaiSanPham.PHU_KIEN THEN pk.id " +
+           "            WHEN com.sale_oto.carshop.enums.LoaiSanPham.DICH_VU THEN dv.id " +
            "       END, " +
            "       CASE ct.loaiSanPham " +
-           "            WHEN com.sale_oto.carshop.enums.LoaiSanPham.OTO THEN ct.oto.tenXe " +
-           "            WHEN com.sale_oto.carshop.enums.LoaiSanPham.PHU_KIEN THEN ct.phuKien.tenPhuKien " +
-           "            WHEN com.sale_oto.carshop.enums.LoaiSanPham.DICH_VU THEN ct.dichVu.tenDichVu " +
+           "            WHEN com.sale_oto.carshop.enums.LoaiSanPham.OTO THEN oto.tenXe " +
+           "            WHEN com.sale_oto.carshop.enums.LoaiSanPham.PHU_KIEN THEN pk.tenPhuKien " +
+           "            WHEN com.sale_oto.carshop.enums.LoaiSanPham.DICH_VU THEN dv.tenDichVu " +
            "       END, " +
            "       SUM(ct.soLuong), " +
            "       SUM(ct.thanhTien) " +
            "FROM ChiTietDonHang ct " +
+           "     LEFT JOIN ct.oto oto " +
+           "     LEFT JOIN ct.phuKien pk " +
+           "     LEFT JOIN ct.dichVu dv " +
            "WHERE ct.donHang.trangThai = com.sale_oto.carshop.enums.TrangThaiDonHang.HOAN_THANH " +
            "  AND ct.donHang.ngayTao BETWEEN :tuNgay AND :denNgay " +
            "GROUP BY ct.loaiSanPham, " +
-           "         ct.oto.id, ct.oto.tenXe, " +
-           "         ct.phuKien.id, ct.phuKien.tenPhuKien, " +
-           "         ct.dichVu.id, ct.dichVu.tenDichVu " +
-           "ORDER BY SUM(ct.thanhTien) DESC")
+           "         oto.id, oto.tenXe, " +
+           "         pk.id, pk.tenPhuKien, " +
+           "         dv.id, dv.tenDichVu " +
+           "ORDER BY SUM(ct.soLuong) DESC, SUM(ct.thanhTien) DESC")
     List<Object[]> findTopProductsBetween(@Param("tuNgay") LocalDateTime tuNgay,
                                           @Param("denNgay") LocalDateTime denNgay,
                                           Pageable pageable);

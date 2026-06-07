@@ -49,6 +49,7 @@ public class SecurityConfig {
         config.setAllowedOrigins(List.of(
                 "http://localhost:3000",
                 "http://localhost:3001",
+                "http://localhost:8081",
                 "http://localhost:5173"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
@@ -131,6 +132,8 @@ public class SecurityConfig {
                     // Giỏ hàng
                     .requestMatchers(HttpMethod.POST, "/api/gio-hang/**").hasAnyRole("ADMIN", "NHAN_VIEN", "KHACH_HANG")
                     .requestMatchers(HttpMethod.GET, "/api/gio-hang/**").hasAnyRole("ADMIN", "NHAN_VIEN", "KHACH_HANG")
+                    .requestMatchers(HttpMethod.PUT, "/api/gio-hang/**").hasAnyRole("ADMIN", "NHAN_VIEN", "KHACH_HANG")
+                    .requestMatchers(HttpMethod.DELETE, "/api/gio-hang/**").hasAnyRole("ADMIN", "NHAN_VIEN", "KHACH_HANG")
 
                     // Khiếu nại - Admin/NV quản lý
                     .requestMatchers(HttpMethod.GET, "/api/khieu-nai").hasAnyRole("ADMIN", "NHAN_VIEN")

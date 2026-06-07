@@ -66,7 +66,7 @@ public interface LichHenRepository extends JpaRepository<LichHen, Long> {
            "  AND lh.trangThai = com.sale_oto.carshop.entity.LichHen.TrangThaiLichHen.DA_HOAN_THANH " +
            "  AND lh.ngayTao BETWEEN :tuNgay AND :denNgay " +
            "GROUP BY lh.dichVu.id, lh.dichVu.tenDichVu " +
-           "ORDER BY SUM(lh.dichVu.gia) DESC")
+           "ORDER BY COUNT(lh) DESC, SUM(lh.dichVu.gia) DESC")
     List<Object[]> findTopServicesBetween(@Param("tuNgay") LocalDateTime tuNgay,
                                           @Param("denNgay") LocalDateTime denNgay,
                                           Pageable pageable);

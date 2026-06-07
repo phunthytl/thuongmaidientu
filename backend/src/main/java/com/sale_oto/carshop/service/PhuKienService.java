@@ -74,7 +74,7 @@ public class PhuKienService {
 
     public List<PhuKienResponse> getSimilarProducts(Long id, int limit) {
         PhuKien target = phuKienRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Phá»¥ kiá»‡n", id));
+                .orElseThrow(() -> new ResourceNotFoundException("Phụ kiện", id));
 
         int resultLimit = limit > 0 ? limit : 4;
         return phuKienRepository.findByTrangThai(true).stream()

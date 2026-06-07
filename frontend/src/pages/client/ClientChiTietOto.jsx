@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { FaGasPump, FaCogs, FaStar, FaUserCircle, FaCalendarAlt, FaCar, FaInfoCircle, FaComments, FaWarehouse, FaCheckCircle, FaMapMarkerAlt, FaHeadset } from 'react-icons/fa';
+import { FaGasPump, FaCogs, FaStar, FaUserCircle, FaCalendarAlt, FaCar, FaInfoCircle, FaComments, FaWarehouse, FaMapMarkerAlt, FaHeadset } from 'react-icons/fa';
 import Navbar from '../../components/layout/Navbar';
 import { productService } from '../../services/productService';
 import { api } from '../../services/api';

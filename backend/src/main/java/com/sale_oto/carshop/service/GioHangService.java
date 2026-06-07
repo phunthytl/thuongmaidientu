@@ -54,6 +54,8 @@ public class GioHangService {
                     return gioHangRepository.save(gioHangMoi);
                 });
 
+        xoaChiTietGioHangMoCoi(gioHang.getId());
+
         ChiTietGioHang chiTiet = timChiTietTrung(gioHang.getId(), request)
                 .orElseGet(() -> taoChiTietMoi(gioHang, request.getLoaiSanPham()));
 
@@ -129,7 +131,7 @@ public class GioHangService {
         return getByKhachHang(khachHangId);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public GioHangResponse getByKhachHang(Long khachHangId) {
         KhachHang khachHang = khachHangRepository.findById(khachHangId)
                 .orElseThrow(() -> new ResourceNotFoundException("Khách hàng", khachHangId));
@@ -145,7 +147,10 @@ public class GioHangService {
                     .build();
         }
 
-        return toResponse(gioHangOpt.get());
+        GioHang gioHang = gioHangOpt.get();
+        xoaChiTietGioHangMoCoi(gioHang.getId());
+        capNhatTongTien(gioHang);
+        return toResponse(gioHang);
     }
 
     private ChiTietGioHang taoChiTietMoi(GioHang gioHang, LoaiSanPham loaiSanPham) {
@@ -212,6 +217,11 @@ public class GioHangService {
 
         gioHang.setTongTien(tongTien);
         gioHangRepository.save(gioHang);
+    }
+
+    private void xoaChiTietGioHangMoCoi(Long gioHangId) {
+        chiTietGioHangRepository.deleteOrphanPhuKienItems(gioHangId);
+        chiTietGioHangRepository.deleteOrphanDichVuItems(gioHangId);
     }
 
     private GioHangResponse toResponse(GioHang gioHang) {
