@@ -17,6 +17,7 @@ import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
@@ -218,8 +219,11 @@ public class DashboardService {
             }
         }
 
-        // Sort gộp theo doanh thu desc, lấy top N
-        result.sort((a, b) -> b.getDoanhThu().compareTo(a.getDoanhThu()));
+        // Sort gộp theo SỐ LƯỢNG BÁN desc (chuẩn "bán chạy" của TMĐT),
+        // doanh thu làm tiêu chí phụ khi số lượng bằng nhau. Lấy top N.
+        result.sort(Comparator
+                .comparingLong(DashboardResponse.TopProduct::getSoLuongBan).reversed()
+                .thenComparing(DashboardResponse.TopProduct::getDoanhThu, Comparator.reverseOrder()));
         return result.size() > limit ? result.subList(0, limit) : result;
     }
 

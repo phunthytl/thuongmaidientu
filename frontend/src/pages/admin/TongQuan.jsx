@@ -4,6 +4,7 @@ import {
     XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart,
     PieChart, Pie, Cell, Legend,
 } from 'recharts';
+import { FaRegFileExcel, FaRegFilePdf } from 'react-icons/fa';
 import { api } from '../../services/api';
 import { exportDashboardToExcel, exportDashboardToPdf } from '../../utils/dashboardExport';
 import '../../assets/css/TongQuan.css';
@@ -188,32 +189,32 @@ export default function TongQuan() {
                         onClick={() => exportDashboardToExcel({ days, kpi, trend, statusStats, apptStatusStats, topProducts, recentOrders })}
                         disabled={loading || !kpi}
                         style={{
-                            padding: '10px 16px', borderRadius: '8px', border: 'none',
-                            background: '#16a34a', color: '#fff',
-                            fontSize: 13, fontWeight: 700, cursor: 'pointer',
-                            display: 'flex', alignItems: 'center', gap: '6px',
+                            padding: '9px 16px', borderRadius: '8px', border: '1px solid #d1d5db',
+                            background: '#fff', color: '#374151',
+                            fontSize: 14, fontWeight: 600, cursor: (loading || !kpi) ? 'default' : 'pointer',
+                            display: 'flex', alignItems: 'center', gap: '8px',
                             fontFamily: 'inherit',
-                            opacity: (loading || !kpi) ? 0.6 : 1,
+                            opacity: (loading || !kpi) ? 0.55 : 1,
                         }}
                         title="Tải báo cáo Excel (.xlsx)"
                     >
-                        📊 Excel
+                        <FaRegFileExcel size={16} color="#15803d" /> Xuất Excel
                     </button>
                     <button
                         type="button"
                         onClick={() => exportDashboardToPdf({ days, kpi, trend, statusStats, apptStatusStats, topProducts, recentOrders })}
                         disabled={loading || !kpi}
                         style={{
-                            padding: '10px 16px', borderRadius: '8px', border: 'none',
-                            background: '#dc2626', color: '#fff',
-                            fontSize: 13, fontWeight: 700, cursor: 'pointer',
-                            display: 'flex', alignItems: 'center', gap: '6px',
+                            padding: '9px 16px', borderRadius: '8px', border: '1px solid #d1d5db',
+                            background: '#fff', color: '#374151',
+                            fontSize: 14, fontWeight: 600, cursor: (loading || !kpi) ? 'default' : 'pointer',
+                            display: 'flex', alignItems: 'center', gap: '8px',
                             fontFamily: 'inherit',
-                            opacity: (loading || !kpi) ? 0.6 : 1,
+                            opacity: (loading || !kpi) ? 0.55 : 1,
                         }}
                         title="Tải báo cáo PDF"
                     >
-                        📄 PDF
+                        <FaRegFilePdf size={16} color="#b91c1c" /> Xuất PDF
                     </button>
                 </div>
             </header>
@@ -401,7 +402,7 @@ export default function TongQuan() {
                 <div className="chart-card">
                     <div className="chart-card-header">
                         <h3>Top 5 sản phẩm bán chạy</h3>
-                        <span className="chart-card-sub">Theo doanh thu — {days} ngày</span>
+                        <span className="chart-card-sub">Theo số lượng bán — {days} ngày</span>
                     </div>
                     {topProducts.length === 0 ? (
                         <div className="chart-empty">Chưa có sản phẩm bán ra</div>

@@ -112,7 +112,7 @@ export default function ThanhToan() {
             setSelectedWard('');
             setShippingFee(0);
         }
-    }, [selectedProvince]);
+    }, [selectedProvince]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         if (selectedDistrict) {
@@ -120,7 +120,7 @@ export default function ThanhToan() {
             setSelectedWard('');
             setShippingFee(0);
         }
-    }, [selectedDistrict]);
+    }, [selectedDistrict]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         if (selectedDistrict && selectedWard && isAddingNew) {
