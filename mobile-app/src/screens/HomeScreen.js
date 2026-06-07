@@ -11,17 +11,29 @@ import { colors } from '../styles/theme';
 export function HomeScreen({ navigation }) {
   const [cars, setCars] = useState([]);
   const [accessories, setAccessories] = useState([]);
+  const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const { toggle, isFavorite } = useFavoriteStore();
 
   const load = async () => {
     setLoading(true);
-    const [carPage, accessoryPage] = await Promise.all([
+    const [carPage, accessoryPage, servicePage] = await Promise.all([
       productApi.featuredCars(6),
-      productApi.accessories({ page: 0, size: 6, sort: 'ngayTao,desc' })
+      productApi.accessories({ page: 0, size: 6, sort: 'ngayTao,desc' }),
+      productApi.services({ page: 0, size: 6, sort: 'ngayTao,desc' })
     ]);
     setCars(productApi.pageContent(carPage));
     setAccessories(productApi.pageContent(accessoryPage));
+    const activeServices = productApi.pageContent(servicePage).filter((item) => item.trangThai !== false);
+    const serviceItems = await Promise.all(activeServices.map(async (item) => {
+      try {
+        const images = await productApi.mediaImages('DICH_VU', item.id);
+        return { ...item, displayImage: images?.[0]?.url };
+      } catch {
+        return item;
+      }
+    }));
+    setServices(serviceItems);
     setLoading(false);
   };
 
@@ -51,6 +63,10 @@ export function HomeScreen({ navigation }) {
         <Pressable style={styles.quickItem} onPress={() => navigation.navigate('Products', { type: 'PHU_KIEN' })}>
           <Ionicons name="construct-outline" size={24} color={colors.primary} />
           <Text style={styles.quickText}>Phụ kiện</Text>
+        </Pressable>
+        <Pressable style={styles.quickItem} onPress={() => navigation.navigate('Products', { type: 'DICH_VU' })}>
+          <Ionicons name="build-outline" size={24} color={colors.primary} />
+          <Text style={styles.quickText}>Dịch vụ</Text>
         </Pressable>
         <Pressable style={styles.quickItem} onPress={() => navigation.navigate('Orders')}>
           <Ionicons name="receipt-outline" size={24} color={colors.primary} />
@@ -84,6 +100,19 @@ export function HomeScreen({ navigation }) {
           />
         ))}
       </View>
+      <Section title="Dịch vụ nổi bật" />
+      <View style={styles.grid}>
+        {services.map((item) => (
+          <ProductCard
+            key={`dv-${item.id}`}
+            item={item}
+            type="DICH_VU"
+            favorite={isFavorite('DICH_VU', item.id)}
+            onFavorite={() => toggle({ ...item, loaiSanPham: 'DICH_VU' })}
+            onPress={() => navigation.navigate('ProductDetail', { id: item.id, type: 'DICH_VU' })}
+          />
+        ))}
+      </View>
     </Screen>
   );
 }
@@ -113,10 +142,12 @@ const styles = StyleSheet.create({
   },
   quick: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 10
   },
   quickItem: {
-    flex: 1,
+    flexBasis: '48%',
+    flexGrow: 1,
     minHeight: 74,
     backgroundColor: colors.surface,
     borderRadius: 8,

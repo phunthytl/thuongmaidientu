@@ -9,7 +9,7 @@ import { useFavoriteStore } from './src/store/favoriteStore';
 import { colors } from './src/styles/theme';
 
 const linking = {
-  prefixes: ['http://localhost:8081', 'carshop://'],
+  prefixes: ['http://localhost:8081', 'http://localhost:8082', 'carshop://'],
   config: {
     screens: {
       Login: 'login',

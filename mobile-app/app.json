@@ -2,6 +2,7 @@
   "expo": {
     "name": "CarShop Mobile",
     "slug": "carshop-mobile",
+    "scheme": "carshop",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",

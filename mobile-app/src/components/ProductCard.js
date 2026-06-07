@@ -5,13 +5,21 @@ import { money, productImage, productName } from '../utils/format';
 
 export function ProductCard({ item, type, onPress, onFavorite, favorite }) {
   const image = productImage(item);
+  const meta = type === 'OTO'
+    ? item.hangXe
+    : type === 'DICH_VU'
+      ? item.thoiGianUocTinh || 'Dịch vụ'
+      : item.loaiPhuKien;
+  const icon = type === 'DICH_VU' ? 'construct-outline' : 'car-sport-outline';
+  const stockText = type === 'DICH_VU' ? 'Đặt lịch' : `Còn ${item.soLuong ?? 0}`;
+
   return (
     <Pressable style={styles.card} onPress={onPress}>
       {image ? (
         <Image source={{ uri: image }} style={styles.image} />
       ) : (
         <View style={[styles.image, styles.placeholder]}>
-          <Ionicons name="car-sport-outline" size={30} color={colors.muted} />
+          <Ionicons name={icon} size={30} color={colors.muted} />
         </View>
       )}
       <View style={styles.body}>
@@ -27,12 +35,12 @@ export function ProductCard({ item, type, onPress, onFavorite, favorite }) {
             />
           </Pressable>
         </View>
-        <Text style={styles.meta}>{type === 'OTO' ? item.hangXe : item.loaiPhuKien}</Text>
+        <Text style={styles.meta}>{meta}</Text>
         <Text style={styles.price}>{money(item.gia)}</Text>
         <View style={styles.footer}>
           <Ionicons name="star" size={14} color={colors.warning} />
           <Text style={styles.rating}>{item.diemDanhGiaTrungBinh?.toFixed?.(1) || '0.0'}</Text>
-          <Text style={styles.stock}>Còn {item.soLuong ?? 0}</Text>
+          <Text style={styles.stock}>{stockText}</Text>
         </View>
       </View>
     </Pressable>

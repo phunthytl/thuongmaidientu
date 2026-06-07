@@ -28,6 +28,13 @@ public class GhnService {
     private final KhoHangRepository khoHangRepository;
     private final RestTemplate restTemplate = new RestTemplate();
 
+    public boolean isConfigured() {
+        return hasText(ghnConfig.getToken())
+                && ghnConfig.getShopId() != null
+                && ghnConfig.getShopId() > 0
+                && hasText(ghnConfig.getApiUrl());
+    }
+
     private HttpHeaders createHeaders() {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Token", ghnConfig.getToken());
@@ -38,7 +45,7 @@ public class GhnService {
 
     public BigDecimal calculateFee(Integer toDistrictId, String toWardCode, int weight, int length, int width,
             int height) {
-        String url = ghnConfig.getApiUrl() + "/v2/shipping-order/fee";
+        String url = ghnV2Url("/shipping-order/fee");
 
         Map<String, Object> request = new HashMap<>();
         request.put("service_type_id", 2); // 2 = Gói chuẩn (Standard)
@@ -69,7 +76,7 @@ public class GhnService {
     }
 
     public String createOrder(DonHang donHang) {
-        String url = ghnConfig.getApiUrl() + "/v2/shipping-order/create";
+        String url = ghnV2Url("/shipping-order/create");
 
         Map<String, Object> request = new HashMap<>();
         request.put("payment_type_id", 1); // 1 = Seller pays phí cho GHN (shop trả). COD KH thanh toán cả gốc + phí
@@ -164,7 +171,7 @@ public class GhnService {
     }
 
     public void cancelOrder(String orderCode) {
-        String url = ghnConfig.getApiUrl() + "/v2/switch-status/cancel";
+        String url = ghnV2Url("/switch-status/cancel");
         Map<String, Object> request = new HashMap<>();
         request.put("order_codes", List.of(orderCode));
 
@@ -177,7 +184,7 @@ public class GhnService {
     }
 
     public String getProvinces() {
-        String url = ghnConfig.getApiUrl().replace("/v2", "") + "/master-data/province";
+        String url = ghnRootUrl("/master-data/province");
         HttpEntity<String> entity = new HttpEntity<>(createHeaders());
         try {
             return restTemplate.exchange(url, HttpMethod.GET, entity, String.class).getBody();
@@ -188,7 +195,7 @@ public class GhnService {
     }
 
     public String getDistricts(Integer provinceId) {
-        String baseUrl = ghnConfig.getApiUrl().replace("/v2", "");
+        String baseUrl = ghnRootUrl("");
         String url = baseUrl + "/master-data/district?province_id=" + provinceId;
         HttpEntity<String> entity = new HttpEntity<>(createHeaders());
         try {
@@ -205,7 +212,7 @@ public class GhnService {
     }
 
     public String getWards(Integer districtId) {
-        String url = ghnConfig.getApiUrl().replace("/v2", "") + "/master-data/ward?district_id=" + districtId;
+        String url = ghnRootUrl("/master-data/ward?district_id=" + districtId);
         HttpEntity<String> entity = new HttpEntity<>(createHeaders());
         try {
             return restTemplate.exchange(url, HttpMethod.GET, entity, String.class).getBody();
@@ -217,7 +224,7 @@ public class GhnService {
 
     public String calculateFeeRaw(Integer toDistrictId, String toWardCode, int weight, int length, int width,
             int height) {
-        String url = ghnConfig.getApiUrl() + "/v2/shipping-order/fee";
+        String url = ghnV2Url("/shipping-order/fee");
         Map<String, Object> request = new HashMap<>();
         request.put("service_type_id", 2); // 2 = Giao chuẩn
         request.put("insurance_value", 0);
@@ -314,5 +321,36 @@ public class GhnService {
 
     private String escapeJson(String value) {
         return value.replace("\\", "\\\\").replace("\"", "\\\"");
+    }
+
+    private String ghnV2Url(String path) {
+        String base = normalizeBaseUrl(ghnConfig.getApiUrl());
+        if (!base.endsWith("/v2")) {
+            base += "/v2";
+        }
+        return base + path;
+    }
+
+    private String ghnRootUrl(String path) {
+        String base = normalizeBaseUrl(ghnConfig.getApiUrl());
+        if (base.endsWith("/v2")) {
+            base = base.substring(0, base.length() - 3);
+        }
+        return base + path;
+    }
+
+    private String normalizeBaseUrl(String url) {
+        if (!hasText(url)) {
+            return "https://dev-online-gateway.ghn.vn/shiip/public-api";
+        }
+        String normalized = url.trim();
+        while (normalized.endsWith("/")) {
+            normalized = normalized.substring(0, normalized.length() - 1);
+        }
+        return normalized;
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.trim().isEmpty();
     }
 }

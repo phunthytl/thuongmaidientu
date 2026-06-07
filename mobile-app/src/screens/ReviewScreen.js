@@ -23,6 +23,7 @@ export function ReviewScreen({ route, navigation }) {
         loaiSanPham: type,
         otoId: type === 'OTO' ? product.id : undefined,
         phuKienId: type === 'PHU_KIEN' ? product.id : undefined,
+        dichVuId: type === 'DICH_VU' ? product.id : undefined,
         diemDanhGia: rating,
         noiDung
       });

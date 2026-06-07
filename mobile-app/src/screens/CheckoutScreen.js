@@ -32,6 +32,13 @@ const defaultAddress = {
 const errorMessageOf = (error) =>
   error.response?.data?.message || error.message || 'Vui lòng thử lại.';
 
+const getPaymentReturnUrl = () => {
+  if (Platform.OS === 'web' && typeof window !== 'undefined') {
+    return `${window.location.origin}/payment-result`;
+  }
+  return 'carshop://payment-result';
+};
+
 export function CheckoutScreen({ navigation }) {
   const user = useAuthStore((state) => state.user);
   const { cart, clear } = useCartStore();
@@ -151,7 +158,9 @@ export function CheckoutScreen({ navigation }) {
         const orderToPay = createdOrders.find((order) =>
           order?.chiTietDonHangs?.every((item) => item.loaiSanPham === 'PHU_KIEN')
         ) || createdOrders[0];
-        const payment = await paymentApi.createVnpayPayment(orderToPay.id);
+        const payment = await paymentApi.createVnpayPayment(orderToPay.id, {
+          clientReturnUrl: getPaymentReturnUrl()
+        });
         await clear(user);
         addNotification({
           title: 'Đang chuyển sang VNPay',

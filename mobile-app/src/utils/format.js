@@ -23,13 +23,13 @@ export const money = (value) => {
   }).format(number);
 };
 
-export const productName = (item) => item?.tenXe || item?.tenPhuKien || item?.tenSanPham || 'Sản phẩm';
+export const productName = (item) => item?.tenXe || item?.tenPhuKien || item?.tenDichVu || item?.tenSanPham || 'Sản phẩm';
 
 export const productImage = (item) => {
   if (Array.isArray(item?.hinhAnhs) && item.hinhAnhs.length > 0) {
     return resolveImageUrl(item.hinhAnhs[0]);
   }
-  return resolveImageUrl(item?.hinhAnh);
+  return resolveImageUrl(item?.displayImage || item?.hinhAnh);
 };
 
 export const customerIdOf = (user) => user?.khachHangId || user?.id;
