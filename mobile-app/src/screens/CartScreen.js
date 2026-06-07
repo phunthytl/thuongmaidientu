@@ -32,6 +32,11 @@ export function CartScreen({ navigation }) {
           {productImage(item) ? <Image source={{ uri: productImage(item) }} style={styles.image} /> : <View style={styles.image} />}
           <View style={styles.info}>
             <Text style={styles.name}>{item.tenSanPham}</Text>
+            {item.tenKho || item.khoXuatHang?.tenKho || item.khoHangId ? (
+              <Text style={styles.warehouse}>
+                {item.tenKho || item.khoXuatHang?.tenKho ? `Kho: ${item.tenKho || item.khoXuatHang?.tenKho}` : `Kho #${item.khoHangId}`}
+              </Text>
+            ) : null}
             <Text style={styles.price}>{money(item.thanhTien)}</Text>
             <View style={styles.qty}>
               <Pressable onPress={() => update(item.id, Math.max(1, item.soLuong - 1))}>
@@ -90,6 +95,11 @@ const styles = StyleSheet.create({
   price: {
     color: colors.accent,
     fontWeight: '900'
+  },
+  warehouse: {
+    color: colors.muted,
+    fontSize: 12,
+    fontWeight: '700'
   },
   qty: {
     flexDirection: 'row',

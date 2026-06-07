@@ -12,6 +12,7 @@ import { useCartStore } from '../store/cartStore';
 import { useFavoriteStore } from '../store/favoriteStore';
 import { colors } from '../styles/theme';
 import { money, productImage, productName } from '../utils/format';
+import { orderApi } from '../api/orderApi';
 
 const errorMessageOf = (error) => {
   const data = error.response?.data;
@@ -26,6 +27,14 @@ const nextDate = () => {
   return date.toISOString().slice(0, 10);
 };
 
+const productIdOfOrderItem = (item, type) => {
+  if (type === 'OTO') return item.otoId ?? item.sanPhamId;
+  if (type === 'DICH_VU') return item.dichVuId ?? item.sanPhamId;
+  return item.phuKienId ?? item.sanPhamId;
+};
+
+const completedStatuses = new Set(['HOAN_THANH', 'DA_HOAN_THANH']);
+
 export function ProductDetailScreen({ route, navigation }) {
   const { id, type } = route.params;
   const productType = String(type || '').toUpperCase();
@@ -37,9 +46,13 @@ export function ProductDetailScreen({ route, navigation }) {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
+  const [checkingReview, setCheckingReview] = useState(false);
   const [notice, setNotice] = useState(null);
   const [branches, setBranches] = useState([]);
   const [branchId, setBranchId] = useState(null);
+  const [warehouseStocks, setWarehouseStocks] = useState([]);
+  const [selectedWarehouseId, setSelectedWarehouseId] = useState(null);
+  const [bookingMode, setBookingMode] = useState(null);
   const [bookingForm, setBookingForm] = useState({
     hoTen: user?.hoTen || '',
     soDienThoai: user?.soDienThoai || '',
@@ -52,6 +65,12 @@ export function ProductDetailScreen({ route, navigation }) {
   useEffect(() => {
     const load = async () => {
       setLoading(true);
+      setNotice(null);
+      setBookingMode(null);
+      setBranches([]);
+      setBranchId(null);
+      setWarehouseStocks([]);
+      setSelectedWarehouseId(null);
       const detailRequest = productType === 'OTO'
         ? productApi.car(productId)
         : productType === 'DICH_VU'
@@ -65,13 +84,21 @@ export function ProductDetailScreen({ route, navigation }) {
         requests.push(productApi.mediaImages(productType, productId).catch(() => []));
         requests.push(customerApi.warehouses().catch(() => []));
       }
+      if (productType === 'PHU_KIEN') {
+        requests.push(productApi.accessoryStock(productId).catch(() => []));
+      }
 
       const [detail, reviewPage, images = [], branchItems = []] = await Promise.all(requests);
       setProduct(productType === 'DICH_VU' ? { ...detail, displayImage: images?.[0]?.url } : detail);
       setReviews(productApi.pageContent(reviewPage));
       if (['OTO', 'DICH_VU'].includes(productType)) {
         setBranches(branchItems);
-        setBranchId((current) => current || branchItems?.[0]?.id || null);
+        setBranchId(branchItems?.[0]?.id || null);
+      }
+      if (productType === 'PHU_KIEN') {
+        const stocks = images || [];
+        setWarehouseStocks(stocks);
+        setSelectedWarehouseId(stocks.find((item) => Number(item.soLuong) > 0)?.khoHangId || null);
       }
       setLoading(false);
     };
@@ -121,6 +148,18 @@ export function ProductDetailScreen({ route, navigation }) {
       return;
     }
 
+    const selectedWarehouse = warehouseStocks.find((item) => Number(item.khoHangId) === Number(selectedWarehouseId));
+    if (productType === 'PHU_KIEN') {
+      if (!selectedWarehouseId) {
+        Alert.alert('Thiếu kho xuất hàng', 'Vui lòng chọn kho còn hàng trước khi thêm phụ kiện vào giỏ.');
+        return;
+      }
+      if (!selectedWarehouse || Number(selectedWarehouse.soLuong) <= 0) {
+        Alert.alert('Kho hết hàng', 'Kho hàng này hiện đang hết hàng. Vui lòng chọn kho khác.');
+        return;
+      }
+    }
+
     setAdding(true);
     try {
       await add(user, {
@@ -132,7 +171,12 @@ export function ProductDetailScreen({ route, navigation }) {
         gia: product.gia,
         hinhAnh: product.hinhAnh,
         hinhAnhs: product.hinhAnhs,
-        displayImage: product.displayImage
+        displayImage: product.displayImage,
+        khoHangId: selectedWarehouseId,
+        tenKho: selectedWarehouse?.tenKho,
+        tinhThanhTen: selectedWarehouse?.tinhThanhTen,
+        diaChiChiTiet: selectedWarehouse?.diaChiChiTiet,
+        tonKho: selectedWarehouse?.soLuong
       });
       setNotice({
         type: 'success',
@@ -154,6 +198,86 @@ export function ProductDetailScreen({ route, navigation }) {
 
   const setBookingField = (name) => (value) => {
     setBookingForm((current) => ({ ...current, [name]: value }));
+  };
+
+  const requireCustomerLogin = (message) => {
+    if (user?.vaiTro === 'KHACH_HANG') return true;
+    Alert.alert('Cần đăng nhập', message, [
+      { text: 'Để sau', style: 'cancel' },
+      { text: 'Đăng nhập', onPress: () => navigation.navigate('Login', { redirectTo: 'Main' }) }
+    ]);
+    return false;
+  };
+
+  const showLoginRequiredNotice = () => {
+    setNotice({
+      type: 'error',
+      title: 'Cần đăng nhập',
+      body: 'Yêu cầu đăng nhập để dùng chức năng này.'
+    });
+  };
+
+  const openTestDriveForm = () => {
+    if (user?.vaiTro !== 'KHACH_HANG') {
+      setBookingMode(null);
+      showLoginRequiredNotice();
+      return;
+    }
+    setNotice(null);
+    setBookingMode('testDrive');
+  };
+
+  const findCompletedReviewTarget = async () => {
+    if (productType === 'PHU_KIEN') {
+      const page = await orderApi.listByCustomer(customerIdOf(user), { page: 0, size: 50, sort: 'ngayTao,desc' });
+      const orders = page?.content || page || [];
+      for (const order of orders) {
+        if (!completedStatuses.has(order.trangThai)) continue;
+        const detail = (order.chiTietDonHangs || []).find((item) =>
+          String(item.loaiSanPham || '').toUpperCase() === productType &&
+          Number(productIdOfOrderItem(item, productType)) === productId
+        );
+        if (detail) {
+          if (detail.daDanhGia) return { alreadyReviewed: true };
+          return { chiTietDonHangId: detail.id };
+        }
+      }
+      return null;
+    }
+
+    const bookings = await productApi.myBookings();
+    const targetType = productType === 'OTO' ? 'LAI_THU' : 'DICH_VU';
+    const booking = (bookings || []).find((item) => {
+      const itemProductId = productType === 'OTO' ? item.otoId : item.dichVuId;
+      return item.loaiLich === targetType &&
+        item.trangThai === 'DA_HOAN_THANH' &&
+        Number(itemProductId) === productId;
+    });
+    if (!booking) return null;
+    if (booking.daDanhGia) return { alreadyReviewed: true };
+    return { lichHenId: booking.id };
+  };
+
+  const openReview = async () => {
+    if (!requireCustomerLogin('Bạn cần đăng nhập và đã nhận hàng/hoàn thành lịch hẹn trước khi đánh giá.')) return;
+
+    setCheckingReview(true);
+    try {
+      const reviewContext = await findCompletedReviewTarget();
+      if (reviewContext?.alreadyReviewed) {
+        Alert.alert('Đã đánh giá', 'Bạn đã đánh giá sản phẩm này rồi.');
+        return;
+      }
+      if (!reviewContext) {
+        Alert.alert('Chưa đủ điều kiện', 'Bạn chỉ có thể viết đánh giá sau khi đã nhận hàng hoặc hoàn thành lịch hẹn.');
+        return;
+      }
+      navigation.navigate('Review', { product, type: productType, reviewContext });
+    } catch (error) {
+      Alert.alert('Không kiểm tra được', errorMessageOf(error));
+    } finally {
+      setCheckingReview(false);
+    }
   };
 
   const bookService = async () => {
@@ -207,6 +331,11 @@ export function ProductDetailScreen({ route, navigation }) {
 
   const bookTestDrive = async () => {
     setNotice(null);
+
+    if (user?.vaiTro !== 'KHACH_HANG') {
+      showLoginRequiredNotice();
+      return;
+    }
 
     if (!branchId) {
       Alert.alert('Thiếu chi nhánh', 'Vui lòng chọn chi nhánh lái thử.');
@@ -292,6 +421,7 @@ export function ProductDetailScreen({ route, navigation }) {
         ['Hãng SX', product.hangSanXuat],
         ['Trọng lượng', product.trongLuong ? `${product.trongLuong} g` : null]
       ];
+  const totalAccessoryStock = warehouseStocks.reduce((sum, item) => sum + Number(item.soLuong || 0), 0);
 
   return (
     <Screen>
@@ -309,6 +439,14 @@ export function ProductDetailScreen({ route, navigation }) {
         <View style={styles.bookingBox}>
           <Text style={styles.section}>Đăng ký lái thử</Text>
           <Text style={styles.description}>Chọn chi nhánh, ngày giờ và thông tin liên hệ để nhân viên xác nhận lịch lái thử.</Text>
+          {!bookingMode ? (
+            <>
+              <Button title="Đăng ký lái thử" icon="calendar-outline" onPress={openTestDriveForm} />
+              <Button title="Liên hệ tư vấn" icon="call-outline" variant="ghost" onPress={contactConsultant} />
+            </>
+          ) : null}
+          {bookingMode === 'testDrive' ? (
+            <>
           <Text style={styles.bookingLabel}>Chi nhánh</Text>
           <View style={styles.branchList}>
             {branches.map((branch) => (
@@ -335,13 +473,23 @@ export function ProductDetailScreen({ route, navigation }) {
           <Field label="Ngày hẹn" value={bookingForm.ngayHen} onChangeText={setBookingField('ngayHen')} placeholder="YYYY-MM-DD" />
           <Field label="Giờ hẹn" value={bookingForm.gioHen} onChangeText={setBookingField('gioHen')} placeholder="HH:mm" />
           <Field label="Ghi chú" value={bookingForm.ghiChu} onChangeText={setBookingField('ghiChu')} multiline />
-          <Button title="Đăng ký lái thử" icon="calendar-outline" onPress={bookTestDrive} loading={adding} />
-          <Button title="Liên hệ tư vấn" icon="call-outline" variant="ghost" onPress={contactConsultant} />
+          <Button title="Gửi đăng ký lái thử" icon="calendar-outline" onPress={bookTestDrive} loading={adding} />
+          <Button title="Ẩn form đăng ký" icon="chevron-up-outline" variant="ghost" onPress={() => setBookingMode(null)} />
+            </>
+          ) : null}
+          {bookingMode === 'testDrive' ? (
+            <Button title="Liên hệ tư vấn" icon="call-outline" variant="ghost" onPress={contactConsultant} />
+          ) : null}
         </View>
       ) : productType === 'DICH_VU' ? (
         <View style={styles.bookingBox}>
           <Text style={styles.section}>Đặt lịch dịch vụ</Text>
           <Text style={styles.description}>Chọn chi nhánh, ngày giờ và thông tin liên hệ để nhân viên xác nhận lịch.</Text>
+          {bookingMode !== 'service' ? (
+            <Button title="Đặt lịch dịch vụ" icon="calendar-outline" onPress={() => setBookingMode('service')} />
+          ) : null}
+          {bookingMode === 'service' ? (
+            <>
           <Text style={styles.bookingLabel}>Chi nhánh</Text>
           <View style={styles.branchList}>
             {branches.map((branch) => (
@@ -368,12 +516,58 @@ export function ProductDetailScreen({ route, navigation }) {
           <Field label="Ngày hẹn" value={bookingForm.ngayHen} onChangeText={setBookingField('ngayHen')} placeholder="YYYY-MM-DD" />
           <Field label="Giờ hẹn" value={bookingForm.gioHen} onChangeText={setBookingField('gioHen')} placeholder="HH:mm" />
           <Field label="Ghi chú" value={bookingForm.ghiChu} onChangeText={setBookingField('ghiChu')} multiline />
-          <Button title="Đặt lịch dịch vụ" icon="calendar-outline" onPress={bookService} loading={adding} />
+          <Button title="Gửi lịch dịch vụ" icon="calendar-outline" onPress={bookService} loading={adding} />
+          <Button title="Ẩn form đặt lịch" icon="chevron-up-outline" variant="ghost" onPress={() => setBookingMode(null)} />
+            </>
+          ) : null}
         </View>
       ) : (
         <>
-          <Text style={styles.stock}>Tồn kho: {product.soLuong ?? 0}</Text>
-          <Button title="Thêm vào giỏ" icon="cart-outline" onPress={addToCart} loading={adding} />
+          <Text style={styles.stock}>Tồn kho: {totalAccessoryStock || product.soLuong || 0}</Text>
+          <View style={styles.bookingBox}>
+            <Text style={styles.section}>Chọn kho xuất hàng</Text>
+            {warehouseStocks.length > 0 ? (
+              <View style={styles.branchList}>
+                {warehouseStocks.map((warehouse) => {
+                  const stock = Number(warehouse.soLuong || 0);
+                  const available = stock > 0;
+                  const active = Number(selectedWarehouseId) === Number(warehouse.khoHangId);
+                  return (
+                    <Pressable
+                      key={warehouse.khoHangId}
+                      disabled={!available}
+                      style={[styles.branchItem, active && styles.branchActive, !available && styles.branchDisabled]}
+                      onPress={() => setSelectedWarehouseId(warehouse.khoHangId)}
+                    >
+                      <Ionicons
+                        name={active ? 'radio-button-on' : 'radio-button-off'}
+                        size={20}
+                        color={active ? colors.primary : colors.muted}
+                      />
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.branchName}>{warehouse.tenKho}</Text>
+                        <Text style={styles.branchAddress}>
+                          {[warehouse.tinhThanhTen, warehouse.diaChiChiTiet].filter(Boolean).join(' - ')}
+                        </Text>
+                      </View>
+                      <Text style={[styles.stockBadge, available ? styles.stockBadgeOk : styles.stockBadgeEmpty]}>
+                        {available ? `Còn ${stock}` : 'Hết hàng'}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            ) : (
+              <Text style={styles.description}>Chưa có thông tin tồn kho cho phụ kiện này.</Text>
+            )}
+          </View>
+          <Button
+            title="Thêm vào giỏ"
+            icon="cart-outline"
+            onPress={addToCart}
+            loading={adding}
+            disabled={!selectedWarehouseId}
+          />
         </>
       )}
       {notice ? (
@@ -409,8 +603,8 @@ export function ProductDetailScreen({ route, navigation }) {
       <Text style={styles.description}>{product.moTa || 'Chưa có mô tả.'}</Text>
       <View style={styles.reviewHeader}>
         <Text style={styles.section}>Đánh giá</Text>
-        <Pressable onPress={() => navigation.navigate('Review', { product, type: productType })}>
-          <Text style={styles.reviewAction}>Viết đánh giá</Text>
+        <Pressable onPress={openReview} disabled={checkingReview}>
+          <Text style={styles.reviewAction}>{checkingReview ? 'Đang kiểm tra...' : 'Viết đánh giá'}</Text>
         </Pressable>
       </View>
       {reviews.length === 0 ? (
@@ -488,6 +682,10 @@ const styles = StyleSheet.create({
     borderColor: colors.primary,
     backgroundColor: '#f0fdfa'
   },
+  branchDisabled: {
+    opacity: 0.55,
+    backgroundColor: '#f8fafc'
+  },
   branchName: {
     color: colors.ink,
     fontWeight: '800'
@@ -496,6 +694,21 @@ const styles = StyleSheet.create({
     color: colors.muted,
     fontSize: 12,
     marginTop: 2
+  },
+  stockBadge: {
+    borderRadius: 999,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    fontSize: 12,
+    fontWeight: '800'
+  },
+  stockBadgeOk: {
+    color: colors.success,
+    backgroundColor: '#dcfce7'
+  },
+  stockBadgeEmpty: {
+    color: colors.danger,
+    backgroundColor: '#fee2e2'
   },
   notice: {
     minHeight: 48,

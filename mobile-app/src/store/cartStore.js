@@ -48,7 +48,8 @@ export const useCartStore = create((set, get) => ({
       }
 
       const currentItems = get().cart?.guest ? get().cart.chiTietGioHangs : [];
-      const id = `guest-${loaiSanPham}-${sanPhamId}`;
+      const khoHangId = payload?.khoHangId ? Number(payload.khoHangId) : null;
+      const id = `guest-${loaiSanPham}-${sanPhamId}-${khoHangId || 'none'}`;
       const soLuong = Number(payload?.soLuong) || 1;
       const donGia = Number(payload?.donGia ?? payload?.gia ?? 0);
       const existing = currentItems.find((item) => item.id === id);
@@ -65,6 +66,11 @@ export const useCartStore = create((set, get) => ({
               soLuong,
               donGia,
               thanhTien: donGia * soLuong,
+              khoHangId,
+              tenKho: payload?.tenKho,
+              tinhThanhTen: payload?.tinhThanhTen,
+              diaChiChiTiet: payload?.diaChiChiTiet,
+              tonKho: payload?.tonKho,
               tenSanPham: payload?.tenSanPham || payload?.tenPhuKien || 'Phụ kiện',
               hinhAnh: payload?.hinhAnh,
               hinhAnhs: payload?.hinhAnhs,

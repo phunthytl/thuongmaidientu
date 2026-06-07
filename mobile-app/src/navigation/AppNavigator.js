@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AddressScreen } from '../screens/AddressScreen';
 import { CartScreen } from '../screens/CartScreen';
 import { CheckoutScreen } from '../screens/CheckoutScreen';
+import { DisputeScreen } from '../screens/DisputeScreen';
 import { FavoritesScreen } from '../screens/FavoritesScreen';
 import { HomeScreen } from '../screens/HomeScreen';
 import { LoginScreen } from '../screens/LoginScreen';
@@ -66,6 +67,7 @@ export function AppNavigator() {
       <Stack.Screen name="ProductDetail" component={ProductDetailScreen} options={{ title: 'Chi tiết sản phẩm' }} />
       <Stack.Screen name="Checkout" component={CheckoutScreen} options={{ title: 'Thanh toán' }} />
       <Stack.Screen name="OrderDetail" component={OrderDetailScreen} options={{ title: 'Chi tiết đơn hàng' }} />
+      <Stack.Screen name="Dispute" component={DisputeScreen} options={{ title: 'Khiếu nại' }} />
       <Stack.Screen name="Review" component={ReviewScreen} options={{ title: 'Đánh giá' }} />
       <Stack.Screen name="Favorites" component={FavoritesScreen} options={{ title: 'Yêu thích' }} />
       <Stack.Screen name="Notifications" component={NotificationsScreen} options={{ title: 'Thông báo' }} />

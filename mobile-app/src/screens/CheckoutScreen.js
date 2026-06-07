@@ -61,6 +61,10 @@ export function CheckoutScreen({ navigation }) {
     () => items.length > 0 && items.every((item) => item.loaiSanPham === 'PHU_KIEN'),
     [items]
   );
+  const cartWarehouseId = useMemo(
+    () => items.find((item) => item.khoHangId)?.khoHangId || null,
+    [items]
+  );
 
   const loadCheckoutData = useCallback(async () => {
     if (!user) return;
@@ -73,13 +77,13 @@ export function CheckoutScreen({ navigation }) {
     setWarehouses(kho || []);
     setAddressId(addressList[0]?.id || null);
     setIsAddingAddress(addressList.length === 0);
-    setWarehouseId((kho || [])[0]?.id || null);
+    setWarehouseId(cartWarehouseId || (kho || [])[0]?.id || null);
     setNewAddress((prev) => ({
       ...prev,
       tenNguoiNhan: prev.tenNguoiNhan || user?.hoTen || '',
       soDienThoai: prev.soDienThoai || user?.soDienThoai || ''
     }));
-  }, [khachHangId, user, user?.hoTen, user?.soDienThoai]);
+  }, [cartWarehouseId, khachHangId, user, user?.hoTen, user?.soDienThoai]);
 
   useFocusEffect(useCallback(() => {
     loadCheckoutData().catch(() => {

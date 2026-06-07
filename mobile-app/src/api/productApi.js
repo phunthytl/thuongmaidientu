@@ -10,6 +10,7 @@ export const productApi = {
   brands: () => api.get('/oto/hang-xe').then(unwrap),
   accessories: (params = {}) => api.get('/phu-kien/loc', { params }).then(unwrap),
   accessory: (id) => api.get(`/phu-kien/${id}`).then(unwrap),
+  accessoryStock: (id) => api.get(`/ton-kho/phu-kien/${id}`).then(unwrap),
   accessoryTypes: () => api.get('/phu-kien/loai').then(unwrap),
   services: (params = {}) => {
     const { keyword, ...pageParams } = params;
@@ -19,6 +20,7 @@ export const productApi = {
   service: (id) => api.get(`/dich-vu/${id}`).then(unwrap),
   mediaImages: (type, id) => api.get(`/media/${type}/${id}/images`).then(unwrap),
   bookService: (payload) => api.post('/lich-hen', payload).then(unwrap),
+  myBookings: () => api.get('/lich-hen/my-lich-hen').then(unwrap),
   reviews: (type, id, params = { page: 0, size: 10, sort: 'ngayTao,desc' }) => {
     const path = type === 'OTO'
       ? `/danh-gia/oto/${id}`
