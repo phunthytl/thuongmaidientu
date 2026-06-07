@@ -21,7 +21,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -74,6 +76,7 @@ public class DonHangService {
             }
         }
 
+<<<<<<< HEAD
         if (!phuKienDichVuList.isEmpty()) {
             KhoHang khoGop = khoHangChung;
             if (khoGop == null) {
@@ -86,6 +89,20 @@ public class DonHangService {
                 }
             }
             DonHang dhGop = createSingleOrder(khachHang, diaChi, khoGop, phuKienDichVuList, request.getGhiChu());
+=======
+        Map<Long, List<ChiTietDonHangRequest>> itemsTheoKho = new LinkedHashMap<>();
+        for (ChiTietDonHangRequest ct : phuKienDichVuList) {
+            Long khoHangId = ct.getKhoHangId() != null ? ct.getKhoHangId()
+                    : (khoHangChung != null ? khoHangChung.getId() : null);
+            itemsTheoKho.computeIfAbsent(khoHangId, ignored -> new ArrayList<>()).add(ct);
+        }
+
+        for (Map.Entry<Long, List<ChiTietDonHangRequest>> entry : itemsTheoKho.entrySet()) {
+            KhoHang khoHang = entry.getKey() != null
+                    ? khoHangRepository.findById(entry.getKey()).orElse(khoHangChung)
+                    : khoHangChung;
+            DonHang dhGop = createSingleOrder(khachHang, diaChi, khoHang, entry.getValue(), request.getGhiChu());
+>>>>>>> mobile
             responses.add(toResponse(dhGop));
         }
 

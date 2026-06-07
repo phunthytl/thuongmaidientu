@@ -166,7 +166,9 @@ public class GioHangService {
                 .filter(item -> switch (request.getLoaiSanPham()) {
                     case OTO, DICH_VU -> false;
                     case PHU_KIEN ->
-                        item.getPhuKien() != null && item.getPhuKien().getId().equals(request.getPhuKienId());
+                        item.getPhuKien() != null
+                                && item.getPhuKien().getId().equals(request.getPhuKienId())
+                                && java.util.Objects.equals(item.getKhoHangId(), request.getKhoHangId());
                 })
                 .findFirst();
     }
