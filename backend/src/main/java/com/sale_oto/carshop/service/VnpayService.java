@@ -21,6 +21,7 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.io.UnsupportedEncodingException;
@@ -38,6 +39,7 @@ public class VnpayService {
 
     private static final ZoneId VNPAY_ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
     private static final DateTimeFormatter VNPAY_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+    private static final String CLIENT_RETURN_PREFIX = "clientReturnUrl=";
 
     private final VnpayConfig vnpayConfig;
     private final DonHangRepository donHangRepository;
@@ -52,7 +54,7 @@ public class VnpayService {
     }
 
     @Transactional
-    public VnpayPaymentResponse createPaymentUrl(Long donHangId, HttpServletRequest request) {
+    public VnpayPaymentResponse createPaymentUrl(Long donHangId, HttpServletRequest request, String clientReturnUrl) {
         ensureConfigured();
 
         DonHang donHang = donHangRepository.findById(donHangId)
@@ -102,6 +104,10 @@ public class VnpayService {
         thanhToan.setTrangThai(TrangThaiThanhToan.CHO_THANH_TOAN);
         thanhToan.setNoiDung(orderInfo);
         thanhToan.setUrlThanhToan(paymentUrl);
+        String safeClientReturnUrl = normalizeClientReturnUrl(clientReturnUrl);
+        if (hasText(safeClientReturnUrl)) {
+            thanhToan.setDuLieuPhanHoi(CLIENT_RETURN_PREFIX + safeClientReturnUrl);
+        }
         thanhToanRepository.save(thanhToan);
 
         return VnpayPaymentResponse.builder()
@@ -124,10 +130,11 @@ public class VnpayService {
 
         ThanhToan thanhToan = txnRef == null ? null
                 : thanhToanRepository.findByMaGiaoDich(txnRef).orElse(null);
+        String clientReturnUrl = getClientReturnUrl(thanhToan);
 
         if (secureHash == null || txnRef == null || thanhToan == null) {
             return buildResult(false, "Khong tim thay giao dich VNPay", thanhToan, txnRef, responseCode,
-                    transactionStatus);
+                    transactionStatus, clientReturnUrl);
         }
 
         Map<String, String> signedParams = new HashMap<>(params);
@@ -135,7 +142,8 @@ public class VnpayService {
         signedParams.remove("vnp_SecureHashType");
         String expectedHash = hmacSha512(vnpayConfig.getHashSecret(), buildHashData(signedParams));
         if (!expectedHash.equalsIgnoreCase(secureHash)) {
-            return buildResult(false, "Chu ky VNPay khong hop le", thanhToan, txnRef, responseCode, transactionStatus);
+            return buildResult(false, "Chu ky VNPay khong hop le", thanhToan, txnRef, responseCode, transactionStatus,
+                    clientReturnUrl);
         }
 
         if (!Objects.equals(toVnpayAmount(thanhToan.getSoTien()), params.get("vnp_Amount"))) {
@@ -143,7 +151,7 @@ public class VnpayService {
             thanhToan.setDuLieuPhanHoi(toJson(params));
             thanhToanRepository.save(thanhToan);
             return buildResult(false, "So tien VNPay tra ve khong khop", thanhToan, txnRef, responseCode,
-                    transactionStatus);
+                    transactionStatus, clientReturnUrl);
         }
 
         boolean paid = "00".equals(responseCode) && "00".equals(transactionStatus);
@@ -179,6 +187,7 @@ public class VnpayService {
                 .maGiaoDich(txnRef)
                 .responseCode(responseCode)
                 .transactionStatus(transactionStatus)
+                .clientReturnUrl(clientReturnUrl)
                 .build();
     }
 
@@ -189,7 +198,7 @@ public class VnpayService {
     }
 
     private VnpayReturnResponse buildResult(boolean success, String message, ThanhToan thanhToan, String txnRef,
-            String responseCode, String transactionStatus) {
+            String responseCode, String transactionStatus, String clientReturnUrl) {
         DonHang donHang = thanhToan != null ? thanhToan.getDonHang() : null;
         return VnpayReturnResponse.builder()
                 .success(success)
@@ -199,7 +208,46 @@ public class VnpayService {
                 .maGiaoDich(txnRef)
                 .responseCode(responseCode)
                 .transactionStatus(transactionStatus)
+                .clientReturnUrl(clientReturnUrl)
                 .build();
+    }
+
+    private String getClientReturnUrl(ThanhToan thanhToan) {
+        if (thanhToan == null || !hasText(thanhToan.getDuLieuPhanHoi())) {
+            return null;
+        }
+        String data = thanhToan.getDuLieuPhanHoi().trim();
+        if (!data.startsWith(CLIENT_RETURN_PREFIX)) {
+            return null;
+        }
+        return normalizeClientReturnUrl(data.substring(CLIENT_RETURN_PREFIX.length()));
+    }
+
+    private String normalizeClientReturnUrl(String value) {
+        if (!hasText(value)) {
+            return null;
+        }
+        try {
+            URI uri = URI.create(value.trim());
+            String scheme = uri.getScheme();
+            if (!hasText(scheme)) {
+                return null;
+            }
+            String lowerScheme = scheme.toLowerCase();
+            if ("carshop".equals(lowerScheme)) {
+                return uri.toString();
+            }
+            if (!"http".equals(lowerScheme) && !"https".equals(lowerScheme)) {
+                return null;
+            }
+            String host = uri.getHost();
+            if ("localhost".equalsIgnoreCase(host) || "127.0.0.1".equals(host)) {
+                return uri.toString();
+            }
+        } catch (IllegalArgumentException ignored) {
+            return null;
+        }
+        return null;
     }
 
     private String buildHashData(Map<String, String> params) {

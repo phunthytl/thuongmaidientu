@@ -13,4 +13,5 @@ public class VnpayReturnResponse {
     private String maGiaoDich;
     private String responseCode;
     private String transactionStatus;
+    private String clientReturnUrl;
 }

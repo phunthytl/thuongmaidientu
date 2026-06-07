@@ -49,6 +49,80 @@
     color: #ffffff;
 }
 
+.orders-filter-bar {
+    display: grid;
+    grid-template-columns: minmax(260px, 1fr) minmax(150px, 180px) minmax(150px, 180px) auto auto;
+    gap: 12px;
+    align-items: end;
+    margin-bottom: 20px;
+}
+
+.orders-search-field input,
+.orders-date-field input {
+    width: 100%;
+    height: 42px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    background: #ffffff;
+    color: #111111;
+    font: inherit;
+    font-size: 13px;
+    padding: 0 12px;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.orders-search-field input:focus,
+.orders-date-field input:focus {
+    border-color: #111111;
+    box-shadow: 0 0 0 2px rgba(17, 17, 17, 0.08);
+}
+
+.orders-date-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.orders-date-field label {
+    color: #666666;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.btn-clear-order-filters {
+    height: 42px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    background: #ffffff;
+    color: #111111;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 0 16px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.btn-clear-order-filters:hover {
+    border-color: #111111;
+    background: #111111;
+    color: #ffffff;
+}
+
+.orders-filter-count {
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    color: #666666;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
 .orders-table-wrapper {
     background-color: #ffffff;
     border: 1px solid #e5e5e5;
@@ -136,4 +210,19 @@
     background-color: #ffffff;
     color: #111111;
     font-weight: 500;
+}
+
+@media (max-width: 1100px) {
+    .orders-filter-bar {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .orders-search-field,
+    .orders-filter-count {
+        grid-column: 1 / -1;
+    }
+
+    .orders-filter-count {
+        justify-content: flex-start;
+    }
 }

@@ -205,7 +205,7 @@ public class DonHangService {
         if (trangThai == TrangThaiDonHang.DA_XAC_NHAN && donHang.getMaDonHangGhn() == null) {
             boolean hasPhuKien = donHang.getChiTietDonHangs().stream()
                     .anyMatch(ct -> ct.getLoaiSanPham() == LoaiSanPham.PHU_KIEN);
-            if (hasPhuKien && donHang.getDiaChiGiaoHang() != null) {
+            if (hasPhuKien && donHang.getDiaChiGiaoHang() != null && ghnService.isConfigured()) {
                 String orderCode = ghnService.createOrder(donHang);
                 donHang.setMaDonHangGhn(orderCode);
             }

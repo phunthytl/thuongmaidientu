@@ -8,11 +8,14 @@ export default function DonHang() {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('ALL');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [dateFrom, setDateFrom] = useState('');
+    const [dateTo, setDateTo] = useState('');
 
     useEffect(() => {
         const fetchOrders = async () => {
             try {
-                const res = await api.get('/don-hang?size=15');
+                const res = await api.get('/don-hang?size=200&sort=ngayTao,desc');
                 if (res.data?.data?.content) {
                     setOrders(res.data.data.content);
                 }
@@ -48,6 +51,61 @@ export default function DonHang() {
         const date = new Date(dateString);
         return date.toLocaleDateString('vi-VN') + ' ' + date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
     }
+
+    const getOrderDate = (order) => order.createdAt || order.ngayTao || order.thoiGianCapNhat;
+
+    const normalizeText = (value) => String(value || '').toLowerCase().trim();
+
+    const matchesDateRange = (order) => {
+        const rawDate = getOrderDate(order);
+        if (!rawDate || (!dateFrom && !dateTo)) return true;
+
+        const orderDate = new Date(rawDate);
+        if (Number.isNaN(orderDate.getTime())) return true;
+
+        if (dateFrom) {
+            const from = new Date(`${dateFrom}T00:00:00`);
+            if (orderDate < from) return false;
+        }
+
+        if (dateTo) {
+            const to = new Date(`${dateTo}T23:59:59`);
+            if (orderDate > to) return false;
+        }
+
+        return true;
+    };
+
+    const matchesSearch = (order) => {
+        const keyword = normalizeText(searchTerm);
+        if (!keyword) return true;
+
+        const customerName = order.tenKhachHang || order.khachHang?.hoTen || order.nguoiDung?.hoTen;
+        const customerPhone = order.soDienThoaiKhachHang || order.khachHang?.soDienThoai || order.nguoiDung?.soDienThoai;
+        const haystack = [
+            order.maDonHang,
+            `ORD-${order.id}`,
+            customerName,
+            customerPhone,
+            order.trangThai,
+            order.tongTien,
+            order.tongGiaTri
+        ].map(normalizeText).join(' ');
+
+        return haystack.includes(keyword);
+    };
+
+    const filteredOrders = orders.filter((order) =>
+        (activeTab === 'ALL' || order.trangThai === activeTab) &&
+        matchesDateRange(order) &&
+        matchesSearch(order)
+    );
+
+    const resetFilters = () => {
+        setSearchTerm('');
+        setDateFrom('');
+        setDateTo('');
+    };
 
     return (
         <div className="orders-container">
@@ -96,6 +154,39 @@ export default function DonHang() {
                 </div>
             </div>
 
+            <div className="orders-filter-bar">
+                <div className="orders-search-field">
+                    <input
+                        type="search"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        placeholder="Tìm mã đơn, khách hàng, số điện thoại..."
+                    />
+                </div>
+                <div className="orders-date-field">
+                    <label>Từ ngày</label>
+                    <input
+                        type="date"
+                        value={dateFrom}
+                        onChange={(e) => setDateFrom(e.target.value)}
+                    />
+                </div>
+                <div className="orders-date-field">
+                    <label>Đến ngày</label>
+                    <input
+                        type="date"
+                        value={dateTo}
+                        onChange={(e) => setDateTo(e.target.value)}
+                    />
+                </div>
+                <button className="btn-clear-order-filters" onClick={resetFilters}>
+                    Xóa lọc
+                </button>
+                <div className="orders-filter-count">
+                    {filteredOrders.length} / {orders.length} đơn
+                </div>
+            </div>
+
             <div className="orders-table-wrapper">
                 <div className="table-header">
                     <div className="col-order-id">Mã Đơn Định Danh</div>
@@ -109,17 +200,17 @@ export default function DonHang() {
                 <div className="table-body">
                     {loading ? (
                         <div className="table-loading">Đang tải danh sách đơn hàng...</div>
-                    ) : orders.filter(o => activeTab === 'ALL' || o.trangThai === activeTab).length === 0 ? (
-                        <div className="table-empty">Hệ thống chưa ghi nhận đơn hàng nào ở trạng thái này.</div>
+                    ) : filteredOrders.length === 0 ? (
+                        <div className="table-empty">Không tìm thấy đơn hàng phù hợp với bộ lọc.</div>
                     ) : (
-                        orders.filter(o => activeTab === 'ALL' || o.trangThai === activeTab).map((item) => (
+                        filteredOrders.map((item) => (
                             <div key={item.id} className="table-row">
                                 <div className="col-order-id">{item.maDonHang || `ORD-${item.id}`}</div>
                                 <div className="col-customer">
                                     <div className="customer-name">{item.tenKhachHang || item.khachHang?.hoTen || item.nguoiDung?.hoTen || 'Khách Vãng Lai'}</div>
                                     <div className="customer-phone">{item.soDienThoaiKhachHang || item.khachHang?.soDienThoai || item.nguoiDung?.soDienThoai || '---'}</div>
                                 </div>
-                                <div className="col-date">{formatDate(item.createdAt || item.ngayTao || item.thoiGianCapNhat)}</div>
+                                <div className="col-date">{formatDate(getOrderDate(item))}</div>
                                 <div className="col-total">{formatPrice(item.tongTien || item.tongGiaTri)}</div>
                                 <div className="col-status">
                                     <select 

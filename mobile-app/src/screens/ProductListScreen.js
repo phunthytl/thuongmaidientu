@@ -27,10 +27,26 @@ export function ProductListScreen({ navigation, route }) {
       size: 20,
       sort: 'ngayTao,desc',
       keyword: keyword || undefined,
-      giaMax: giaMax || undefined
+      giaMax: type === 'DICH_VU' ? undefined : giaMax || undefined
     };
-    const page = type === 'OTO' ? await productApi.cars(params) : await productApi.accessories(params);
-    setItems(productApi.pageContent(page));
+    const page = type === 'OTO'
+      ? await productApi.cars(params)
+      : type === 'DICH_VU'
+        ? await productApi.services(params)
+        : await productApi.accessories(params);
+    let nextItems = productApi.pageContent(page);
+    if (type === 'DICH_VU') {
+      nextItems = nextItems.filter((item) => item.trangThai !== false);
+      nextItems = await Promise.all(nextItems.map(async (item) => {
+        try {
+          const images = await productApi.mediaImages('DICH_VU', item.id);
+          return { ...item, displayImage: images?.[0]?.url };
+        } catch {
+          return item;
+        }
+      }));
+    }
+    setItems(nextItems);
     setLoading(false);
   };
 
@@ -45,9 +61,14 @@ export function ProductListScreen({ navigation, route }) {
         <Pressable style={[styles.segmentItem, type === 'PHU_KIEN' && styles.active]} onPress={() => setType('PHU_KIEN')}>
           <Text style={[styles.segmentText, type === 'PHU_KIEN' && styles.activeText]}>Phụ kiện</Text>
         </Pressable>
+        <Pressable style={[styles.segmentItem, type === 'DICH_VU' && styles.active]} onPress={() => setType('DICH_VU')}>
+          <Text style={[styles.segmentText, type === 'DICH_VU' && styles.activeText]}>Dịch vụ</Text>
+        </Pressable>
       </View>
-      <Field label="Tìm kiếm" value={keyword} onChangeText={setKeyword} placeholder="Tên xe hoặc phụ kiện" />
-      <Field label="Giá tối đa" value={giaMax} onChangeText={setGiaMax} keyboardType="numeric" placeholder="Ví dụ: 1000000000" />
+      <Field label="Tìm kiếm" value={keyword} onChangeText={setKeyword} placeholder="Tên xe, phụ kiện hoặc dịch vụ" />
+      {type !== 'DICH_VU' ? (
+        <Field label="Giá tối đa" value={giaMax} onChangeText={setGiaMax} keyboardType="numeric" placeholder="Ví dụ: 1000000000" />
+      ) : null}
       <Pressable style={styles.search} onPress={load}>
         <Text style={styles.searchText}>Lọc sản phẩm</Text>
       </Pressable>
