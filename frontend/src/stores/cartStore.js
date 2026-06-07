@@ -21,6 +21,20 @@ const saveGuestCart = (items) => {
   localStorage.setItem(GUEST_KEY, JSON.stringify(items));
 };
 
+const normalizeKhoHangId = (value) => value || null;
+
+const sameCartLine = (item, id, type, khoHangId) =>
+  item.id === id &&
+  item.type === type &&
+  normalizeKhoHangId(item.khoHangId) === normalizeKhoHangId(khoHangId);
+
+const findCartLine = (items, { chiTietId, id, type, khoHangId }) => {
+  if (chiTietId) {
+    return items.find((item) => item.chiTietId === chiTietId);
+  }
+  return items.find((item) => sameCartLine(item, id, type, khoHangId));
+};
+
 // ─── Map API response → store item shape ──────────────────────────────────────
 const mapApiItem = (ct) => ({
   // Dùng chiTietId làm key để gọi API cập nhật/xoá
@@ -77,12 +91,12 @@ export const useCartStore = create((set, get) => ({
     if (!currentUserId) {
       // Guest: lưu local
       const existing = items.find(
-        (i) => i.id === product.id && i.type === product.type
+        (i) => sameCartLine(i, product.id, product.type, product.khoHangId)
       );
       const newItems = existing
         ? items.map((i) =>
-            i.id === product.id && i.type === product.type
-              ? { ...i, quantity: i.quantity + quantity, khoHangId: product.khoHangId || i.khoHangId }
+            sameCartLine(i, product.id, product.type, product.khoHangId)
+              ? { ...i, quantity: i.quantity + quantity }
               : i
           )
         : [...items, { ...product, quantity }];
@@ -103,12 +117,12 @@ export const useCartStore = create((set, get) => ({
   },
 
   // ── Cập nhật số lượng ────────────────────────────────────────────────────
-  updateQuantity: async (id, type, quantity) => {
+  updateQuantity: async (id, type, quantity, chiTietId = null, khoHangId = null) => {
     const { currentUserId, items } = get();
 
     if (!currentUserId) {
       const newItems = items.map((i) =>
-        i.id === id && i.type === type ? { ...i, quantity } : i
+        sameCartLine(i, id, type, khoHangId) ? { ...i, quantity } : i
       );
       set({ items: newItems });
       saveGuestCart(newItems);
@@ -116,7 +130,7 @@ export const useCartStore = create((set, get) => ({
     }
 
     // Tìm chiTietId từ items
-    const item = items.find((i) => i.id === id && i.type === type);
+    const item = findCartLine(items, { chiTietId, id, type, khoHangId });
     if (!item?.chiTietId) return;
 
     await cartService.updateItem(item.chiTietId, quantity);
@@ -124,17 +138,17 @@ export const useCartStore = create((set, get) => ({
   },
 
   // ── Xóa một item ─────────────────────────────────────────────────────────
-  removeFromCart: async (id, type) => {
+  removeFromCart: async (id, type, chiTietId = null, khoHangId = null) => {
     const { currentUserId, items } = get();
 
     if (!currentUserId) {
-      const newItems = items.filter((i) => !(i.id === id && i.type === type));
+      const newItems = items.filter((i) => !sameCartLine(i, id, type, khoHangId));
       set({ items: newItems });
       saveGuestCart(newItems);
       return;
     }
 
-    const item = items.find((i) => i.id === id && i.type === type);
+    const item = findCartLine(items, { chiTietId, id, type, khoHangId });
     if (!item?.chiTietId) return;
 
     await cartService.removeItem(item.chiTietId);
@@ -179,18 +193,18 @@ export const useCartStore = create((set, get) => ({
   },
 
   // ── Cập nhật kho cho item ────────────────────────────────────────────────
-  updateItemKho: async (id, type, khoHangId) => {
+  updateItemKho: async (id, type, khoHangId, chiTietId = null, currentKhoHangId = null) => {
     const { items, currentUserId } = get();
     if (!currentUserId) {
       const newItems = items.map(i =>
-        i.id === id && i.type === type ? { ...i, khoHangId } : i
+        sameCartLine(i, id, type, currentKhoHangId) ? { ...i, khoHangId } : i
       );
       set({ items: newItems });
       saveGuestCart(newItems);
       return;
     }
 
-    const item = items.find((i) => i.id === id && i.type === type);
+    const item = findCartLine(items, { chiTietId, id, type, khoHangId: currentKhoHangId });
     if (!item?.chiTietId) return;
 
     await cartService.updateItemKho(item.chiTietId, khoHangId);

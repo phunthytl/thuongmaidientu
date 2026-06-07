@@ -54,9 +54,9 @@ export default function GioHang() {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
   };
 
-  const handleKhoChange = (itemId, itemType, khoHangId) => {
+  const handleKhoChange = (item, khoHangId) => {
     if (updateItemKho && khoHangId) {
-      updateItemKho(itemId, itemType, parseInt(khoHangId));
+      updateItemKho(item.id, item.type, parseInt(khoHangId), item.chiTietId, item.khoHangId);
     }
   };
 
@@ -97,7 +97,7 @@ export default function GioHang() {
             {items.map(item => {
               const warehouses = item.type !== 'DICH_VU' ? (warehouseMap[item.id] || []) : [];
               return (
-                <div key={item.chiTietId ?? `${item.id}-${item.type}`} className="cart-item">
+                <div key={item.chiTietId ?? `${item.id}-${item.type}-${item.khoHangId || 'none'}`} className="cart-item">
                   <div className="item-main">
                     <div className="item-img">
                       {item.hinhAnh
@@ -118,7 +118,7 @@ export default function GioHang() {
                             <FaWarehouse size={14} style={{ color: '#6b7280' }} />
                             <select 
                               value={item.khoHangId || ''} 
-                              onChange={(e) => handleKhoChange(item.id, item.type, e.target.value)}
+                              onChange={(e) => handleKhoChange(item, e.target.value)}
                               style={{ 
                                 padding: '6px 10px', 
                                 borderRadius: '8px', 
@@ -150,7 +150,7 @@ export default function GioHang() {
                             <FaWarehouse size={14} style={{ color: '#6b7280' }} />
                             <select 
                               value={item.khoHangId || ''} 
-                              onChange={(e) => handleKhoChange(item.id, item.type, e.target.value)}
+                              onChange={(e) => handleKhoChange(item, e.target.value)}
                               style={{ 
                                 padding: '6px 10px', 
                                 borderRadius: '8px', 
@@ -181,11 +181,11 @@ export default function GioHang() {
                   
                   <div className="item-quantity">
                     <div className="quantity-controls">
-                      <button onClick={() => updateQuantity(item.id, item.type, Math.max(1, item.quantity - 1))}>
+                      <button onClick={() => updateQuantity(item.id, item.type, Math.max(1, item.quantity - 1), item.chiTietId, item.khoHangId)}>
                         <FaMinus />
                       </button>
                       <input type="number" value={item.quantity} readOnly />
-                      <button onClick={() => updateQuantity(item.id, item.type, item.quantity + 1)}>
+                      <button onClick={() => updateQuantity(item.id, item.type, item.quantity + 1, item.chiTietId, item.khoHangId)}>
                         <FaPlus />
                       </button>
                     </div>
@@ -196,7 +196,7 @@ export default function GioHang() {
                   </div>
                   
                   <div className="item-actions">
-                    <button onClick={() => removeFromCart(item.id, item.type)} className="remove-btn">
+                    <button onClick={() => removeFromCart(item.id, item.type, item.chiTietId, item.khoHangId)} className="remove-btn">
                       <FaTrash />
                     </button>
                   </div>
