@@ -15,6 +15,8 @@ import { ProductListScreen } from '../screens/ProductListScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { RegisterScreen } from '../screens/RegisterScreen';
 import { ReviewScreen } from '../screens/ReviewScreen';
+import { ServicesScreen } from '../screens/ServicesScreen';
+import { ServiceBookingScreen } from '../screens/ServiceBookingScreen';
 import { PaymentResultScreen } from '../screens/PaymentResultScreen';
 import { useAuthStore } from '../store/authStore';
 import { colors } from '../styles/theme';
@@ -78,6 +80,8 @@ export function AppNavigator() {
           <Stack.Screen name="Favorites" component={FavoritesScreen} options={{ title: 'Yêu thích' }} />
           <Stack.Screen name="Notifications" component={NotificationsScreen} options={{ title: 'Thông báo' }} />
           <Stack.Screen name="Addresses" component={AddressScreen} options={{ title: 'Địa chỉ giao hàng' }} />
+          <Stack.Screen name="Services" component={ServicesScreen} options={{ title: 'Dịch vụ' }} />
+          <Stack.Screen name="ServiceBooking" component={ServiceBookingScreen} options={{ title: 'Đặt lịch dịch vụ' }} />
         </>
       )}
     </Stack.Navigator>

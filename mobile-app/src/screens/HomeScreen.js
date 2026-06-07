@@ -52,6 +52,10 @@ export function HomeScreen({ navigation }) {
           <Ionicons name="construct-outline" size={24} color={colors.primary} />
           <Text style={styles.quickText}>Phụ kiện</Text>
         </Pressable>
+        <Pressable style={styles.quickItem} onPress={() => navigation.navigate('Services')}>
+          <Ionicons name="build-outline" size={24} color={colors.primary} />
+          <Text style={styles.quickText}>Dịch vụ</Text>
+        </Pressable>
         <Pressable style={styles.quickItem} onPress={() => navigation.navigate('Orders')}>
           <Ionicons name="receipt-outline" size={24} color={colors.primary} />
           <Text style={styles.quickText}>Đơn hàng</Text>
