@@ -6,6 +6,7 @@ import { customerApi } from '../api/customerApi';
 import { orderApi } from '../api/orderApi';
 import { paymentApi } from '../api/paymentApi';
 import { Button } from '../components/Button';
+import { EmptyState } from '../components/EmptyState';
 import { Field } from '../components/Field';
 import { Screen } from '../components/Screen';
 import { useAuthStore } from '../store/authStore';
@@ -62,6 +63,7 @@ export function CheckoutScreen({ navigation }) {
   );
 
   const loadCheckoutData = useCallback(async () => {
+    if (!user) return;
     const [addr, kho] = await Promise.all([
       customerApi.addresses(khachHangId),
       customerApi.warehouses()
@@ -77,7 +79,7 @@ export function CheckoutScreen({ navigation }) {
       tenNguoiNhan: prev.tenNguoiNhan || user?.hoTen || '',
       soDienThoai: prev.soDienThoai || user?.soDienThoai || ''
     }));
-  }, [khachHangId, user?.hoTen, user?.soDienThoai]);
+  }, [khachHangId, user, user?.hoTen, user?.soDienThoai]);
 
   useFocusEffect(useCallback(() => {
     loadCheckoutData().catch(() => {
@@ -123,6 +125,10 @@ export function CheckoutScreen({ navigation }) {
   };
 
   const submit = async () => {
+    if (!user) {
+      navigation.navigate('Login', { redirectTo: 'Checkout' });
+      return;
+    }
     setErrorText('');
     setLoading(true);
     try {
@@ -185,6 +191,15 @@ export function CheckoutScreen({ navigation }) {
       setLoading(false);
     }
   };
+
+  if (!user) {
+    return (
+      <Screen>
+        <EmptyState icon="log-in-outline" title="Đăng nhập để thanh toán" body="Bạn có thể xem sản phẩm và thêm phụ kiện vào giỏ trước. Khi thanh toán, hãy đăng nhập để tạo đơn hàng." />
+        <Button title="Đăng nhập" icon="log-in-outline" onPress={() => navigation.navigate('Login', { redirectTo: 'Checkout' })} />
+      </Screen>
+    );
+  }
 
   return (
     <Screen>

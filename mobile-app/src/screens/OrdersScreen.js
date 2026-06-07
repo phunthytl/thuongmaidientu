@@ -1,6 +1,7 @@
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Button } from '../components/Button';
 import { EmptyState } from '../components/EmptyState';
 import { Screen } from '../components/Screen';
 import { orderApi } from '../api/orderApi';
@@ -13,8 +14,21 @@ export function OrdersScreen({ navigation }) {
   const [orders, setOrders] = useState([]);
 
   useFocusEffect(useCallback(() => {
+    if (!user) {
+      setOrders([]);
+      return;
+    }
     orderApi.listByCustomer(customerIdOf(user)).then((page) => setOrders(page.content || []));
   }, [user]));
+
+  if (!user) {
+    return (
+      <Screen>
+        <EmptyState icon="receipt-outline" title="Đăng nhập để xem đơn hàng" body="Lịch sử đơn hàng sẽ hiển thị sau khi bạn đăng nhập." />
+        <Button title="Đăng nhập" icon="log-in-outline" onPress={() => navigation.navigate('Login', { redirectTo: 'Main' })} />
+      </Screen>
+    );
+  }
 
   if (orders.length === 0) {
     return (

@@ -6,7 +6,7 @@ import { Screen } from '../components/Screen';
 import { useAuthStore } from '../store/authStore';
 import { colors } from '../styles/theme';
 
-export function LoginScreen({ navigation }) {
+export function LoginScreen({ navigation, route }) {
   const [email, setEmail] = useState('');
   const [matKhau, setMatKhau] = useState('');
   const { login, loading } = useAuthStore();
@@ -14,6 +14,12 @@ export function LoginScreen({ navigation }) {
   const submit = async () => {
     try {
       await login(email.trim(), matKhau);
+      const redirectTo = route.params?.redirectTo;
+      if (redirectTo) {
+        navigation.replace(redirectTo);
+      } else {
+        navigation.replace('Main');
+      }
     } catch (error) {
       Alert.alert('Không đăng nhập được', error.response?.data?.message || 'Kiểm tra lại email và mật khẩu.');
     }

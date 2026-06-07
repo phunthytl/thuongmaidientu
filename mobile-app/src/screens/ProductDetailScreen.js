@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { productApi } from '../api/productApi';
 import { customerApi } from '../api/customerApi';
 import { Button } from '../components/Button';
@@ -61,15 +61,15 @@ export function ProductDetailScreen({ route, navigation }) {
         detailRequest,
         productApi.reviews(productType, productId)
       ];
-      if (productType === 'DICH_VU') {
-        requests.push(productApi.mediaImages('DICH_VU', productId).catch(() => []));
+      if (['OTO', 'DICH_VU'].includes(productType)) {
+        requests.push(productApi.mediaImages(productType, productId).catch(() => []));
         requests.push(customerApi.warehouses().catch(() => []));
       }
 
       const [detail, reviewPage, images = [], branchItems = []] = await Promise.all(requests);
       setProduct(productType === 'DICH_VU' ? { ...detail, displayImage: images?.[0]?.url } : detail);
       setReviews(productApi.pageContent(reviewPage));
-      if (productType === 'DICH_VU') {
+      if (['OTO', 'DICH_VU'].includes(productType)) {
         setBranches(branchItems);
         setBranchId((current) => current || branchItems?.[0]?.id || null);
       }
@@ -81,7 +81,17 @@ export function ProductDetailScreen({ route, navigation }) {
   const addToCart = async () => {
     setNotice(null);
 
-    if (!user || user.vaiTro !== 'KHACH_HANG') {
+    if (productType === 'OTO') {
+      Alert.alert('Không thêm được', 'Ô tô không thể thêm vào giỏ hàng.');
+      setNotice({
+        type: 'error',
+        title: 'Không thêm được',
+        body: 'Ô tô không thể thêm vào giỏ hàng.'
+      });
+      return;
+    }
+
+    if ((!user || user.vaiTro !== 'KHACH_HANG') && productType !== 'PHU_KIEN') {
       Alert.alert('Không thêm được', 'Bạn cần đăng nhập bằng tài khoản khách hàng để thêm sản phẩm vào giỏ.');
       setNotice({
         type: 'error',
@@ -116,7 +126,13 @@ export function ProductDetailScreen({ route, navigation }) {
       await add(user, {
         loaiSanPham: productType,
         sanPhamId: productId,
-        soLuong: 1
+        soLuong: 1,
+        tenSanPham: productName(product),
+        tenPhuKien: product.tenPhuKien,
+        gia: product.gia,
+        hinhAnh: product.hinhAnh,
+        hinhAnhs: product.hinhAnhs,
+        displayImage: product.displayImage
       });
       setNotice({
         type: 'success',
@@ -189,6 +205,59 @@ export function ProductDetailScreen({ route, navigation }) {
     }
   };
 
+  const bookTestDrive = async () => {
+    setNotice(null);
+
+    if (!branchId) {
+      Alert.alert('Thiếu chi nhánh', 'Vui lòng chọn chi nhánh lái thử.');
+      return;
+    }
+
+    if (!bookingForm.hoTen || !bookingForm.soDienThoai || !bookingForm.ngayHen || !bookingForm.gioHen) {
+      Alert.alert('Thiếu thông tin', 'Vui lòng nhập họ tên, số điện thoại, ngày hẹn và giờ hẹn.');
+      return;
+    }
+
+    setAdding(true);
+    try {
+      await productApi.bookService({
+        loaiLich: 'LAI_THU',
+        otoId: productId,
+        chiNhanhId: branchId,
+        hoTen: bookingForm.hoTen,
+        soDienThoai: bookingForm.soDienThoai,
+        email: bookingForm.email || undefined,
+        ngayHen: bookingForm.ngayHen,
+        gioHen: bookingForm.gioHen,
+        ghiChu: bookingForm.ghiChu || undefined
+      });
+      setNotice({
+        type: 'success',
+        title: 'Đăng ký lái thử thành công',
+        body: 'Lịch lái thử của bạn đã được ghi nhận. Nhân viên sẽ liên hệ xác nhận.'
+      });
+    } catch (error) {
+      const message = errorMessageOf(error);
+      Alert.alert('Không đăng ký được', message);
+      setNotice({
+        type: 'error',
+        title: 'Không đăng ký được',
+        body: message
+      });
+    } finally {
+      setAdding(false);
+    }
+  };
+
+  const contactConsultant = async () => {
+    const phoneUrl = 'tel:19001234';
+    try {
+      await Linking.openURL(phoneUrl);
+    } catch {
+      Alert.alert('Liên hệ tư vấn', 'Vui lòng gọi hotline 1900 1234 để được tư vấn.');
+    }
+  };
+
   if (loading) {
     return (
       <Screen>
@@ -236,7 +305,40 @@ export function ProductDetailScreen({ route, navigation }) {
           <Ionicons name={isFavorite(productType, productId) ? 'heart' : 'heart-outline'} size={28} color={colors.danger} />
         </Pressable>
       </View>
-      {productType === 'DICH_VU' ? (
+      {productType === 'OTO' ? (
+        <View style={styles.bookingBox}>
+          <Text style={styles.section}>Đăng ký lái thử</Text>
+          <Text style={styles.description}>Chọn chi nhánh, ngày giờ và thông tin liên hệ để nhân viên xác nhận lịch lái thử.</Text>
+          <Text style={styles.bookingLabel}>Chi nhánh</Text>
+          <View style={styles.branchList}>
+            {branches.map((branch) => (
+              <Pressable
+                key={branch.id}
+                style={[styles.branchItem, branchId === branch.id && styles.branchActive]}
+                onPress={() => setBranchId(branch.id)}
+              >
+                <Ionicons
+                  name={branchId === branch.id ? 'radio-button-on' : 'radio-button-off'}
+                  size={20}
+                  color={branchId === branch.id ? colors.primary : colors.muted}
+                />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.branchName}>{branch.tenKho}</Text>
+                  <Text style={styles.branchAddress}>{[branch.tinhThanhName, branch.diaChiChiTiet].filter(Boolean).join(' - ')}</Text>
+                </View>
+              </Pressable>
+            ))}
+          </View>
+          <Field label="Họ tên" value={bookingForm.hoTen} onChangeText={setBookingField('hoTen')} />
+          <Field label="Số điện thoại" value={bookingForm.soDienThoai} onChangeText={setBookingField('soDienThoai')} keyboardType="phone-pad" />
+          <Field label="Email" value={bookingForm.email} onChangeText={setBookingField('email')} keyboardType="email-address" />
+          <Field label="Ngày hẹn" value={bookingForm.ngayHen} onChangeText={setBookingField('ngayHen')} placeholder="YYYY-MM-DD" />
+          <Field label="Giờ hẹn" value={bookingForm.gioHen} onChangeText={setBookingField('gioHen')} placeholder="HH:mm" />
+          <Field label="Ghi chú" value={bookingForm.ghiChu} onChangeText={setBookingField('ghiChu')} multiline />
+          <Button title="Đăng ký lái thử" icon="calendar-outline" onPress={bookTestDrive} loading={adding} />
+          <Button title="Liên hệ tư vấn" icon="call-outline" variant="ghost" onPress={contactConsultant} />
+        </View>
+      ) : productType === 'DICH_VU' ? (
         <View style={styles.bookingBox}>
           <Text style={styles.section}>Đặt lịch dịch vụ</Text>
           <Text style={styles.description}>Chọn chi nhánh, ngày giờ và thông tin liên hệ để nhân viên xác nhận lịch.</Text>
@@ -287,7 +389,7 @@ export function ProductDetailScreen({ route, navigation }) {
             </Text>
             <Text style={styles.noticeBody}>{notice.body}</Text>
           </View>
-          {notice.type === 'success' ? (
+          {notice.type === 'success' && productType === 'PHU_KIEN' ? (
             <Pressable onPress={() => navigation.navigate('Main', { screen: 'Cart' })}>
               <Text style={styles.noticeAction}>Xem giỏ</Text>
             </Pressable>

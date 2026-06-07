@@ -52,7 +52,13 @@ export function CartScreen({ navigation }) {
         <Text style={styles.totalLabel}>Tổng tiền</Text>
         <Text style={styles.totalValue}>{money(cart?.tongTien)}</Text>
       </View>
-      <Button title="Thanh toán" icon="card-outline" onPress={() => navigation.navigate('Checkout')} />
+      <Button
+        title={user ? 'Thanh toán' : 'Đăng nhập để thanh toán'}
+        icon={user ? 'card-outline' : 'log-in-outline'}
+        onPress={() => user
+          ? navigation.navigate('Checkout')
+          : navigation.navigate('Login', { redirectTo: 'Checkout' })}
+      />
     </Screen>
   );
 }
